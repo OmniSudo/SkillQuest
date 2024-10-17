@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>SkillQuest</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<canvas id="canvas" oncontextmenu="event.preventDefault()" tabindex=-1></canvas>
+<script type='text/javascript'>
+    var Module =
+        {
+            canvas: (function() {
+                var canvas = document.getElementById('canvas');
+                canvas.addEventListener("webglcontextlost", function(e) { alert('WebGL context lost. You will need to reload the page.'); e.preventDefault(); }, false);
+
+                return canvas;
+            })()
+        };
+
+</script>
+<script type="application/javascript" src="skillquest.game.js"></script>
+</body>
+</html>

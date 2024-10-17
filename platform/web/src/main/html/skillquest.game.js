@@ -1,0 +1,1 @@
+../../../../game/bin/skillquest.game.js

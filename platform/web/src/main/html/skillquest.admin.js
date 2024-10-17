@@ -1,0 +1,1 @@
+../../../../admin/bin/skillquest.admin.js
