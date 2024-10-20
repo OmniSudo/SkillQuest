@@ -23,7 +23,7 @@ namespace skillquest::game::base::doohickey::ui::main_menu {
                     sq::shared()->network()
                                 ->channels()
                                 .create(
-                                        "characterselect",
+                                        "character_select",
                                         true
                                 )
             },

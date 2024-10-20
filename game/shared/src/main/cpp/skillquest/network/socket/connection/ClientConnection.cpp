@@ -133,7 +133,7 @@ namespace skillquest::network::socket::connection {
         auto text = packet.dump();
         uint32_t length = htonl( text.length() );
 
-        ::send( _socket, &length, sizeof( length ), MSG_NOSIGNAL );
+        ::send( _socket, &length, sizeof( uint32_t ), MSG_NOSIGNAL );
         ::send( _socket, text.c_str(), text.size(), MSG_NOSIGNAL );
 
         return packet;
@@ -145,8 +145,8 @@ namespace skillquest::network::socket::connection {
         std::scoped_lock lock( _receiving );
 
         uint32_t size;
-        if( ::recv( _socket, &size, sizeof( uint32_t ), 0 ) != sizeof( uint32_t ) ) {
-            sq::shared()->logger()->error( "Socket stream read length error" );
+        if( ::recv( _socket, &size, sizeof( uint32_t ), 0 ) < 0 ) {
+            sq::shared()->logger()->error( "Socket stream read length error: {0}", size );
         }
         size = ntohl( size );
 
@@ -159,7 +159,8 @@ namespace skillquest::network::socket::connection {
         std::vector< uint8_t > bytes;
         bytes.resize( size, 0x00 );
 
-        if( ::recv( _socket, &( bytes[ 0 ] ), size, 0 ) != size ) {
+        auto rcvlen = ::recv( _socket, &( bytes[ 0 ] ), size, 0 );
+        if( rcvlen < 0 ) {
             sq::shared()->logger()->error( "Socket stream read data error" );
         }
         auto text = std::string{ bytes.begin(), bytes.end() };

@@ -148,6 +148,9 @@ namespace skillquest::application {
     }
 
     void ClientEngine::onStop () {
+        auto cl = sq::client();
+        cl->_graphics = nullptr;
+
         Engine::onStop();
     }
 }// namespace skillquest::application

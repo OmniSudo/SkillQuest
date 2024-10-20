@@ -12,11 +12,11 @@ namespace skillquest::game::base::packet::item {
     class ItemStackInfoPacket : public network::IPacket {
     public:
         /**
-		 * SERVER
+		 * SERVER->CLIENT
 		 * TODO: item properties to packet properties
-		 * @param item
+		 * @param itemstack
 		 */
-        explicit ItemStackInfoPacket( std::shared_ptr< thing::item::ItemStack > itemstack )
+        explicit ItemStackInfoPacket( const std::shared_ptr< thing::item::ItemStack >& itemstack )
             : IPacket_INIT,
               _item_uri{ itemstack->item()->uri() },
               _owner_uid{ itemstack->owner()->uid() },
@@ -27,7 +27,7 @@ namespace skillquest::game::base::packet::item {
         explicit ItemStackInfoPacket( const json& data )
             : network::IPacket( data ),
               _item_uri{ data[ "item" ].get< std::string >() },
-              //_count{ data[ "count" ].get< std::size_t >() },
+              _count{ data[ "count" ].get< std::size_t >() },
               _owner_uid{ data[ "owner" ].get< std::string >() },
               _stack_uid{ data[ "stack" ].get< std::string >() } {
         }

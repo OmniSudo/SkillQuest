@@ -17,9 +17,9 @@ namespace skillquest::game::base::thing::item {
 	public:
 		struct CreateInfo {
 			util::UID id = {};
-            std::shared_ptr< character::Character > owner;
-			std::shared_ptr< stuff::IThing > item;
-			std::size_t count;
+            std::shared_ptr< character::Character > owner = nullptr;
+			std::shared_ptr< stuff::IThing > item = nullptr;
+			std::size_t count = 0;
 		};
 	
 	private:
@@ -47,5 +47,17 @@ namespace skillquest::game::base::thing::item {
             _item = value->root();
             return *this;
         }
+
+		auto operator == ( const ItemStack& self ) const {
+			return this && self.uri() == this->uri();
+		}
+
+		auto operator == (const util::UID& self ) const {
+			return this && self == util::UID{ this->uri().path() };
+		}
+
+		auto operator != ( const ItemStack& self ) const { return !(*this == self);}
+
+		auto operator != ( const util::UID& self ) const { return !(*this == self);}
 	};
 }

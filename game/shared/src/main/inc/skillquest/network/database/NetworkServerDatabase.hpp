@@ -22,7 +22,7 @@ namespace skillquest::network {
 		
 		protected:
 			/**
-			* The networking renderer
+			* The networking controller
 			*/
 			network::NetworkController* _controller;
 			

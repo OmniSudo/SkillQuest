@@ -34,7 +34,8 @@ namespace skillquest::network::database {
 		auto type = json[ "type" ].get< std::string >();
 		auto i = _packetDeserializers.find( type );
 		if ( i != _packetDeserializers.end() ) {
-			return i->second.operator()( json );
+			auto packet = i->second.operator()( json );
+	 		return packet;
 		}
 		
 		return nullptr;

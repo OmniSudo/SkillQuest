@@ -35,7 +35,7 @@ namespace skillquest::util {
 		virtual auto operator== ( const UID& other ) const -> bool {
 			return value == other.value;
 		}
-		
+
 		auto operator<=> ( const UID& other ) const -> auto {
 			return value <=> other.value;
 		}

@@ -91,13 +91,16 @@ namespace skillquest::graphics {
     }
 
     void GLWindow::render () {
-        // TODO: Does swap buffers need to be called in the same thread as GL
-        sq::client()->graphics()->thread().enqueue(
-                [ this ] () {
-                    glfwSwapBuffers( _handle );
-                },
-                "Swap Buffers"
-        );
+        auto cl = sq::client();
+        if ( cl && cl->graphics() ) {
+            // TODO: Does swap buffers need to be called in the same thread as GL
+            cl->graphics()->thread().enqueue(
+                    [ this ] () {
+                        glfwSwapBuffers( _handle );
+                    },
+                    "Swap Buffers"
+            );
+        }
     }
 
     void* GLWindow::handle () {

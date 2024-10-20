@@ -41,7 +41,8 @@ namespace skillquest::game::base::packet::world::chunk {
 
         explicit ChunkDataPacket ( const json& data ) :
                 network::IPacket( data ) {
-            auto decoded = convert::base64::decode( data[ "data" ].get< std::string >() );
+            auto b64 = data[ "blocks" ].get< std::string >();
+            auto decoded = convert::base64::decode( b64 );
             auto cstr = decoded.c_str();
             for ( auto i = 0; i < _blocks.size(); i++ ) {
                 _blocks[ i ] = ::be64toh( *(( std::size_t* ) decoded.c_str() + i) );
@@ -57,7 +58,8 @@ namespace skillquest::game::base::packet::world::chunk {
             for ( int i = 0; i < _blocks.size(); i++ ) {
                 formatted[ i ] = ::htobe64( _blocks[ i ] );
             }
-            data[ "data" ] = convert::base64::encode( std::string( ( char* ) &formatted[ 0 ], formatted.size() * sizeof( std::size_t ) ) );
+            std::string converted = convert::base64::encode( std::string( ( char* ) &formatted[ 0 ], formatted.size() * sizeof( std::size_t ) ) );
+            data[ "blocks" ] = converted;
             auto ids = json{};
             for ( auto& [ id, uri ] : _ids ) {
                 ids[ std::to_string( id ) ] = uri.toString();

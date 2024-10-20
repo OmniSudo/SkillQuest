@@ -22,47 +22,77 @@ namespace skillquest::game::base::doohickey::item {
     ) {
         // Create or update the item in the client's item storage
         sq::shared()->logger()->trace( "Creating item {0}", data->uri() );
-        auto item = createOrUpdateItem( data->uri() );
-        if ( item ) {
-            sq::shared()->logger()->info( "Created item {0}", item->uri() );
-            auto i = callbacks().find( data->uri() );
-            if ( i != callbacks().end() ) {
-                i->second.operator ()( item );
-                callbacks().erase( i );
-            }
-        } else {
-            sq::shared()->logger()->info( "Failed to create item {0}", data->uri() );
-        }
+        auto item = createOrUpdate( data );
     }
 
-    void
-    ClientItemNetworking::request ( const URI& uri, std::function< void ( std::shared_ptr< thing::item::IItem > item ) > callback ) {
-        if ( callbacks().contains( uri ) ) {
-            auto chain = callbacks()[ uri ];
-            callbacks()[ uri ] = [ callback, chain, this ] ( std::shared_ptr< thing::item::IItem > item ) {
-                chain( item );
-                callback( item );
-            };
-        } else {
-            callbacks()[ uri ] = callback;
-        }
-
-        // TODO: GET EXTENSION URI
-        // _channel->send( localplayer()->connection(), new packet::item::ItemInfoRequestPacket{ uri } );
+    void ClientItemNetworking::onNet_ItemInfoDeniedPacket (
+            skillquest::network::Connection connection, std::shared_ptr< packet::item::ItemInfoDeniedPacket > data
+    ) {
+        sq::shared()->logger()->error( "Server cannot send item {0}", data->uri() );
     }
 
     void ClientItemNetworking::onDeactivate () {
-        Thing::onDeactivate();
+        stuff::Doohickey::onDeactivate();
         _channel->drop( this );
     }
 
-    std::shared_ptr< thing::item::IItem > ClientItemNetworking::createOrUpdateItem ( const URI& uri ) {
+    std::shared_ptr< thing::item::IItem >
+    ClientItemNetworking::createOrUpdate ( std::shared_ptr< packet::item::ItemInfoPacket >& data ) {
         if ( std::dynamic_pointer_cast< thing::item::ClientItem >(
-                stuff().contains( uri ) ? stuff()[ uri ] : nullptr
+                stuff().contains( data->uri() ) ? stuff()[ data->uri() ] : nullptr
         ) ) {
-            stuff().remove( uri );
+            stuff().remove( data->uri() );
         }
 
-        return stuff().create< thing::item::ClientItem >( { .uri = uri } );
+        return stuff().create< thing::item::ClientItem >(
+                { .uri = data->uri() }
+        );
     }
-}// namespace skillquest::game::base::thing::item
+
+    std::shared_future< std::shared_ptr< thing::item::IItem > > ClientItemNetworking::request ( const URI& uri, bool force ) {
+        if ( responses().contains( uri ) ) return futures()[ uri ];
+
+        auto response = responses()[ uri ] = std::make_shared< Response >( this, uri );
+        if ( force || !stuff().contains( uri ) ) {
+            _channel->send( localplayer()->connection(), new packet::item::ItemInfoRequestPacket{ uri } );
+        } else {
+            response->promise.set_value( std::dynamic_pointer_cast< thing::item::IItem >( stuff()[ uri ] ) );
+        }
+
+        auto future = response->promise.get_future().share();
+        futures()[ uri ] = future;
+        return future;
+    }
+
+    ClientItemNetworking::Response::Response ( ClientItemNetworking* networking, const URI& uri ) {
+        this->networking = networking;
+        channel = sq::shared()->network()->channels().create( uri.toString() );
+        promise = std::promise< std::shared_ptr< thing::item::IItem > >{};
+
+        channel->add( this, &ClientItemNetworking::Response::onNet_ResponseItemInfoDeniedPacket );
+        channel->add( this, &ClientItemNetworking::Response::onNet_ResponseItemInfoPacket );
+    }
+
+    void ClientItemNetworking::Response::onNet_ResponseItemInfoPacket (
+            skillquest::network::Connection connection, std::shared_ptr< packet::item::ItemInfoPacket > data
+    ) {
+        sq::shared()->logger()->trace( "Creating item {0}", data->uri() );
+        auto item = networking->createOrUpdate( data );
+
+        promise.set_value( item );
+
+        channel = nullptr;
+        networking->_responses.erase( data->uri() );
+    }
+
+    void ClientItemNetworking::Response::onNet_ResponseItemInfoDeniedPacket (
+            skillquest::network::Connection connection, std::shared_ptr< packet::item::ItemInfoDeniedPacket > data
+    ) {
+        sq::shared()->logger()->error( "Server denied sending {0}", data->uri() );
+
+        promise.set_value( nullptr );
+
+        channel = nullptr;
+        networking->_responses.erase( data->uri() );
+    }
+}
