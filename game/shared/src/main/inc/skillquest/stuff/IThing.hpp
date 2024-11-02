@@ -17,7 +17,7 @@
 namespace skillquest::stuff {
 	class IStuff;
 	
-	class IThing : public virtual util::ToString, public virtual HasURI {
+	class IThing : public virtual util::ToString, public HasURI {
 	public:
         friend class Stuff;
 

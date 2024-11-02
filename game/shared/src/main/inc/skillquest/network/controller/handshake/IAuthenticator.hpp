@@ -28,11 +28,15 @@ namespace skillquest::network::controller::handshake {
 		 */
 		virtual bool logout ( const util::UID& session_id ) = 0;
 		
+		virtual bool create ( const std::string& email, const std::string& passhash ) = 0;
+
 		virtual bool create ( network::Connection connection ) = 0;
-	
+
 	public:
 		virtual util::UID uid ( const std::string& username ) const = 0;
-		
+
+        virtual auto uid ( const std::string& email, const util::UID& uid ) -> void = 0;
+
 		virtual bool exists ( const std::string& username ) const = 0;
 		
 		virtual std::string email ( const util::UID& uid ) const = 0;

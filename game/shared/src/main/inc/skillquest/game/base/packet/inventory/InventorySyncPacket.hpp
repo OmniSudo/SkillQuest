@@ -8,6 +8,7 @@
 #include "skillquest/network.hpp"
 #include "skillquest/uri.hpp"
 #include "skillquest/character.hpp"
+#include "skillquest/inventory.hpp"
 #include "skillquest/game/base/thing/inventory/character/CharacterInventory.hpp"
 
 namespace skillquest::game::base::packet::inventory {
@@ -18,7 +19,7 @@ namespace skillquest::game::base::packet::inventory {
          * Sends inventory information to client
          * @param name Character to log into
          */
-        explicit InventorySyncPacket(std::shared_ptr<thing::inventory::Inventory> &target)
+        explicit InventorySyncPacket(sq::sh::Inventory &target)
             : IPacket_INIT, _target{target} {
         }
 
@@ -36,6 +37,6 @@ namespace skillquest::game::base::packet::inventory {
             return data;
         }
 
-        property(target, std::shared_ptr<thing::inventory::Inventory>, public, public_ptr);
+        property(target, URI, public_const, public_ptr);
     };
 };

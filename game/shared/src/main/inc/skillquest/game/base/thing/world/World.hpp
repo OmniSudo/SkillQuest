@@ -58,3 +58,7 @@ namespace skillquest::game::base::thing::world {
         
     };
 }
+
+namespace sq::world {
+    typedef skillquest::game::base::thing::world::World World;
+}

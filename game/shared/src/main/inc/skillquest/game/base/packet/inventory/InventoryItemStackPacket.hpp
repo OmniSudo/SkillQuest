@@ -5,28 +5,29 @@
 
 #pragma once
 
-#include "skillquest/inventory.hpp"
 #include "skillquest/network.hpp"
 #include "skillquest/uri.hpp"
 #include "skillquest/sh.api.hpp"
-#include "skillquest/game/base/thing/inventory/Inventory.hpp"
+#include "skillquest/inventory.hpp"
+#include "skillquest/item.hpp"
 
 namespace skillquest::game::base::packet::inventory {
-    class InventoryUpdatePacket : public network::IPacket {
+    class InventoryItemStackPacket : public network::IPacket {
     public:
         /**
          * CLIENT -> SERVER
          * Requests the server to send inventory information
          * @param target
          */
-        explicit InventoryUpdatePacket(const sq::sh::Inventory &target, const URI &slot)
-            : IPacket_INIT, _target{target->uri()}, _slot{slot} {
+        explicit InventoryItemStackPacket(sq::sh::Inventory target, const URI &slot)
+            : IPacket_INIT, _target{target->uri()},
+              _stack{target->stacks()[slot] ? target->stacks()[slot]->uri() : {}} {
         }
 
-        explicit InventoryUpdatePacket(const json &data)
+        explicit InventoryItemStackPacket(const json &data)
             : network::IPacket(data),
               _target{data["uri"].get<std::string>()},
-              _slot{data["slot"].get<std::string>()} {
+              _stack{data["stack"].get<std::string>()} {
             if (!_target) {
                 _target = std::make_shared<thing::inventory::Inventory>(sq::sh::Inventory::element_type::CreateInfo{});
             }
@@ -34,12 +35,14 @@ namespace skillquest::game::base::packet::inventory {
 
         json serialize() const override {
             json data = IPacket::serialize();
-            data["uri"] = _target->uri().toString();
-            data["slot"] = _slot.toString();
+            if (_target) {
+                data["uri"] = _target.toString();
+                data["stack"] = _stack.toString();
+            }
             return data;
         }
 
         property(target, URI, public_const, public_ptr);
-        property(slot, URI, public_const, public_ptr);
+        property(stack, URI, public_const, public_ptr);
     };
 };

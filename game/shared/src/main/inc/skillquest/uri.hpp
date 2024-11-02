@@ -5,14 +5,13 @@
 
 #pragma once
 
-#include <iostream>
 #include "skillquest/string.hpp"
 #include <sstream>
 #include <stdexcept>
 #include "skillquest/json.hpp"
 
 namespace skillquest {
-    class URI : public util::ToString {
+    class URI final : public util::ToString {
     private:
         std::string _full;
         std::string _scheme;

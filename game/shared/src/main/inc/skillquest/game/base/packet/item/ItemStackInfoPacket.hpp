@@ -16,7 +16,7 @@ namespace skillquest::game::base::packet::item {
 		 * TODO: item properties to packet properties
 		 * @param itemstack
 		 */
-        explicit ItemStackInfoPacket( const std::shared_ptr< thing::item::ItemStack >& itemstack )
+        explicit ItemStackInfoPacket( const sq::sh::ItemStack& itemstack )
             : IPacket_INIT,
               _item_uri{ itemstack->item()->uri() },
               _owner_uid{ itemstack->owner()->uid() },

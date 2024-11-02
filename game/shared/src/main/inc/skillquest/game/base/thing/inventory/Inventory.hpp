@@ -10,7 +10,7 @@
 #include "skillquest/item.hpp"
 
 namespace skillquest::game::base::thing::inventory {
-    class Inventory : stuff::Thing {
+    class Inventory : public stuff::Thing {
         property(stacks, std::map< URI COMMA std::shared_ptr< thing::item::ItemStack > >, public_ref, none);
 
     public:
@@ -24,13 +24,13 @@ namespace skillquest::game::base::thing::inventory {
                 .uri = info.uri
             }) {
             for (auto &[slot, stack]: info.stacks) {
-                this->stacks[slot] = stuff()[stack];
+                this->_stacks[slot.toString()] = std::dynamic_pointer_cast< sq::sh::ItemStack::element_type >(stuff()[stack]);
             }
         }
 
     public:
         virtual std::shared_ptr<thing::item::ItemStack> &operator [](const URI &uri) {
-            return _stacks[uri];
+            return _stacks[uri.toString()];
         }
     };
 }

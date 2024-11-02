@@ -23,7 +23,7 @@ namespace skillquest::stuff {
 		
 		std::string toString () const override;
 		
-		auto uri () const -> URI final;
+		auto uri () const -> URI override;
 		
 		auto stuff () -> IStuff& final;
 		
@@ -60,7 +60,7 @@ namespace skillquest::stuff {
 		
 		auto disconnect ( const std::type_index& type ) -> std::shared_ptr< IComponent > final;
 	
-	public:
+	private:
 		std::shared_ptr< IStuff > _stuff;
 		
 		URI _uri;
