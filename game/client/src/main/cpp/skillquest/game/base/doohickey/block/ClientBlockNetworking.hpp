@@ -5,12 +5,14 @@
 #pragma once
 
 
+#include "skillquest/sh.api.hpp"
 #include "skillquest/game/base/packet/block/BlockInfoRequestPacket.hpp"
 #include "skillquest/game/base/packet/block/BlockInfoPacket.hpp"
 #include "skillquest/game/base/packet/block/BlockInfoDeniedPacket.hpp"
 #include "skillquest/game/base/thing/block/Block.hpp"
 #include "skillquest/game/base/thing/character/player/LocalPlayer.hpp"
 #include "skillquest/stuff.doohickey.hpp"
+
 namespace skillquest::game::base::doohickey::block {
     class ClientBlockNetworking : public stuff::Doohickey {
     public:
@@ -37,6 +39,7 @@ namespace skillquest::game::base::doohickey::block {
             Response ( ClientBlockNetworking* networking, const URI& uri );
 
             ~Response () {
+                sq::shared()->network()->channels().destroy( channel );
                 channel = nullptr;
             }
 

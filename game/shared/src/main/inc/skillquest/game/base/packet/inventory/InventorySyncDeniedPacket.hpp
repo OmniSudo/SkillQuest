@@ -1,32 +1,29 @@
 /**
  * @author  omnisudo
- * @date    2024.11.01
+ * @date    2024.10.18
  */
 
 #pragma once
 
 #include "skillquest/network.hpp"
 #include "skillquest/uri.hpp"
-#include "skillquest/sh.api.hpp"
+#include "skillquest/character.hpp"
 #include "skillquest/inventory.hpp"
 
 namespace skillquest::game::base::packet::inventory {
-    class InventoryInitRequestPacket : public network::IPacket {
+    class InventorySyncDeniedPacket : public network::IPacket {
     public:
         /**
-         * CLIENT -> SERVER
-         * Requests the server to send inventory information
-         * @param target
+         * SERVER -> CLIENT
+         * Sends inventory information to client
+         * @param name Character to log into
          */
-        explicit InventoryInitRequestPacket( const URI &target)
+        explicit InventorySyncDeniedPacket(const URI &target)
             : IPacket_INIT, _target{target} {
         }
 
-        explicit InventoryInitRequestPacket(const json &data)
-            : network::IPacket(data),
-              _target{
-                  data["uri"].get<std::string>()
-              } {
+        explicit InventorySyncDeniedPacket(const json &data)
+            : network::IPacket(data), _target{ data[ "uri" ].get< std::string >() } {
         }
 
         json serialize() const override {

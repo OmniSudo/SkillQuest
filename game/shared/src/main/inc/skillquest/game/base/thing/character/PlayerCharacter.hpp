@@ -10,22 +10,21 @@
 #include "skillquest/network.hpp"
 
 namespace skillquest::game::base::thing::character {
-	class PlayerCharacter : public Character {
+    class PlayerCharacter : public Character {
     public:
         struct CreateInfo {
-            const Character::CreateInfo& character;
+            const Character::CreateInfo &character;
             std::string name;
         };
 
-	property( name, std::string, public, public_ptr )
+        property(name, std::string, public, public_ptr);
 
-	public:
-		explicit PlayerCharacter ( const CreateInfo& info ) :
-        Character{ info.character },
-        _name{ info.name }{
+    public:
+        explicit PlayerCharacter(const CreateInfo &info)
+            : Character{info.character},
+              _name{info.name} {
+        }
 
-    }
-		
-		~PlayerCharacter () override = default;
-	};
+        ~PlayerCharacter() override = default;
+    };
 }

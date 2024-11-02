@@ -9,4 +9,5 @@
 
 namespace sq::sh {
     typedef std::shared_ptr< skillquest::game::base::thing::inventory::Inventory > Inventory;
+    typedef Inventory::element_type INVENTORY;
 }

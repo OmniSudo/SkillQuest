@@ -9,6 +9,7 @@
 #include "skillquest/uri.hpp"
 #include "skillquest/sh.api.hpp"
 #include "skillquest/inventory.hpp"
+#include "skillquest/item.hpp"
 
 namespace skillquest::game::base::packet::inventory {
     class InventoryInitPacket : public network::IPacket {
@@ -19,9 +20,9 @@ namespace skillquest::game::base::packet::inventory {
          * @param target
          */
         explicit InventoryInitPacket(sq::sh::Inventory &target)
-            : IPacket_INIT, _target{target->uri()} {
-            for ( const auto& [ slot, stack ] : target->stacks() ) {
-                _stacks[ slot ] = stack;
+            : IPacket_INIT, _target{target->uri()}, _stacks{} {
+            for ( const auto&[slot, stack] : target->stacks() ) {
+                _stacks.emplace( slot, stack->uri() );
             }
         }
 
@@ -29,9 +30,10 @@ namespace skillquest::game::base::packet::inventory {
             : network::IPacket(data ),
         _target{ data[ "uri" ].get< std::string >() }
         {
-            for ( const auto& [ slot, stack_json ] : data[ "slots"] ) {
-                auto stack = URI{ stack_json.get< std::string >()            };
-                _stacks[ URI{ slot } ] = stack;
+            auto slots = data[ "slots" ];
+            for ( auto pair = slots.begin(); pair != slots.end(); pair++ ) {
+                auto stack = URI{ pair.value().get< std::string >() };
+                _stacks.emplace( URI{pair.key()            }, stack );
             }
         }
 
@@ -40,7 +42,7 @@ namespace skillquest::game::base::packet::inventory {
 
             data["uri"] = _target.toString();
             auto& stacks = data[ "stacks" ] = {};
-            for ( const auto& [ slot, uri ] : _target->stacks() ) {
+            for ( const auto& [ slot, uri ] : this->stacks() ) {
                 stacks[ slot.toString() ] = uri.toString();
             }
 

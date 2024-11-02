@@ -24,7 +24,7 @@ namespace skillquest::game::base::thing::inventory {
                 .uri = info.uri
             }) {
             for (auto &[slot, stack]: info.stacks) {
-                this->_stacks[slot.toString()] = std::dynamic_pointer_cast< sq::sh::ItemStack::element_type >(stuff()[stack]);
+                this->_stacks[slot.toString()] = std::dynamic_pointer_cast< thing::item::ItemStack >(stuff()[stack]);
             }
         }
 

@@ -121,6 +121,7 @@ namespace skillquest::stuff {
 		}
 		_things_by_scheme[ thing->uri().scheme() ][ thing->uri() ] = thing;
         thing->ptr_to_self( thing );
+		sq::shared()->logger()->trace( "Added {0}", thing->uri().toString() );
 		return thing;
 	}
 }

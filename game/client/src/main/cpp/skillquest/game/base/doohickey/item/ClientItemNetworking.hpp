@@ -12,6 +12,7 @@
 #include "skillquest/game/base/packet/item/ItemInfoDeniedPacket.hpp"
 #include "skillquest/game/base/thing/character/player/LocalPlayer.hpp"
 #include "skillquest/network.hpp"
+#include "skillquest/sh.api.hpp"
 #include "skillquest/stuff.doohickey.hpp"
 
 namespace skillquest::game::base::doohickey::item {
@@ -45,6 +46,7 @@ namespace skillquest::game::base::doohickey::item {
             Response ( ClientItemNetworking* networking, const URI& uri );
 
             ~Response () {
+                sq::shared()->network()->channels().destroy( channel );
                 channel = nullptr;
             }
 

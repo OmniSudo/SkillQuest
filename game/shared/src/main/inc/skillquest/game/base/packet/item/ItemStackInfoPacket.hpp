@@ -7,6 +7,7 @@
 #include "skillquest/item.hpp"
 #include "skillquest/network.hpp"
 #include "skillquest/uri.hpp"
+#include "skillquest/character.hpp"
 
 namespace skillquest::game::base::packet::item {
     class ItemStackInfoPacket : public network::IPacket {

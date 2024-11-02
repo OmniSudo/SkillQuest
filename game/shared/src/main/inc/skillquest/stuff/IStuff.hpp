@@ -152,5 +152,6 @@ namespace skillquest::stuff {
 		virtual auto add ( IThing* thing ) -> std::shared_ptr< IThing > = 0;
 		
 		virtual auto add ( std::shared_ptr< IThing > thing ) -> std::shared_ptr< IThing > = 0;
+
 	};
 }

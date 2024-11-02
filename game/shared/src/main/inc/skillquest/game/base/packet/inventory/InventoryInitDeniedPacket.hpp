@@ -1,6 +1,6 @@
 /**
  * @author  omnisudo
- * @date    2024.11.01
+ * @date    2024.11.02
  */
 
 #pragma once
@@ -11,26 +11,25 @@
 #include "skillquest/inventory.hpp"
 
 namespace skillquest::game::base::packet::inventory {
-    class InventoryInitRequestPacket : public network::IPacket {
+    class InventoryInitDeniedPacket : public network::IPacket {
     public:
         /**
          * CLIENT -> SERVER
          * Requests the server to send inventory information
          * @param target
          */
-        explicit InventoryInitRequestPacket( const URI &target)
-            : IPacket_INIT, _target{target} {
+        explicit InventoryInitDeniedPacket(const URI& inventory)
+            : IPacket_INIT, _target{inventory} {
         }
 
-        explicit InventoryInitRequestPacket(const json &data)
-            : network::IPacket(data),
-              _target{
-                  data["uri"].get<std::string>()
-              } {
+        explicit InventoryInitDeniedPacket(const json &data)
+            : network::IPacket(data ),
+        _target{ data[ "uri" ].get< std::string >() }
+        {
         }
 
         json serialize() const override {
-            json data = IPacket::serialize();
+          json data = IPacket::serialize();
             data["uri"] = _target.toString();
             return data;
         }
@@ -38,3 +37,4 @@ namespace skillquest::game::base::packet::inventory {
         property(target, URI, public_const, public_ptr);
     };
 };
+

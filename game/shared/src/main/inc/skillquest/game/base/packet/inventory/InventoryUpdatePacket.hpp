@@ -27,14 +27,11 @@ namespace skillquest::game::base::packet::inventory {
             : network::IPacket(data),
               _target{data["uri"].get<std::string>()},
               _slot{data["slot"].get<std::string>()} {
-            if (!_target) {
-                _target = std::make_shared<thing::inventory::Inventory>(sq::sh::Inventory::element_type::CreateInfo{});
-            }
         }
 
         json serialize() const override {
             json data = IPacket::serialize();
-            data["uri"] = _target->uri().toString();
+            data["uri"] = _target.toString();
             data["slot"] = _slot.toString();
             return data;
         }

@@ -6,6 +6,7 @@
 #pragma once
 
 #include "skillquest/stuff.thing.hpp"
+#include "skillquest/inventory.hpp"
 #include "skillquest/util/uid.hpp"
 
 namespace skillquest::game::base::thing::character {
@@ -21,6 +22,7 @@ namespace skillquest::game::base::thing::character {
 		~Character () override = default;
 
         property( uid, util::UID, public, public_ptr )
+        property(inventory, sq::sh::Inventory, public_ref, public_ptr);
 
 	};
 }
