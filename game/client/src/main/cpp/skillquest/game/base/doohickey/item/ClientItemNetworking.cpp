@@ -11,7 +11,7 @@ namespace skillquest::game::base::doohickey::item {
     ClientItemNetworking::ClientItemNetworking ( const ClientItemNetworking::CreateInfo& info )
             : stuff::Doohickey{ { .uri = CL_URI } },
               _channel{ sq::shared()->network()->channels().create( "item", true ) },
-              _localplayer{ info.localplayer } {
+              _localplayer{ info.player } {
         sq::shared()->network()->packets().add< packet::item::ItemInfoPacket >();
         _channel->add( this, &ClientItemNetworking::onNet_ItemInfoPacket );
     }

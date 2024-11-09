@@ -5,6 +5,7 @@
 
 #include "ClientInventoryNetworking.hpp"
 
+#include "skillquest/game/base/doohickey/addon/BaseAddonCL.hpp"
 #include "skillquest/game/base/doohickey/item/ClientItemStackNetworking.hpp"
 #include "skillquest/game/base/packet/inventory/InventoryInitRequestPacket.hpp"
 #include "skillquest/game/base/packet/inventory/InventoryItemStackRequestPacket.hpp"
@@ -16,9 +17,6 @@ namespace skillquest::game::base::doohickey::inventory {
           },
           _channel{
               sq::shared()->network()->channels().create("inventory", true)
-          },
-          _localplayer{
-              info.localplayer
           } {
         sq::shared()->network()->packets().add<packet::inventory::InventoryInitPacket>();
         sq::shared()->network()->packets().add<packet::inventory::InventoryInitDeniedPacket>();
@@ -35,13 +33,14 @@ namespace skillquest::game::base::doohickey::inventory {
     }
 
     ClientInventoryNetworking::~ClientInventoryNetworking() {
+        sq::shared()->network()->channels().destroy( _channel );
     }
 
     std::shared_future<sq::sh::Inventory> ClientInventoryNetworking::request(const URI &uri) {
         if (init_responses().contains(uri)) return futures()[uri];
 
         auto response = init_responses()[uri] = std::make_shared<InitResponse>(this, uri);
-        _channel->send(localplayer()->connection(), new packet::inventory::InventoryInitRequestPacket{uri});
+        _channel->send(addon::BaseAddonCL::instance()->localplayer()->connection(), new packet::inventory::InventoryInitRequestPacket{uri});
 
         auto future = response->promise.get_future().share();
         futures()[uri] = future;
@@ -52,7 +51,7 @@ namespace skillquest::game::base::doohickey::inventory {
         if (sync_responses().contains(inventory->uri())) return futures()[inventory->uri()];
 
         auto response = sync_responses()[inventory->uri()] = std::make_shared<SyncResponse>(this, inventory->uri());
-        _channel->send(localplayer()->connection(),
+        _channel->send(addon::BaseAddonCL::instance()->localplayer()->connection(),
                        new packet::inventory::InventoryInitRequestPacket{inventory->uri()});
 
         auto future = response->promise.get_future().share();
@@ -71,7 +70,7 @@ namespace skillquest::game::base::doohickey::inventory {
         if (stack_responses().contains(uri)) return futures()[uri];
 
         auto response = stack_responses()[uri] = std::make_shared<StackResponse>(this, inventory, slot);
-        _channel->send(localplayer()->connection(),
+        _channel->send(addon::BaseAddonCL::instance()->localplayer()->connection(),
                        new packet::inventory::InventoryItemStackRequestPacket{inventory, slot});
 
         auto future = response->promise.get_future().share();

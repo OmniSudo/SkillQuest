@@ -36,7 +36,6 @@ namespace skillquest::game::base::packet::inventory::character {
             data["character"] = _character.toString();
             data["inventory"] = _inventory.toString();
 
-
             return data;
         }
 

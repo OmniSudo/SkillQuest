@@ -130,6 +130,7 @@ namespace skillquest::application {
 #ifdef PLATFORM_WEB
         ImGui_ImplGlfw_InstallEmscriptenCallbacks( w, "#canvas" );
 #endif
+
         sq::shared()->stuff()->create< game::base::doohickey::ui::login::UILoginWindow >(
                 {
                         .doohickey = {

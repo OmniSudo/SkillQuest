@@ -18,9 +18,7 @@ namespace skillquest::game::base::doohickey::block {
     public:
         inline static const URI CL_URI = { "net://skill.quest/client/block" };
 
-        struct CreateInfo {
-            std::shared_ptr< thing::character::player::LocalPlayer > localplayer;
-        };
+        struct CreateInfo {};
 
         explicit ClientBlockNetworking( const CreateInfo& info );
 
@@ -51,7 +49,6 @@ namespace skillquest::game::base::doohickey::block {
         net_receive( BlockInfoDeniedPacket, packet::block::BlockInfoDeniedPacket );
 
         property( channel, std::shared_ptr< skillquest::network::Channel >, protected_ref, none );
-        property( localplayer, std::shared_ptr< thing::character::player::LocalPlayer >, protected, none );
         property( responses, std::map< URI COMMA std::shared_ptr< Response > >, protected_ref, none );
         property( futures, std::map< URI COMMA std::shared_future< std::shared_ptr< thing::block::IBlock > > >, protected_ref, none );
 

@@ -10,19 +10,21 @@
 #include "skillquest/util/uid.hpp"
 
 namespace skillquest::game::base::thing::character {
-	class Character : public stuff::Thing {
-	public:
+    class Character : public stuff::Thing {
+    public:
         struct CreateInfo {
-            const stuff::Thing::CreateInfo& thing;
+            const stuff::Thing::CreateInfo &thing;
             util::UID uid;
         };
 
-		Character ( const CreateInfo& info ) : stuff::Thing{ info.thing }, _uid{ info.uid } {}
-		
-		~Character () override = default;
+        Character(const CreateInfo &info)
+            : stuff::Thing{info.thing},
+              _uid{info.uid} {
+        }
 
-        property( uid, util::UID, public, public_ptr )
+        ~Character() override = default;
+
+        property(uid, util::UID, public, public_ptr)
         property(inventory, sq::sh::Inventory, public_ref, public_ptr);
-
-	};
+    };
 }

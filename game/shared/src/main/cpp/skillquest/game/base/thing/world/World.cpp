@@ -18,8 +18,8 @@ namespace skillquest::game::base::thing::world {
         _channel->drop( this );
     }
 
-    std::shared_ptr< character::PlayerCharacter > World::add_player (
-            std::shared_ptr< character::PlayerCharacter > player
+    sq::sh::PlayerCharacter World::add_player (
+            sq::sh::PlayerCharacter player
     ) {
         if ( !player ) {
             sq::shared()->logger()->error( "Tried to add null player to world {0}", uri() );
@@ -34,7 +34,7 @@ namespace skillquest::game::base::thing::world {
     }
 
     bool World::remove_player (
-            std::shared_ptr< character::PlayerCharacter > player
+            sq::sh::PlayerCharacter player
     ) {
         if ( !player ) return false;
         auto i = _players_by_name.find( player->name() );
@@ -52,28 +52,16 @@ namespace skillquest::game::base::thing::world {
             if ( i->second->uid() == user_uid ) {
                 _players_by_name.erase( i++ );
                 return true;
-            } else {
-                ++i;
             }
+            ++i;
         }
 
         return false;
     }
 
-    std::shared_ptr< world::chunk::Chunk > World::chunk ( glm::u16vec3 pos ) {
+    std::shared_ptr< world::chunk::Chunk > World::chunk ( glm::u64vec3 pos ) {
         auto i = _chunks.find( pos );
         if ( i == _chunks.end() ) return nullptr;
         return i->second;
-    }
-
-    std::shared_ptr< stuff::IThing > World::block ( glm::u64vec3 pos ) {
-        auto chunk = this->chunk( { pos.x / 0x10, pos.y / 0x10, pos.z / 0x10 } );
-        if ( chunk ) return chunk->get( { pos.x & 0xF, pos.y & 0xF, pos.z & 0xF } );
-        return nullptr;
-    }
-
-    void World::block ( glm::u64vec3 pos, std::shared_ptr< stuff::IThing > block ) {
-        auto chunk = this->chunk( { pos.x / 0x10, pos.y / 0x10, pos.z / 0x10 } );
-        if ( chunk ) chunk->set( { pos.x & 0xF, pos.y & 0xF, pos.z & 0xF }, block );
     }
 }

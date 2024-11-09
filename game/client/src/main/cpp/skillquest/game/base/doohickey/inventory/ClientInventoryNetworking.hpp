@@ -18,7 +18,7 @@
 namespace skillquest::game::base::doohickey::inventory {
     class ClientInventoryNetworking : public stuff::Doohickey {
     public:
-        inline static const URI CL_URI = { "net://skill.quest/client/block" };
+        inline static const URI CL_URI = { "net://skill.quest/client/inventory" };
 
         struct CreateInfo {
             std::shared_ptr< thing::character::player::LocalPlayer > localplayer;
@@ -106,8 +106,7 @@ namespace skillquest::game::base::doohickey::inventory {
         net_receive( InventoryUpdatePacket, packet::inventory::InventoryUpdatePacket );
         net_receive( InventoryInitPacket, packet::inventory::InventoryInitPacket );
 
-        property( channel, std::shared_ptr< skillquest::network::Channel >, protected_ref, none );
-        property( localplayer, std::shared_ptr< thing::character::player::LocalPlayer >, protected, none );
+        property( channel, skillquest::network::Channel*&, protected_ref, none );
         property( init_responses, std::map< URI COMMA std::shared_ptr< InitResponse > >, protected_ref, none );
         property( sync_responses, std::map< URI COMMA std::shared_ptr< SyncResponse > >, protected_ref, none );
         property( stack_responses, std::map< URI COMMA std::shared_ptr< StackResponse > >, protected_ref, none );

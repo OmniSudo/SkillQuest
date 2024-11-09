@@ -5,12 +5,12 @@
 #include "ClientBlockNetworking.hpp"
 #include "skillquest/game/base/thing/block/ClientBlock.hpp"
 #include "skillquest/sh.api.hpp"
+#include "skillquest/game/base/doohickey/addon/BaseAddonCL.hpp"
 
 namespace skillquest::game::base::doohickey::block {
     ClientBlockNetworking::ClientBlockNetworking ( const ClientBlockNetworking::CreateInfo& info )
             : stuff::Doohickey{ { .uri = CL_URI } },
-              _channel{ sq::shared()->network()->channels().create( "block", true ) },
-              _localplayer{ info.localplayer } {
+              _channel{ sq::shared()->network()->channels().create( "block", true ) } {
         sq::shared()->network()->packets().add< packet::block::BlockInfoPacket >();
         _channel->add( this, &ClientBlockNetworking::onNet_BlockInfoPacket );
 
@@ -55,7 +55,7 @@ namespace skillquest::game::base::doohickey::block {
         if ( responses().contains( uri ) ) return futures()[ uri ];
 
         auto response = responses()[ uri ] = std::make_shared< Response >( this, uri );
-        _channel->send( localplayer()->connection(), new packet::block::BlockInfoRequestPacket{ uri } );
+        _channel->send( addon::BaseAddonCL::instance()->player()->connection(), new packet::block::BlockInfoRequestPacket{ uri } );
 
         auto future = response->promise.get_future().share();
         futures()[ uri ] = future;

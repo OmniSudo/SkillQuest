@@ -16,20 +16,24 @@ namespace skillquest::game::base::thing::character::player {
     class LocalPlayer : public PlayerCharacter {
     public:
         struct CreateInfo {
-            const PlayerCharacter::CreateInfo& player;
+            const PlayerCharacter::CreateInfo &player;
             network::Connection connection;
-            std::shared_ptr< world::World > world;
+            std::shared_ptr<world::World> world;
         };
 
-        explicit LocalPlayer ( const CreateInfo& info );
+        explicit LocalPlayer(const CreateInfo &info);
 
-        ~LocalPlayer () override = default;
+        ~LocalPlayer() override = default;
 
     protected:
-        auto onActivate () -> void override;
+        auto onActivate() -> void override;
 
-    property( connection, network::Connection, public, none )
+        property(connection, network::Connection, public, none);
 
-    property( world, std::shared_ptr< world::World >, public, none )
+        property(world, std::shared_ptr< world::World >, public, public_ptr);
     };
+}
+
+namespace sq::cl {
+    typedef std::shared_ptr<skillquest::game::base::thing::character::player::LocalPlayer> LocalPlayer;
 }

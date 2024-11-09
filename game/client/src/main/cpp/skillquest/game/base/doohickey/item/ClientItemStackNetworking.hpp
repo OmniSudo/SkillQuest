@@ -18,7 +18,7 @@ namespace skillquest::game::base::doohickey::item {
         inline static const URI CL_URI = { "net://skill.quest/client/itemstack" };
 
         struct CreateInfo {
-            std::shared_ptr< thing::character::player::LocalPlayer > localplayer;
+            sq::sh::PlayerCharacter player;
         };
 
         explicit ClientItemStackNetworking( const CreateInfo& info );
@@ -53,7 +53,6 @@ namespace skillquest::game::base::doohickey::item {
         net_receive( ItemStackInfoDeniedPacket, packet::item::ItemStackInfoDeniedPacket );
 
         property( channel, std::shared_ptr< skillquest::network::Channel >, protected_ref, none );
-        property( localplayer, std::shared_ptr< thing::character::player::LocalPlayer >, protected, none );
         property( responses, std::map< URI COMMA std::shared_ptr< Response > >, protected_ref, none );
         property( futures, std::map< URI COMMA std::shared_future< std::shared_ptr< thing::item::ItemStack > > >, protected_ref, none );
     };

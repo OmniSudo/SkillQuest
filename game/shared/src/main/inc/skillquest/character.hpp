@@ -5,7 +5,6 @@
 
 #pragma once
 
-#include "game/base/packet/character/create/CharacterCreatedResponsePacket.hpp"
 #include "skillquest/game/base/thing/character/Character.hpp"
 #include "skillquest/game/base/thing/character/PlayerCharacter.hpp"
 #include "skillquest/game/base/thing/character/NonPlayerCharacter.hpp"

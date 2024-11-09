@@ -21,7 +21,7 @@ namespace skillquest::game::base::doohickey::item {
         inline static const URI CL_URI = { "net://skill.quest/client/item" };
 
         struct CreateInfo {
-            std::shared_ptr< thing::character::player::LocalPlayer > localplayer;
+            std::shared_ptr< thing::character::player::LocalPlayer > player;
         };
 
         explicit ClientItemNetworking ( const CreateInfo& info );
@@ -29,7 +29,8 @@ namespace skillquest::game::base::doohickey::item {
         void onDeactivate () override;
 
         /**
-         * Request an item defintion from the server; searches for local before sending net message by default
+         *
+         * Request an item definition from the server; searches for local before sending net message by default
          * @param uri
          * @return
          */
@@ -61,6 +62,5 @@ namespace skillquest::game::base::doohickey::item {
         property( localplayer, std::shared_ptr< thing::character::player::LocalPlayer >, protected, none );
         property( responses, std::map< URI COMMA std::shared_ptr< Response > >, protected_ref, none );
         property( futures, std::map< URI COMMA std::shared_future< std::shared_ptr< thing::item::IItem > > >, protected_ref, none );
-
     };
 }// namespace skillquest::game::base::thing::item

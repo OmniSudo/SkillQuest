@@ -9,25 +9,18 @@
 #include "skillquest/game/base/doohickey/item/ClientItemNetworking.hpp"
 #include "skillquest/game/base/doohickey/item/ClientItemStackNetworking.hpp"
 #include "skillquest/sh.api.hpp"
+#include "skillquest/game/base/doohickey/addon/BaseAddonCL.hpp"
+#include "skillquest/game/base/doohickey/addon/BaseAddonCL.hpp"
 #include "skillquest/game/base/doohickey/block/ClientBlockNetworking.hpp"
+#include "skillquest/game/base/doohickey/character/ClientCharacterInventoryNetworking.hpp"
 
 namespace skillquest::game::base::doohickey::ui::ingame {
     UIInGame::UIInGame(const UIInGame::CreateInfo &info)
         : stuff::Doohickey{info.doohickey},
           _player{info.local} {
-        stuff().create<item::ClientItemNetworking>({
-            .localplayer = player(),
-        });
-
-        stuff().create<item::ClientItemStackNetworking>({
-            .localplayer = player(),
-        });
-
-        stuff().create<block::ClientBlockNetworking>({
-            .localplayer = player()
-        });
-
-        world()->download({0, 0, 0});
+        stuff().create< addon::BaseAddonCL >(
+            addon::BaseAddonCL::CreateInfo{ .player = info.local }
+        );
     }
 
     UIInGame::~UIInGame() {
@@ -53,10 +46,6 @@ namespace skillquest::game::base::doohickey::ui::ingame {
     void UIInGame::onDeactivate() {
         stuff::Doohickey::onDeactivate();
         sq::shared()->events()->drop(this);
-    }
-
-    std::shared_ptr<thing::world::ClientWorld> UIInGame::world() {
-        return std::dynamic_pointer_cast<thing::world::ClientWorld>(player()->world());
     }
 
     void UIInGame::onKeyPressedEvent(std::shared_ptr<input::device::keyboard::KeyboardKeyPressed> event) {
