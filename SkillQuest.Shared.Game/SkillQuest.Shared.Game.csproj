@@ -8,6 +8,7 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <PackageReference Include="Lidgren.Network" Version="1.0.2" />
       <PackageReference Include="Silk.NET.Maths" Version="2.22.0" />
     </ItemGroup>
 
@@ -17,6 +18,8 @@
 
     <ItemGroup>
       <Folder Include="data\Addons\SkillQuest\Shared\" />
+      <Folder Include="data\Addons\SkillQuest\Shared\src\Packet\" />
+      <Folder Include="data\Addons\SkillQuest\Shared\src\Thing\" />
     </ItemGroup>
 
 </Project>

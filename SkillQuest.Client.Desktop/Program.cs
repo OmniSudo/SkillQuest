@@ -1,4 +1,4 @@
-﻿using SkillQuest.Client.Game.Addons.Client.SkillQuest;
+﻿using SkillQuest.Client.Game.Addons.SkillQuest.Client;
 
 namespace SkillQuest.Client.Desktop;
 

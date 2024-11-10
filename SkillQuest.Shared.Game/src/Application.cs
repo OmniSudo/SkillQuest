@@ -63,8 +63,10 @@ public class Application : IApplication{
         var previous = DateTime.Now;
         var total = TimeSpan.Zero;
 
+        _running = true;
+
         while ( Running ) {
-            var delta = previous - DateTime.Now;
+            var delta = DateTime.Now - previous;
             total += delta;
 
             while ( total > TickFrequency ) {
@@ -76,6 +78,8 @@ public class Application : IApplication{
                 
                 total -= TickFrequency;
             }
+            
+            previous = DateTime.Now;
         }
 
         Stop?.Invoke();
