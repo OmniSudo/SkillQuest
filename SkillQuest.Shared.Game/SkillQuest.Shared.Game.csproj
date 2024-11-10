@@ -11,4 +11,12 @@
       <PackageReference Include="Silk.NET.Maths" Version="2.22.0" />
     </ItemGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\SkillQuest.API\SkillQuest.API.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="data\Addons\Shared\SkillQuest\src\" />
+    </ItemGroup>
+
 </Project>
