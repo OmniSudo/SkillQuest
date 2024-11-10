@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using System.Collections.Immutable;
 
 namespace SkillQuest.Shared.Game;
 
@@ -27,7 +28,7 @@ public interface IApplication{
 
     public event DoStop Stop;
     
-    public ConcurrentDictionary< string, Addon > Addons { get; protected set; }
+    public ImmutableDictionary<string, Addon> Addons { get; }
     
     public Addon? this[ string name ] { get; protected set; }
 }

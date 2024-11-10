@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using System.Collections.Immutable;
 using System.Runtime.CompilerServices;
 
 namespace SkillQuest.Shared.Game;
@@ -37,7 +38,8 @@ public class Application : IApplication{
     TimeSpan IApplication.TickFrequency() => TimeSpan.FromSeconds(1) / TicksPerSecond;
 
     public IApplication Mount(Addon addon){
-        Addons[addon.Name] = addon;
+        _addons[addon.Name] = addon;
+        addon.Application = this;
         return this;
     }
 
@@ -46,10 +48,10 @@ public class Application : IApplication{
             var copy = new Dictionary<string, Addon>( Addons );
             foreach (var pair in copy) {
                 pair.Value.Application = null;
-                Addons.TryRemove(pair.Key, out _);
+                _addons.TryRemove(pair.Key, out _);
             }
         } else if (Addons.ContainsKey( addon.Name ) && Addons[addon.Name] == addon) {
-            Addons.TryRemove(addon.Name, out var rm );
+            _addons.TryRemove(addon.Name, out var rm );
             addon.Application = null;
         }
         return this;
@@ -85,15 +87,17 @@ public class Application : IApplication{
 
     public event IApplication.DoStop? Stop;
 
-    public ConcurrentDictionary<string, Addon> Addons { get; set; }
+    public ImmutableDictionary<string, Addon > Addons => _addons.ToImmutableDictionary();
 
+    private ConcurrentDictionary<string, Addon> _addons = new();
+    
     public Addon? this[string name] {
         get {
             return Addons.GetValueOrDefault(name);
         }
         set {
             if (value == null) {
-                Addons.TryRemove(name, out _);
+                _addons.TryRemove(name, out _);
             }
             else {
                 var old = Addons.GetValueOrDefault(name);
@@ -101,7 +105,7 @@ public class Application : IApplication{
                 if (old is not null) {
                     old.Application = null;
                 }
-                Addons[name] = value;
+                _addons[name] = value;
                 value.Application = this;
             }
         }

@@ -11,4 +11,8 @@
       <ProjectReference Include="..\SkillQuest.Shared.Game\SkillQuest.Shared.Game.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="data\Addons\SkillQuest\Client\" />
+    </ItemGroup>
+
 </Project>

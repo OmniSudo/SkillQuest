@@ -16,7 +16,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="data\Addons\Shared\SkillQuest\src\" />
+      <Folder Include="data\Addons\SkillQuest\Shared\" />
     </ItemGroup>
 
 </Project>
