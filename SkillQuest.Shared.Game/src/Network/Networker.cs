@@ -8,7 +8,7 @@ using SkillQuest.API.Network;
 
 namespace SkillQuest.Shared.Game.Network;
 
-public sealed class Networker : INetworker {
+public sealed class Networker : INetworker{
 
     public ImmutableDictionary<IPEndPoint, IClientConnection> Clients => _clients.ToImmutableDictionary();
 
@@ -20,21 +20,19 @@ public sealed class Networker : INetworker {
     private ConcurrentDictionary<IPEndPoint, IServerConnection> _servers = new();
     private ConcurrentDictionary<string, IChannel> _channels = new();
 
-    public Task< IClientConnection? > Connect(IPEndPoint endpoint){
-        var client = new RemoteConnection( this, endpoint );
+    public Task<IClientConnection?> Connect(IPEndPoint endpoint){
+        var client = new RemoteConnection(this, endpoint);
         _clients.TryAdd(endpoint, client);
-        
+
         TaskCompletionSource<IClientConnection> tcs = new();
 
-        client.Connected += (connection) => {
-            tcs.SetResult(connection);
-        };
-            
+        client.Connected += (connection) => { tcs.SetResult(connection); };
+
         client.Disconnected += (connection) => {
-            Console.WriteLine( $"Droppped {connection.EndPoint}" );
+            Console.WriteLine($"Droppped {connection.EndPoint}");
             _clients.TryRemove(connection.EndPoint, out _);
         };
-        
+
         return tcs.Task;
     }
 
@@ -42,14 +40,19 @@ public sealed class Networker : INetworker {
         _clients[connection.EndPoint] = connection;
     }
 
-    public async Task< IServerConnection? > Host(short port){
-        var server = new ServerConnection( this, port );
+    public async Task<IServerConnection?> Host(short port){
+        var server = new ServerConnection(this, port);
         await server.Listen();
         return server;
     }
 
     public IChannel CreateChannel(Uri uri){
-        return _channels[ uri.ToString() ] = new Channel() { Name = uri.ToString() };
+        var name = uri.ToString();
+
+        if (!_channels.ContainsKey(name))
+            _channels[name] = new Channel() { Name = name };
+
+        return _channels[name];
     }
 
     public void DestroyChannel(IChannel channel){
