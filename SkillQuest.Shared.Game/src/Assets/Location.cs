@@ -3,8 +3,6 @@ using SkillQuest.API;
 namespace SkillQuest.Shared.Game.Assets;
 
 public class Location{
-    public Uri Uri { get; }
-
     public Location(IAddon addon, string path){
         string side = "Shared";
 
@@ -18,6 +16,16 @@ public class Location{
                 side = "Server";
                 break;
         }
-        Uri = new Uri( "file://" + Path.Combine($"Addons/{addon.Name}/{side}/assets/", path ) );
+        this.Path = System.IO.Path.Combine($"Addons/{addon.Name}/{side}/assets/", path );
+    }
+
+    public string Path { get; set; }
+
+    public override string ToString(){
+        return Path;
+    }
+
+    public static implicit operator string(Location location){
+        return location.ToString();
     }
 }
