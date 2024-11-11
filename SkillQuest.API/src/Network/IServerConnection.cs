@@ -13,7 +13,7 @@ public interface IServerConnection : IConnection{
 
     public event DoConnected Connected;
 
-    public delegate void DoDisconnected(IServerConnection server, IPEndPoint endpoint);
+    public delegate void DoDisconnected(IServerConnection server, IClientConnection endpoint);
 
     public event DoDisconnected Disconnected;
 

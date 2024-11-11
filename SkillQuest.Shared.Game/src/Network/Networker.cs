@@ -47,7 +47,8 @@ public sealed class Networker : INetworker{
     }
 
     public IChannel CreateChannel(Uri uri){
-        var name = uri.ToString();
+        
+        var name = new UriBuilder( uri ){ Scheme = "packet" }.Uri.ToString();
 
         if (!_channels.ContainsKey(name))
             _channels[name] = new Channel() { Name = name };

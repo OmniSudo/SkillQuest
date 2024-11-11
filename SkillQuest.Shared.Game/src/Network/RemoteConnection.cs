@@ -19,14 +19,14 @@ public class RemoteConnection : IRemoteConnection{
 
     RSA RSA { get; } = new RSACryptoServiceProvider();
 
-    NetAESEncryption AES { get; set; }
+    internal NetEncryption Encryption { get; set; }
 
     public RemoteConnection(INetworker networker, IPEndPoint endpoint){
         Networker = networker;
         EndPoint = endpoint;
         Key = new byte[16];
-        new Random().NextBytes( Key );
-        
+        new Random().NextBytes(Key);
+
         var config = new NetPeerConfiguration("SkillQuest");
         config.EnableMessageType(NetIncomingMessageType.DiscoveryResponse);
         Client = new NetClient(config);
@@ -37,22 +37,34 @@ public class RemoteConnection : IRemoteConnection{
         Client.DiscoverKnownPeer(EndPoint);
     }
 
+    public string EMail { get; set; }
+
+    public Guid Id { get; set; }
+
+    public string AuthToken { get; set; }
+
+    public Guid Session { get; set; }
+
     public byte[] Key { get; set; }
 
     public void Send(Packet packet, bool udp = false){
         var serialized = JsonSerializer.Serialize(packet, packet.GetType());
 
         NetOutgoingMessage message = Client.CreateMessage();
-        message.Write(packet.GetType().FullName);
+        var bytes = Encoding.UTF8.GetBytes(packet.GetType().FullName);
+        message.Write( bytes.Length );
+        message.Write( bytes );
+        
+        bytes = Encoding.UTF8.GetBytes(serialized);
+        message.Write( bytes.Length );
+        message.Write( bytes );
+        if (!message.Encrypt(Encryption)) return;
 
-        message.Write(serialized);
-
-        Client.SendMessage(message, udp ? NetDeliveryMethod.Unreliable : NetDeliveryMethod.ReliableOrdered, 0);
+        Client.SendMessage(message, udp ? NetDeliveryMethod.Unreliable : NetDeliveryMethod.ReliableSequenced, 0);
     }
 
     public void InterruptTimeout(){
-        AES = new NetAESEncryption(Client);
-        AES.SetKey(Key, 0, Key.Length);
+        Encryption = new NetXtea(Client, Key);
     }
 
     public void Disconnect(){
@@ -115,15 +127,28 @@ public class RemoteConnection : IRemoteConnection{
                     }
                     break;
                 case NetIncomingMessageType.Data:
-                    message.Decrypt(AES);
-                    var typename = message.ReadString();
-                    var data = message.ReadString();
+                    if (!message.Decrypt(Encryption)) break;
+
+                    var length = message.ReadInt32();
+                    message.ReadBytes(length, out var bytes);
+                    var typename = Encoding.UTF8.GetString(bytes);
+                    length = message.ReadInt32();
+                    message.ReadBytes(length, out bytes);
+                    var data = Encoding.UTF8.GetString(bytes);
+
                     var type = Type.GetType(typename);
 
-                    Packet? packet = JsonSerializer.Deserialize(data, type) as Packet;
+                    try {
+                        Packet? packet = JsonSerializer.Deserialize(data, type) as Packet;
 
-                    if (packet is not null) Receive(packet);
-                    else Console.WriteLine("Unknown packet type {0}", typename); // TODO: Log ERROR
+                        if (packet is not null) {
+                            Receive(packet);
+                            break;
+                        }
+                        Console.WriteLine("Unknown packet type {0}", typename); // TODO: Log ERROR
+                    } catch (Exception e) {
+                        Console.WriteLine($"Packet Exception:\n{e}");
+                    }
                     break;
                 default:
                     Console.WriteLine("Unhandled Message Type: {0}", message.MessageType);

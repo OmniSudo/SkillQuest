@@ -118,19 +118,31 @@ public class ServerConnection : IServerConnection{
                     Console.WriteLine(text); // TODO: Proper logger
                     break;
                 case NetIncomingMessageType.Data:
-                    // TODO: message.Decrypt();
-                    var typename = message.ReadString();
-                    var data = message.ReadString();
-                    var type = Type.GetType(typename);
                     var connection = this._clients[message.SenderEndPoint];
 
-                    if (type is not null) {
+                    if (!message.Decrypt((connection as LocalConnection)?.Encryption)) break;
+                    
+                    var length = message.ReadInt32();
+                    message.ReadBytes(length, out var bytes);
+                    var typename = Encoding.UTF8.GetString(bytes);
+                    length = message.ReadInt32();
+                    message.ReadBytes(length, out bytes);
+                    var data = Encoding.UTF8.GetString(bytes);
+                    var type = Type.GetType(typename);
 
-                        Packet? packet = JsonSerializer.Deserialize(data, type) as Packet;
-                        if (packet is not null) Receive(connection, packet);
-                        break;
+                    if (type is not null) {
+                        try {
+                            Packet? packet = JsonSerializer.Deserialize(data, type) as Packet;
+
+                            if (packet is not null) {
+                                Receive(connection, packet);
+                                break;
+                            }
+                            Console.WriteLine("Unknown packet type {0}", typename); // TODO: Log ERROR
+                        } catch (Exception e) {
+                            Console.WriteLine($"Packet Exception:\n{e}"); // TODO: Log ERROR
+                        }
                     }
-                    Console.WriteLine("Unknown packet type {0}", typename); // TODO: Log ERROR
                     break;
                 default:
                     Console.WriteLine("Unhandled Message Type: {0}", message.MessageType);
@@ -165,10 +177,14 @@ public class ServerConnection : IServerConnection{
         _clients.TryRemove(connection.EndPoint, out _);
 
         Console.WriteLine($"Disconnected @ {connection.EndPoint}");
-        Disconnected?.Invoke(this, connection.EndPoint);
+        Disconnected?.Invoke(this, connection);
     }
 
     public async Task Receive(IClientConnection connection, Packet packet){
-        connection.Receive( packet );
+        try {
+            connection.Receive(packet);
+        } catch (Exception e) {
+            Console.WriteLine( $"Unable to handle {packet.Channel} {packet.GetType().Name}:\n{e}" );
+        }
     }
 }

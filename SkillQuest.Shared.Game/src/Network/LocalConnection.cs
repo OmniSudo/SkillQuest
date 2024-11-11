@@ -1,5 +1,6 @@
 using System.Net;
 using System.Security.Cryptography;
+using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using Lidgren.Network;
@@ -32,9 +33,17 @@ public class LocalConnection : ILocalConnection {
 
     public NetConnection Connection { get; private set; }
 
+    public string EMail { get; set; }
+
+    public Guid Id { get; set; }
+
+    public string AuthToken { get; set; }
+
+    public Guid Session { get; set; }
+
     public byte[] Key { get; set; }
 
-    NetAESEncryption AES { get; set; }
+    internal NetEncryption Encryption { get; set; }
 
     Timer _timeout;
 
@@ -42,17 +51,19 @@ public class LocalConnection : ILocalConnection {
         var serialized = JsonSerializer.Serialize(packet,packet.GetType());
 
         NetOutgoingMessage message = Connection.Peer.CreateMessage();
-        message.Write(packet.GetType().FullName);
-
-        message.Write(serialized);
-        message.Encrypt(AES);
-        Connection.SendMessage( message, udp ? NetDeliveryMethod.Unreliable : NetDeliveryMethod.ReliableOrdered, 0 );
+        var bytes = Encoding.UTF8.GetBytes(packet.GetType().FullName);
+        message.Write( bytes.Length );
+        message.Write( bytes );
+        
+        bytes = Encoding.UTF8.GetBytes(serialized);
+        message.Write( bytes.Length );
+        message.Write( bytes );
+        if ( message.Encrypt(Encryption) ) Connection.SendMessage( message, udp ? NetDeliveryMethod.Unreliable : NetDeliveryMethod.ReliableOrdered, 0 );
     }
 
     public void Connect(NetConnection netConnection){
         Connection = netConnection;
-        AES = new NetAESEncryption( Connection.Peer );
-        AES.SetKey( Key, 0, Key.Length );
+        Encryption = new NetXtea(Connection.Peer, Key);
     }
 
     public void InterruptTimeout(){
