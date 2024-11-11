@@ -1,7 +1,6 @@
-using System.Collections.Concurrent;
 using System.Collections.Immutable;
 
-namespace SkillQuest.Shared.Game;
+namespace SkillQuest.API;
 
 public interface IApplication{
     public bool Running { get; set; }
@@ -10,9 +9,9 @@ public interface IApplication{
 
     public TimeSpan TickFrequency();
 
-    public IApplication Mount(Addon addon);
+    public IApplication Mount(IAddon addon);
 
-    public IApplication Unmount(Addon addon);
+    public IApplication Unmount(IAddon? addon);
 
     public void Run();
 
@@ -28,7 +27,7 @@ public interface IApplication{
 
     public event DoStop Stop;
     
-    public ImmutableDictionary<string, Addon> Addons { get; }
+    public ImmutableDictionary<Uri, IAddon> Addons { get; }
     
-    public Addon? this[ string name ] { get; protected set; }
+    public IAddon? this[ Uri uri ] { get; }
 }

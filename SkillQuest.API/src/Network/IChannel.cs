@@ -1,19 +1,19 @@
-using SkillQuest.Shared.Game.Network;
-
 namespace SkillQuest.API.Network;
 
 public interface IChannel{
     public string Name { get; }
 
-    public bool Encrypt { get; set; }
+    // TODO: public bool Encrypt { get; set; }
     
-    public void Send < TPacket > (IConnection connection, TPacket packet) where TPacket : IPacket;
-    
-    public void Send ( IConnection connection, IPacket packet );
-    
-    public void Add ( Action< IConnection, IPacket > handler );
-    
-    public void Drop ( Action< IConnection, IPacket > handler );
+    public void Send ( IClientConnection? connection, Packet packet );
+
+    public void Receive(IClientConnection connection, Packet packet);
+
+    public delegate void DoPacket< TPacket >( IClientConnection connection, TPacket packet ) where TPacket : Packet;
+
+    public void Subscribe < TPacket >( DoPacket<TPacket> handler ) where TPacket : Packet;
+
+    public void Unsubscribe< TPacket >() where TPacket : Packet;
 
     public void Reset();
 }

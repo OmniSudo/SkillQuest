@@ -1,3 +1,5 @@
+using SkillQuest.API.ECS;
+
 namespace SkillQuest.Shared.Game.ECS;
 
 public class Component<TAttached> : IComponent where TAttached : class, IComponent{

@@ -1,4 +1,4 @@
-namespace SkillQuest.Shared.Game.ECS;
+namespace SkillQuest.API.ECS;
 
 public interface IComponent{
     public IThing? Thing { get; set; }

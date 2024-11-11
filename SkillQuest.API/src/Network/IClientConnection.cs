@@ -1,13 +1,12 @@
 using System.Net;
 using System.Security.Cryptography;
-using SkillQuest.Shared.Game.Network;
 
 namespace SkillQuest.API.Network;
 
 public interface IClientConnection : IConnection {
     public byte[] Key { get; set; }
     
-    public void Send(IPacket packet, bool udp = false );
+    public void Send(Packet packet, bool udp = false );
 
     /// <summary>
     /// Interrupt the timeout
@@ -25,4 +24,6 @@ public interface IClientConnection : IConnection {
     public event DoDisconnect Disconnected;
 
     void Connect(IPEndPoint endpoint);
+    
+    void Receive( Packet packet );
 }

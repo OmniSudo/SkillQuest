@@ -1,12 +1,9 @@
-using System.Collections.Concurrent;
 using System.Collections.Immutable;
-using System.ComponentModel;
-using System.Runtime.CompilerServices;
 
-namespace SkillQuest.Shared.Game.ECS;
+namespace SkillQuest.API.ECS;
 
 public interface IThing{
-    public Uri Uri { get; protected set; }
+    public Uri? Uri { get; }
     
     public delegate void DoConnectComponent ( IThing thing, IComponent component );
     

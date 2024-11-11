@@ -1,8 +1,12 @@
 using System.Collections.Concurrent;
 using System.Collections.Immutable;
-using System.Runtime.CompilerServices;
+using System.Data;
+using SkillQuest.API;
+using SkillQuest.Shared.Game.ECS;
 
 namespace SkillQuest.Shared.Game;
+
+using static State;
 
 public class Application : IApplication{
     public bool Running {
@@ -30,28 +34,26 @@ public class Application : IApplication{
         }
     }
 
-    public Application(){
-    }
+    public Application(){ }
 
     uint IApplication.TicksPerSecond() => 100;
 
     TimeSpan IApplication.TickFrequency() => TimeSpan.FromSeconds(1) / TicksPerSecond;
 
-    public IApplication Mount(Addon addon){
-        _addons[addon.Name] = addon;
+    public IApplication Mount(IAddon addon){
+        SH.Stuff.Add(addon);
         addon.Application = this;
         return this;
     }
 
-    public IApplication Unmount(Addon addon) {
+    public IApplication Unmount(IAddon? addon){
         if (addon is null) {
-            var copy = new Dictionary<string, Addon>( Addons );
-            foreach (var pair in copy) {
+            foreach ( var pair in Addons) {
                 pair.Value.Application = null;
-                _addons.TryRemove(pair.Key, out _);
+                SH.Stuff.Remove(pair.Value);
             }
-        } else if (Addons.ContainsKey( addon.Name ) && Addons[addon.Name] == addon) {
-            _addons.TryRemove(addon.Name, out var rm );
+        } else if (SH.Stuff.Things.ContainsKey(addon.Uri!)) {
+            SH.Stuff.Remove(addon);
             addon.Application = null;
         }
         return this;
@@ -75,10 +77,10 @@ public class Application : IApplication{
                 }
 
                 Update?.Invoke();
-                
+
                 total -= TickFrequency;
             }
-            
+
             previous = DateTime.Now;
         }
 
@@ -91,25 +93,29 @@ public class Application : IApplication{
 
     public event IApplication.DoStop? Stop;
 
-    public ImmutableDictionary<string, Addon > Addons => _addons.ToImmutableDictionary();
+    public ImmutableDictionary<Uri, IAddon> Addons => SH.Stuff.Things
+        .Where(
+            (pair) => pair.Value is IAddon
+            )
+        .ToImmutableDictionary(
+            pair => pair.Key, pair => pair.Value as IAddon
+        )!;
 
-    private ConcurrentDictionary<string, Addon> _addons = new();
-    
-    public Addon? this[string name] {
+    public IAddon? this[Uri uri] {
         get {
-            return Addons.GetValueOrDefault(name);
+            return Addons.GetValueOrDefault(uri) as IAddon;
         }
         set {
             if (value == null) {
-                _addons.TryRemove(name, out _);
-            }
-            else {
-                var old = Addons.GetValueOrDefault(name);
+                SH.Stuff.Remove(uri);
+            } else {
+                var old = Addons.GetValueOrDefault(uri);
 
                 if (old is not null) {
+                    SH.Stuff.Remove(old);
                     old.Application = null;
                 }
-                _addons[name] = value;
+                SH.Stuff.Add( value );
                 value.Application = this;
             }
         }

@@ -39,8 +39,8 @@ public class RemoteConnection : IRemoteConnection{
 
     public byte[] Key { get; set; }
 
-    public void Send(IPacket packet, bool udp = false){
-        var serialized = JsonSerializer.Serialize(packet);
+    public void Send(Packet packet, bool udp = false){
+        var serialized = JsonSerializer.Serialize(packet, packet.GetType());
 
         NetOutgoingMessage message = Client.CreateMessage();
         message.Write(packet.GetType().FullName);
@@ -115,12 +115,12 @@ public class RemoteConnection : IRemoteConnection{
                     }
                     break;
                 case NetIncomingMessageType.Data:
-                    // TODO: message.Decrypt();
+                    message.Decrypt(AES);
                     var typename = message.ReadString();
                     var data = message.ReadString();
                     var type = Type.GetType(typename);
 
-                    IPacket? packet = JsonSerializer.Deserialize(data, type) as IPacket;
+                    Packet? packet = JsonSerializer.Deserialize(data, type) as Packet;
 
                     if (packet is not null) Receive(packet);
                     else Console.WriteLine("Unknown packet type {0}", typename); // TODO: Log ERROR
@@ -132,7 +132,8 @@ public class RemoteConnection : IRemoteConnection{
         }
     }
 
-    void Receive(IPacket packet){
-        Console.WriteLine(JsonSerializer.Serialize(packet));
+    public void Receive(Packet packet){
+        Networker.Channels.TryGetValue(packet.Channel, out var channel);
+        channel?.Receive(this, packet);
     }
 }

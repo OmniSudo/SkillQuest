@@ -1,5 +1,6 @@
 using System.Collections.Concurrent;
 using System.Collections.Immutable;
+using SkillQuest.API.ECS;
 
 namespace SkillQuest.Shared.Game.ECS;
 
@@ -8,7 +9,7 @@ public class Stuff : IStuff {
 
     public event IStuff.DoThingRemoved? ThingRemoved;
 
-    ImmutableDictionary<Uri, IThing> IStuff.Things => _things.ToImmutableDictionary();
+    public ImmutableDictionary<Uri, IThing> Things => _things.ToImmutableDictionary();
 
     public IStuff Add(IThing thing){
         var old = _things.GetValueOrDefault(thing.Uri);
@@ -29,9 +30,14 @@ public class Stuff : IStuff {
         if (old != thing ) return this;
 
         ThingRemoved?.Invoke(old);
-        _things.TryRemove(thing.Uri, out _);
+        Remove(thing.Uri!);
 
         return this;
+    }
+
+    public IThing? Remove(Uri uri){
+        _things.TryRemove(uri, out var thing );
+        return thing;
     }
     
     private ConcurrentDictionary<Uri, IThing> _things = new();

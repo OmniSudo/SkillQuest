@@ -1,5 +1,6 @@
 using System.Collections.Concurrent;
 using System.Collections.Immutable;
+using SkillQuest.API.ECS;
 
 namespace SkillQuest.Shared.Game.ECS;
 
@@ -7,25 +8,26 @@ using static State;
 
 public class Thing : IThing{
 
-    public Thing(Uri uri, Stuff? stuff = null){
-        this.Uri = uri;
-        this.Stuff = stuff ?? SH.Stuff;
+    public Thing(Uri? uri = null, Stuff? stuff = null){
+        Uri = uri;
+        Stuff = stuff;
     }
 
-    public Stuff Stuff {
+    public Stuff? Stuff {
         get {
             return _stuff;
         }
         set {
-            if (_stuff != value) {
-                _stuff?.Remove(this);
-                _stuff = value;
-                _stuff.Add(this);
-            }
+            if (_stuff == value)
+                return;
+            _stuff?.Remove(this);
+            _stuff = value ?? SH.Stuff;
+            _stuff.Add(this);
         }
     }
 
-    public Uri Uri { get; set; }
+
+    public virtual Uri? Uri { get; }
 
     public event IThing.DoConnectComponent ConnectComponent;
 

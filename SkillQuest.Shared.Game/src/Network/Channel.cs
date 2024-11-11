@@ -1,30 +1,33 @@
+using System.Collections.Concurrent;
 using SkillQuest.API.Network;
 
 namespace SkillQuest.Shared.Game.Network;
 
-public class Channel : IChannel {
+class Channel : IChannel {
+    public string Name { get; init; }
 
-    public string Name { get; }
-
-    public bool Encrypt { get; set; }
-
-    public void Send<TPacket>(IConnection connection, TPacket packet) where TPacket : IPacket{
-        throw new NotImplementedException();
+    public void Send(IClientConnection? connection, Packet packet){
+        packet.Channel = Name;
+        connection?.Send(packet);
     }
 
-    public void Send(IConnection connection, IPacket packet){
-        throw new NotImplementedException();
+    public void Receive(IClientConnection connection, Packet packet){
+        if (_handlers.TryGetValue(packet.GetType(), out var handler)) {
+            handler.Invoke(connection, packet);
+        }
     }
 
-    public void Add(Action<IConnection, IPacket> handler){
-        throw new NotImplementedException();
+    ConcurrentDictionary<Type, Action<IClientConnection, Packet>> _handlers = new();
+
+    public void Subscribe<TPacket>(IChannel.DoPacket<TPacket> handler) where TPacket : Packet{
+        _handlers[ typeof(TPacket) ] = ( clientConnection, packet ) => handler( clientConnection, packet as TPacket ?? throw new ArgumentNullException( nameof(packet) ) );
     }
 
-    public void Drop(Action<IConnection, IPacket> handler){
-        throw new NotImplementedException();
+    public void Unsubscribe<TPacket>() where TPacket : Packet{
+        _handlers.TryRemove( typeof(TPacket), out _);
     }
 
     public void Reset(){
-        throw new NotImplementedException();
+        _handlers.Clear();
     }
 }

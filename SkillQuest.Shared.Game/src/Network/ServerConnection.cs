@@ -93,11 +93,11 @@ public class ServerConnection : IServerConnection{
                     switch (status) {
                         case NetConnectionStatus.Connected:
                             
-                            Console.WriteLine($"Connected @ {message.SenderEndPoint}");
                             var connected = _clients[message.SenderEndPoint];
 
                             if (connected is not null) {
-                                Console.WriteLine( $"{message.SenderConnection} @ {message.SenderEndPoint}");
+                                Console.WriteLine($"Connected @ {message.SenderEndPoint}");
+
                                 (connected as LocalConnection)?.Connect(message.SenderConnection);
                                 connected.InterruptTimeout();
                                 Connected?.Invoke(this, connected);
@@ -126,7 +126,7 @@ public class ServerConnection : IServerConnection{
 
                     if (type is not null) {
 
-                        IPacket? packet = JsonSerializer.Deserialize(data, type) as IPacket;
+                        Packet? packet = JsonSerializer.Deserialize(data, type) as Packet;
                         if (packet is not null) Receive(connection, packet);
                         break;
                     }
@@ -144,13 +144,13 @@ public class ServerConnection : IServerConnection{
     /// </summary>
     /// <param name="jsonObject"></param>
     /// <exception cref="NotImplementedException"></exception>
-    public void Broadcast(IPacket packet){
+    public void Broadcast(Packet packet){
         foreach (var client in Clients) {
             Send(client.Value.EndPoint, packet);
         }
     }
 
-    public void Send(IPEndPoint endpoint, IPacket packet){
+    public void Send(IPEndPoint endpoint, Packet packet){
         _clients.TryGetValue( endpoint, out var client );
         client?.Send(packet);
     }
@@ -168,8 +168,7 @@ public class ServerConnection : IServerConnection{
         Disconnected?.Invoke(this, connection.EndPoint);
     }
 
-    public async Task Receive(IClientConnection connection, IPacket packet){
-        Console.WriteLine(connection.EndPoint.ToString());
-        Console.WriteLine(JsonSerializer.Serialize(packet, packet.GetType()));
+    public async Task Receive(IClientConnection connection, Packet packet){
+        connection.Receive( packet );
     }
 }

@@ -38,8 +38,8 @@ public class LocalConnection : ILocalConnection {
 
     Timer _timeout;
 
-    public void Send(IPacket packet, bool udp = false ){
-        var serialized = JsonSerializer.Serialize(packet);
+    public void Send(Packet packet, bool udp = false ){
+        var serialized = JsonSerializer.Serialize(packet,packet.GetType());
 
         NetOutgoingMessage message = Connection.Peer.CreateMessage();
         message.Write(packet.GetType().FullName);
@@ -72,8 +72,8 @@ public class LocalConnection : ILocalConnection {
         throw new NotImplementedException();
     }
 
-    void Receive(IClientConnection connection, IPacket packet){
-        Console.WriteLine( connection.EndPoint.ToString() );
-        Console.WriteLine( JsonSerializer.Serialize( packet ) );
+    public void Receive(Packet packet){
+        Networker.Channels.TryGetValue(packet.Channel, out var channel);
+        channel?.Receive(this, packet);
     }
 }

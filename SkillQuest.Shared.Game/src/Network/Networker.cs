@@ -47,4 +47,12 @@ public sealed class Networker : INetworker {
         await server.Listen();
         return server;
     }
+
+    public IChannel CreateChannel(Uri uri){
+        return _channels[ uri.ToString() ] = new Channel() { Name = uri.ToString() };
+    }
+
+    public void DestroyChannel(IChannel channel){
+        _channels.TryRemove(channel.Name, out _);
+    }
 }

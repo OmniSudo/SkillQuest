@@ -1,6 +1,6 @@
 using System.Collections.Immutable;
 
-namespace SkillQuest.Shared.Game.ECS;
+namespace SkillQuest.API.ECS;
 
 public interface IStuff{
     public delegate void DoThingAdded(IThing thing);

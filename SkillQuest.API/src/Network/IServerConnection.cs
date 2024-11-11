@@ -2,13 +2,12 @@ using System.Collections.Immutable;
 using System.Net;
 using System.Security.Cryptography;
 using System.Text.Json.Nodes;
-using SkillQuest.Shared.Game.Network;
 
 namespace SkillQuest.API.Network;
 
 public interface IServerConnection : IConnection{
-    public void Broadcast(IPacket packet);
-    public void Send(IPEndPoint endpoint, IPacket packet);
+    public void Broadcast(Packet packet);
+    public void Send(IPEndPoint endpoint, Packet packet);
     
     public delegate void DoConnected(IServerConnection server, IClientConnection client);
 

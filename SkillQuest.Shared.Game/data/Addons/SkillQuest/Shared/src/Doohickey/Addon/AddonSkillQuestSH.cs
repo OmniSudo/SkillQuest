@@ -1,20 +1,28 @@
-using System.ComponentModel;
-using SkillQuest.Shared.Game.ECS;
-using IComponent = SkillQuest.Shared.Game.ECS.IComponent;
+using SkillQuest.API;
+using SkillQuest.API.Network;
 
-namespace SkillQuest.Shared.Game.Addons.Shared.SkillQuest;
+namespace SkillQuest.Shared.Game.Addons.SkillQuest.Shared.Doohickey.Addon;
 
-public class AddonSkillQuestSH : Addon{
+using static State;
+
+public class AddonSkillQuestSH : Game.Addon {
+    public override string Name { get;} = "SkillQuest";
+
+    public override string Author { get; } = "omnisudo et. all";
+
+    protected IChannel Channel { get; private set; }
+    
     public AddonSkillQuestSH(){
         Mounted += OnMounted;
         Unmounted += OnUnmounted;
     }
 
-    void OnMounted(Addon addon, IApplication? application){
-        
+    void OnMounted(IAddon addon, IApplication? application){
+        Channel = SH.Net.CreateChannel(new Uri("net://skill.quest/test"));
+        Channel.Subscribe< TestPacket >((connection, packet) => Console.WriteLine(packet.Message));
     }
 
-    void OnUnmounted(Addon addon, IApplication? application){
+    void OnUnmounted(IAddon addon, IApplication? application){
         
     }
 }

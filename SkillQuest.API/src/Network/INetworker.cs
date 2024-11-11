@@ -1,8 +1,7 @@
 using System.Collections.Immutable;
 using System.Net;
-using SkillQuest.API.Network;
 
-namespace SkillQuest.Shared.Game.Network;
+namespace SkillQuest.API.Network;
 
 public interface INetworker{
     public ImmutableDictionary<IPEndPoint, IClientConnection> Clients { get; }
@@ -17,4 +16,8 @@ public interface INetworker{
     public void Listen(ILocalConnection connection);
 
     public Task<IServerConnection?> Host(short port);
+    
+    public IChannel CreateChannel( Uri uri );
+    
+    public void DestroyChannel(IChannel channel);
 }
