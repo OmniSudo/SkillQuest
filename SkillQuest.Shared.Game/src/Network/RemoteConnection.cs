@@ -9,7 +9,7 @@ using SkillQuest.API.Network;
 
 namespace SkillQuest.Shared.Game.Network;
 
-public class RemoteConnection : IRemoteConnection{
+internal class RemoteConnection : IRemoteConnection{
 
     public INetworker Networker { get; }
 
@@ -52,15 +52,19 @@ public class RemoteConnection : IRemoteConnection{
 
         NetOutgoingMessage message = Client.CreateMessage();
         var bytes = Encoding.UTF8.GetBytes(packet.GetType().FullName);
-        message.Write( bytes.Length );
-        message.Write( bytes );
-        
+        message.WriteVariableInt32(bytes.Length);
+        message.Write(bytes);
+
         bytes = Encoding.UTF8.GetBytes(serialized);
-        message.Write( bytes.Length );
-        message.Write( bytes );
+        message.WriteVariableInt32(bytes.Length);
+        message.Write(bytes);
         if (!message.Encrypt(Encryption)) return;
 
-        Client.SendMessage(message, udp ? NetDeliveryMethod.Unreliable : NetDeliveryMethod.ReliableSequenced, 0);
+        Client.SendMessage(
+            message,
+            udp ? NetDeliveryMethod.Unreliable : NetDeliveryMethod.ReliableSequenced,
+            0
+        );
     }
 
     public void InterruptTimeout(){
@@ -129,16 +133,16 @@ public class RemoteConnection : IRemoteConnection{
                 case NetIncomingMessageType.Data:
                     if (!message.Decrypt(Encryption)) break;
 
-                    var length = message.ReadInt32();
-                    message.ReadBytes(length, out var bytes);
-                    var typename = Encoding.UTF8.GetString(bytes);
-                    length = message.ReadInt32();
-                    message.ReadBytes(length, out bytes);
-                    var data = Encoding.UTF8.GetString(bytes);
-
-                    var type = Type.GetType(typename);
-
                     try {
+                        var length = message.ReadVariableInt32();
+                        message.ReadBytes(length, out var bytes);
+                        var typename = Encoding.UTF8.GetString(bytes);
+                        length = message.ReadVariableInt32();
+                        message.ReadBytes(length, out bytes);
+                        var data = Encoding.UTF8.GetString(bytes);
+
+                        var type = Type.GetType(typename);
+
                         Packet? packet = JsonSerializer.Deserialize(data, type) as Packet;
 
                         if (packet is not null) {

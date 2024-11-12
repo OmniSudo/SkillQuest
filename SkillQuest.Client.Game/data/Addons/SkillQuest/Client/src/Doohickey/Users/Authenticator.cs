@@ -19,68 +19,6 @@ public class Authenticator : Doohickey{
 
     IChannel _channel;
 
-    public async Task DoLogin(){
-        getemail:
-        Console.Write("email > ");
-        var email = string.Empty;
-        ConsoleKey key;
-
-        do {
-            var keyInfo = Console.ReadKey(intercept: true);
-            key = keyInfo.Key;
-
-            if (key == ConsoleKey.Backspace && email.Length > 0) {
-                Console.Write("\b \b");
-                email = email[0..^1];
-            } else if (!char.IsControl(keyInfo.KeyChar)) {
-                Console.Write(keyInfo.KeyChar);
-                email += keyInfo.KeyChar;
-            }
-        } while ( key != ConsoleKey.Enter );
-
-        var trimmed = email.Trim();
-
-        if (trimmed.EndsWith(".")) {
-            Console.WriteLine("Invalid Email");
-            goto getemail;
-        }
-        
-        Console.WriteLine();
-
-        try {
-            var addr = new System.Net.Mail.MailAddress(trimmed);
-
-            if (addr.Address != trimmed) {
-                Console.WriteLine("Invalid Email");
-                goto getemail;
-            }
-        } catch {
-            Console.WriteLine("Invalid Email");
-            goto getemail;
-        }
-
-        email = trimmed;
-
-        Console.Write("password > ");
-        var pass = string.Empty;
-
-        do {
-            var keyInfo = Console.ReadKey(intercept: true);
-            key = keyInfo.Key;
-
-            if (key == ConsoleKey.Backspace && pass.Length > 0) {
-                Console.Write("\b \b");
-                pass = pass[0..^1];
-            } else if (!char.IsControl(keyInfo.KeyChar)) {
-                Console.Write("*");
-                pass += keyInfo.KeyChar;
-            }
-        } while ( key != ConsoleKey.Enter );
-        Console.WriteLine();
-        
-        Login(email, pass);
-    }
-
     public void Login(string email, string password){
         var authtoken = Convert.ToBase64String(SHA256.HashData(Encoding.UTF8.GetBytes(password)));
 
@@ -99,7 +37,9 @@ public class Authenticator : Doohickey{
 
         if (!packet.Success) {
             Console.WriteLine($">  {packet.Reason}");
-            DoLogin();
+            AuthenticationFailure?.Invoke( sender, packet.Reason! );
+        } else {
+            AuthenticationSuccess?.Invoke( sender );
         }
     }
 
@@ -108,15 +48,38 @@ public class Authenticator : Doohickey{
 
         if (!packet.Success) {
             Console.WriteLine($">  {packet.Reason}");
-            DoLogin();
+            LoginFailure?.Invoke(sender, packet.Reason);
+        } else {
+            LoginSuccess?.Invoke(sender);
         }
     }
 
     void OnLogoutStatusPacket(IClientConnection connection, LogoutStatusPacket packet){
         Console.WriteLine($"Logout Successful: {packet.Success}");
+        LoggedOut?.Invoke(connection);
     }
 
     public void Logout(){
         _channel.Send(_connection, new LogoutRequestPacket());
     }
+
+    public delegate void DoAuthenticationSuccess(IClientConnection connection);
+    
+    public event DoAuthenticationSuccess AuthenticationSuccess;
+    
+    public delegate void DoAuthenticationFailure(IClientConnection connection, string reason);
+    
+    public event DoAuthenticationFailure AuthenticationFailure;
+    
+    public delegate void DoLoginSuccess ( IClientConnection connection );
+    
+    public event DoLoginSuccess LoginSuccess;
+    
+    public delegate void DoLoginFailure ( IClientConnection connection, string reason );
+    
+    public event DoLoginFailure LoginFailure;
+    
+    public delegate void DoLoggedOut ( IClientConnection connection );
+    
+    public event DoLoggedOut LoggedOut;
 }

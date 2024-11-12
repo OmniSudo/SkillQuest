@@ -3,7 +3,7 @@ using SkillQuest.API.Network;
 
 namespace SkillQuest.Shared.Game.Network;
 
-class Channel : IChannel {
+internal class Channel : IChannel {
     public string Name { get; init; }
 
     public void Send(IClientConnection? connection, Packet packet){

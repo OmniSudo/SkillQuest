@@ -25,7 +25,7 @@ public interface IStuff{
         }
     }
 
-    public IStuff Add(IThing thing);
+    public IThing? Add(IThing thing);
 
-    public IStuff Remove(IThing thing);
+    public IThing? Remove(IThing thing);
 }

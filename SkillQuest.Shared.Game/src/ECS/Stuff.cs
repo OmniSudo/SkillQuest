@@ -11,9 +11,13 @@ public class Stuff : IStuff {
 
     public ImmutableDictionary<Uri, IThing> Things => _things.ToImmutableDictionary();
 
-    public IStuff Add(IThing thing){
+    public IThing? Add(IThing thing){
+        if (thing.Uri is null) {
+            throw new NullReferenceException( nameof(thing.Uri) );
+        }
+        
         var old = _things.GetValueOrDefault(thing.Uri);
-        if (old == thing ) return this;
+        if (old == thing ) return thing;
 
         if (old is not null) {
             ThingRemoved?.Invoke(old);
@@ -22,21 +26,23 @@ public class Stuff : IStuff {
         _things[thing.Uri] = thing;
         ThingAdded?.Invoke(thing);
 
-        return this;
+        return thing;
     }
 
-    public IStuff Remove(IThing thing){
+    public IThing? Remove(IThing thing){
         var old = _things.GetValueOrDefault(thing.Uri);
-        if (old != thing ) return this;
+        if (old != thing ) return null;
 
-        ThingRemoved?.Invoke(old);
         Remove(thing.Uri!);
 
-        return this;
+        return thing;
     }
 
     public IThing? Remove(Uri uri){
         _things.TryRemove(uri, out var thing );
+        if (thing is null) return null;
+        
+        ThingRemoved?.Invoke(thing);
         return thing;
     }
     

@@ -13,7 +13,7 @@ namespace SkillQuest.Shared.Game.Network;
 
 using static State;
 
-public class ServerConnection : IServerConnection{
+internal class ServerConnection : IServerConnection{
 
     public INetworker Networker { get; }
 
@@ -122,10 +122,10 @@ public class ServerConnection : IServerConnection{
 
                     if (!message.Decrypt((connection as LocalConnection)?.Encryption)) break;
                     
-                    var length = message.ReadInt32();
+                    var length = message.ReadVariableInt32();
                     message.ReadBytes(length, out var bytes);
                     var typename = Encoding.UTF8.GetString(bytes);
-                    length = message.ReadInt32();
+                    length = message.ReadVariableInt32();
                     message.ReadBytes(length, out bytes);
                     var data = Encoding.UTF8.GetString(bytes);
                     var type = Type.GetType(typename);

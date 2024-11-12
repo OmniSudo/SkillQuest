@@ -10,7 +10,7 @@ public class Thing : IThing{
 
     public Thing(Uri? uri = null, Stuff? stuff = null){
         Uri = uri;
-        Stuff = stuff;
+        Stuff = stuff ?? SH.Stuff;
     }
 
     public Stuff? Stuff {
@@ -18,7 +18,7 @@ public class Thing : IThing{
             return _stuff;
         }
         set {
-            if (_stuff == value)
+            if (value == _stuff)
                 return;
             _stuff?.Remove(this);
             _stuff = value ?? SH.Stuff;

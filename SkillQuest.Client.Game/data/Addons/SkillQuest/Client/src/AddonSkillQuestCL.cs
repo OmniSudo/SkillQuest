@@ -1,5 +1,6 @@
 using System.Net;
 using SkillQuest.API;
+using SkillQuest.Client.Game.Addons.SkillQuest.Client.Doohickey.Gui.Login;
 using SkillQuest.Client.Game.Addons.SkillQuest.Client.Doohickey.Users;
 using SkillQuest.Shared.Game;
 using SkillQuest.Shared.Game.Addons.SkillQuest.Shared.Doohickey.Addon;
@@ -10,7 +11,7 @@ namespace SkillQuest.Client.Game.Addons.SkillQuest.Client;
 using static Shared.Game.State;
 
 public class AddonSkillQuestCL : AddonSkillQuestSH{
-    public override Uri Uri => new( "cl://addon.skill.quest/skillquest" ) ;
+    public override Uri Uri => new("cl://addon.skill.quest/skillquest");
 
     public new string Description => "Base Game Client";
 
@@ -21,12 +22,13 @@ public class AddonSkillQuestCL : AddonSkillQuestSH{
 
     void OnMounted(IAddon addon, IApplication? application){
         var connection = SH.Net.Connect(IPEndPoint.Parse("127.0.0.1:3698")).Result;
-        
-        Authenticator = new Authenticator( connection );
-        Authenticator.DoLogin();
+
+        if (connection is not null) {
+            _ = new GuiLoginSignup(connection).Render();
+        }
     }
 
     public Authenticator Authenticator { get; private set; }
-    
+
     void OnUnmounted(IAddon addon, IApplication? application){ }
 }

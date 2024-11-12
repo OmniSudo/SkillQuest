@@ -11,14 +11,15 @@ namespace SkillQuest.Shared.Game.Network;
 
 using static State;
 
-public class LocalConnection : ILocalConnection {
+internal class LocalConnection : ILocalConnection{
     public LocalConnection(
         ServerConnection server,
         IPEndPoint endpoint
     ){
         Server = server;
         EndPoint = endpoint;
-        _timeout = new Timer( TimeSpan.FromSeconds( 10 ) );
+        _timeout = new Timer(TimeSpan.FromSeconds(10));
+
         _timeout.Elapsed += (sender, args) => {
             Server.Disconnect(this);
             _timeout.Enabled = false;
@@ -26,7 +27,7 @@ public class LocalConnection : ILocalConnection {
     }
 
     public IServerConnection Server { get; }
-    
+
     public INetworker Networker => Server?.Networker ?? SH.Net;
 
     public IPEndPoint EndPoint { get; }
@@ -47,18 +48,26 @@ public class LocalConnection : ILocalConnection {
 
     Timer _timeout;
 
-    public void Send(Packet packet, bool udp = false ){
-        var serialized = JsonSerializer.Serialize(packet,packet.GetType());
+    public void Send(Packet packet, bool udp = false){
+        var serialized = JsonSerializer.Serialize(packet, packet.GetType());
 
         NetOutgoingMessage message = Connection.Peer.CreateMessage();
         var bytes = Encoding.UTF8.GetBytes(packet.GetType().FullName);
-        message.Write( bytes.Length );
-        message.Write( bytes );
-        
+        message.WriteVariableInt32(bytes.Length);
+        message.Write(bytes);
+
         bytes = Encoding.UTF8.GetBytes(serialized);
-        message.Write( bytes.Length );
-        message.Write( bytes );
-        if ( message.Encrypt(Encryption) ) Connection.SendMessage( message, udp ? NetDeliveryMethod.Unreliable : NetDeliveryMethod.ReliableOrdered, 0 );
+        message.WriteVariableInt32(bytes.Length);
+        message.Write(bytes);
+
+        if (message.Encrypt(Encryption)) {
+            Connection.SendMessage(
+                message,
+                udp ? NetDeliveryMethod.Unreliable : NetDeliveryMethod.ReliableOrdered,
+                0
+            );
+            
+        }
     }
 
     public void Connect(NetConnection netConnection){
@@ -71,7 +80,7 @@ public class LocalConnection : ILocalConnection {
     }
 
     public void Disconnect(){
-        Connection.Disconnect( "CLIENT DISCONNECT" );
+        Connection.Disconnect("CLIENT DISCONNECT");
         Disconnected?.Invoke(this);
     }
 
@@ -80,7 +89,7 @@ public class LocalConnection : ILocalConnection {
     public event IClientConnection.DoDisconnect? Disconnected;
 
     public void Connect(IPEndPoint endpoint){
-        throw new NotImplementedException();
+        throw new InvalidOperationException();
     }
 
     public void Receive(Packet packet){
