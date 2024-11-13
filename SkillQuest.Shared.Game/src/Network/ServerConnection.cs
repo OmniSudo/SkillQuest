@@ -122,26 +122,25 @@ internal class ServerConnection : IServerConnection{
 
                     if (!message.Decrypt((connection as LocalConnection)?.Encryption)) break;
                     
-                    var length = message.ReadVariableInt32();
-                    message.ReadBytes(length, out var bytes);
-                    var typename = Encoding.UTF8.GetString(bytes);
-                    length = message.ReadVariableInt32();
-                    message.ReadBytes(length, out bytes);
-                    var data = Encoding.UTF8.GetString(bytes);
-                    var type = Type.GetType(typename);
+                    try {
+                        var length = message.ReadVariableInt32();
+                        message.ReadBytes(length, out var bytes);
+                        var typename = Encoding.UTF8.GetString(bytes);
+                        length = message.ReadVariableInt32();
+                        message.ReadBytes(length, out bytes);
+                        var data = Encoding.UTF8.GetString(bytes);
 
-                    if (type is not null) {
-                        try {
-                            Packet? packet = JsonSerializer.Deserialize(data, type) as Packet;
+                        var type = Type.GetType(typename);
 
-                            if (packet is not null) {
-                                Receive(connection, packet);
-                                break;
-                            }
-                            Console.WriteLine("Unknown packet type {0}", typename); // TODO: Log ERROR
-                        } catch (Exception e) {
-                            Console.WriteLine($"Packet Exception:\n{e}"); // TODO: Log ERROR
+                        Packet? packet = JsonSerializer.Deserialize(data, type) as Packet;
+
+                        if (packet is not null) {
+                            Receive(connection, packet);
+                            break;
                         }
+                        Console.WriteLine("Unknown packet type {0}", typename); // TODO: Log ERROR
+                    } catch (Exception e) {
+                        Console.WriteLine($"Packet Exception:\n{e}");
                     }
                     break;
                 default:
