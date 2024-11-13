@@ -1,5 +1,6 @@
 using SkillQuest.API.ECS;
 using SkillQuest.API.Network;
+using SkillQuest.API.Thing.Character;
 
 namespace SkillQuest.Client.Game.Addons.SkillQuest.Client.Doohickey.Gui.CharacterSelect;
 
@@ -20,9 +21,50 @@ public class GuiCharacterSelection : Doohickey, IRenderable {
     public async Task Render(){
         var characters = await _characterSelect.Characters();
 
-        if (characters.Length > 0) {
-            var selected = await _characterSelect.Select( characters.First() );
+        var selection = await DoSelect( characters );
+
+
+        if (selection == characters.Length) {
+            
+        } else {
+            var selected = await _characterSelect.Select( characters[ selection ] );
             Console.WriteLine( "Selected {0}", selected?.Name );
         }
+    }
+
+    public async Task<int> DoSelect( IPlayerCharacter[] characters ){
+        ConsoleKey key;
+        int selection = 0;
+
+        do {
+            Console.Clear();
+            var width = Console.BufferWidth;
+            Console.WriteLine( "Select A Character" );
+            
+            
+            for ( var i = 0; i < characters.Length; i++ ) {
+                if (i == selection) {
+                    Console.Write( "\t> " );
+                } else {
+                    Console.Write( "\t  " );
+                }
+                Console.WriteLine( characters[i].Name );
+            }
+        
+            Console.WriteLine( ( selection == characters.Length ? "> " : "  " ) + "Create A New Character" );
+            
+            var keyInfo = Console.ReadKey(intercept: true);
+            key = keyInfo.Key;
+
+            if (key == ConsoleKey.UpArrow) {
+                selection--;
+                if (selection < 0 ) selection = characters.Length;
+            } else if (key == ConsoleKey.DownArrow) {
+                selection++;
+                if ( selection > characters.Length ) selection = 0;
+            }
+        } while ( key != ConsoleKey.Enter );
+        
+        return selection;
     }
 }
