@@ -1,13 +1,13 @@
 namespace SkillQuest.Shared.Game.Addons.SkillQuest.Shared.Packet.Character;
 
-public class CharacterInfo(Guid userId, Guid characterId, string name, Uri world, Uri uri){
-    public Guid UserId { get; set; } = userId;
+public class CharacterInfo {
+    public Guid? UserId { get; set; }
 
-    public Guid CharacterId { get; set; } = characterId;
+    public Guid? CharacterId { get; set; }
 
-    public string Name { get; set; } = name;
+    public string? Name { get; set; }
 
-    public Uri Uri { get; set; } = uri;
+    public Uri? Uri { get; set; }
 
-    public Uri World { get; set; } = world;
+    public Uri? World { get; set; }
 }

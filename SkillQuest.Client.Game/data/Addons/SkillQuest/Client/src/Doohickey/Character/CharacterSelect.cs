@@ -23,7 +23,6 @@ public class CharacterSelect : Doohickey{
     public CharacterSelect(IClientConnection connection){
         _connection = connection;
         _channel = SH.Net.CreateChannel(Uri);
-        _characters = new TaskCompletionSource<IPlayerCharacter[]>();
 
         _channel.Subscribe<CharacterSelectInfoPacket>(OnCharacterSelectInfoPacket);
         _channel.Subscribe<SelectCharacterResponsePacket>(OnSelectCharacterResponsePacket);
@@ -34,16 +33,17 @@ public class CharacterSelect : Doohickey{
     public void Reset(){
         _characters = new TaskCompletionSource<IPlayerCharacter[]>();
         _selected = new TaskCompletionSource<IPlayerCharacter>();
+        _channel.Reset();
     }
 
     void OnCharacterSelectInfoPacket(IClientConnection connection, CharacterSelectInfoPacket packet){
         _characters.SetResult(
             packet.Characters?.Select(
                 character => new CharacterSelectPlayer(
-                    character.CharacterId,
-                    character.Name,
-                    character.World,
-                    character.Uri,
+                    character.CharacterId ?? Guid.Empty,
+                    character.Name!,
+                    character.World!,
+                    character.Uri!,
                     _connection
                 )
             ).ToArray<IPlayerCharacter>() ?? Array.Empty<IPlayerCharacter>()
@@ -55,16 +55,16 @@ public class CharacterSelect : Doohickey{
             return;
 
         if (packet.Selected is not null) {
-            var character = Character(packet.Selected.CharacterId).Result;
+            var character = Character(packet.Selected.CharacterId ?? Guid.Empty).Result;
 
             if (character is null) {
-                _selected.SetCanceled(new CancellationToken(true));
+                _selected.SetCanceled();
                 return;
             }
 
             _selected.SetResult(character);
         } else {
-            _selected.SetCanceled(new CancellationToken(true));
+            _selected.SetCanceled();
         }
     }
 
@@ -84,7 +84,9 @@ public class CharacterSelect : Doohickey{
                 _channel.Send(_connection, new SelectCharacterRequestPacket() { Id = character.CharacterId });
             }
 
-            return await _selected.Task;
+            return await Task.WhenAny(_selected.Task, Task.Delay(TimeSpan.FromSeconds(2.5))) == _selected.Task
+                ? await _selected.Task
+                : null;
         }
 
         return null;

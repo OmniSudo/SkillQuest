@@ -22,10 +22,13 @@ public class GuiCharacterSelection : Doohickey, IRenderable {
         var characters = await _characterSelect.Characters();
 
         var selection = await DoSelect( characters );
-
-
+        
         if (selection == characters.Length) {
-            
+            _characterSelect.Reset();
+            Stuff!.Remove(_characterSelect);
+            Stuff!.Remove(this);
+
+            _ = new GuiCharacterCreation( _connection ).Render();
         } else {
             var selected = await _characterSelect.Select( characters[ selection ] );
             Console.WriteLine( "Selected {0}", selected?.Name );

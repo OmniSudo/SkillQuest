@@ -20,7 +20,11 @@ public class CharacterSelectPlayer(
     public IClientConnection? Connection { get; set; } = connection;
 
     public static explicit operator CharacterInfo(CharacterSelectPlayer cp){
-        return new CharacterInfo(characterId: cp.CharacterId, name: cp.Name, userId: cp.Connection?.Id ?? Guid.Empty,
-            world: cp.World, uri: cp.Uri );
+        return new CharacterInfo() {
+            CharacterId = cp.CharacterId,
+            Name = cp.Name,
+            UserId = cp.Connection?.Id ?? Guid.Empty,
+            World = cp.World, Uri = cp.Uri
+        };
     }
 }
