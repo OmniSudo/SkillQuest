@@ -48,10 +48,15 @@ public class GuiCharacterSelection : Doohickey, IRenderable {
                 } else {
                     Console.Write( "\t  " );
                 }
-                Console.WriteLine( characters[i].Name );
+                Console.Write( characters[i].Name );
+                if (i == selection) {
+                    Console.WriteLine( " <" );
+                } else {
+                    Console.WriteLine();
+                }
             }
         
-            Console.WriteLine( ( selection == characters.Length ? "> " : "  " ) + "Create A New Character" );
+            Console.WriteLine( ( selection == characters.Length ? "> " : "  " ) + "Create A New Character" + ( selection == characters.Length ? " <" : "" ));
             
             var keyInfo = Console.ReadKey(intercept: true);
             key = keyInfo.Key;
