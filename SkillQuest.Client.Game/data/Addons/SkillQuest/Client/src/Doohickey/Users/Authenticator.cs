@@ -6,23 +6,26 @@ using SkillQuest.Shared.Game.Addons.SkillQuest.Shared.Packet.Credentials;
 namespace SkillQuest.Client.Game.Addons.SkillQuest.Client.Doohickey.Users;
 
 using Doohickey = Shared.Game.ECS.Doohickey;
+using static Shared.Game.State;
 
 public class Authenticator : Doohickey{
-    public override Uri Uri => new Uri("cl://control.skill.quest/users/authenticator");
+    public static Uri InstanceUri => new Uri("cl://control.skill.quest/users/authenticator");
 
-    public Authenticator(IClientConnection connection){
-        _connection = connection;
-        _channel = connection.Networker.CreateChannel(Uri);
+    public static Authenticator Instance => SH.Stuff.Things.GetValueOrDefault(InstanceUri) as Authenticator ?? 
+                                             SH.Stuff.Add( new Authenticator() );
+    
+    public override Uri Uri => InstanceUri;
+    
+    public Authenticator(){
+        _channel = SH.Net.CreateChannel(Uri);
     }
-
-    IClientConnection _connection;
 
     IChannel _channel;
 
-    public void Login(string email, string password){
+    public void Login(IClientConnection connection, string email, string password){
         var authtoken = Convert.ToBase64String(SHA256.HashData(Encoding.UTF8.GetBytes(password)));
 
-        _channel.Send(_connection, new LoginRequestPacket() {
+        _channel.Send(connection, new LoginRequestPacket() {
             Email = email,
             AuthToken = authtoken
         });
@@ -56,11 +59,11 @@ public class Authenticator : Doohickey{
 
     void OnLogoutStatusPacket(IClientConnection connection, LogoutStatusPacket packet){
         Console.WriteLine($"Logout Successful: {packet.Success}");
-        LoggedOut?.Invoke(connection);
+        LoggedOut?.Invoke(connection, null);
     }
 
-    public void Logout(){
-        _channel.Send(_connection, new LogoutRequestPacket());
+    public void Logout(IClientConnection connection){
+        _channel.Send(connection, new LogoutRequestPacket());
     }
 
     public delegate void DoAuthenticationSuccess(IClientConnection connection);
@@ -79,7 +82,7 @@ public class Authenticator : Doohickey{
     
     public event DoLoginFailure LoginFailure;
     
-    public delegate void DoLoggedOut ( IClientConnection connection );
+    public delegate void DoLoggedOut ( IClientConnection connection, string reason );
     
     public event DoLoggedOut LoggedOut;
 }

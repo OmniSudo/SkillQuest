@@ -66,7 +66,6 @@ internal class LocalConnection : ILocalConnection{
                 udp ? NetDeliveryMethod.Unreliable : NetDeliveryMethod.ReliableOrdered,
                 0
             );
-            
         }
     }
 

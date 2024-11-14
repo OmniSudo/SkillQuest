@@ -10,23 +10,39 @@ using Doohickey = Shared.Game.ECS.Doohickey;
 public class GuiLoginSignup : Doohickey, IRenderable{
     public override Uri? Uri { get; } = new Uri( "gui://skill.quest/login" );
 
+    private void OpenCharacterSelect(IClientConnection connection){
+        Stuff?.Remove(this);
+        _ = new GuiCharacterSelection(_connection)?.Render();
+    }
+    
+    private void OnRenderReset(IClientConnection clientConnection, string reason) => _ = Render();
+
     public GuiLoginSignup(IClientConnection connection){
-        Authenticator = new Authenticator(connection);
+        _connection = connection;
+        
+        Stuffed += (_, _) => {
+            Authenticator.Instance.AuthenticationFailure += OnRenderReset;
 
-        Authenticator.AuthenticationFailure += (clientConnection, reason) => _ = Render();
+            Authenticator.Instance.LoginFailure += OnRenderReset;
 
-        Authenticator.LoginFailure += (clientConnection, reason) => _ = Render();
+            Authenticator.Instance.LoginSuccess += OpenCharacterSelect;
 
-        Authenticator.LoginSuccess += clientConnection => {
-            Stuff?.Remove(this);
-            _ = new GuiCharacterSelection(connection)?.Render();
+            Authenticator.Instance.LoggedOut += OnRenderReset;
         };
 
-        Authenticator.LoggedOut += clientConnection => _ = Render();
+        Unstuffed += (_, _) => {
+            Authenticator.Instance.AuthenticationFailure -= OnRenderReset;
+
+            Authenticator.Instance.LoginFailure -= OnRenderReset;
+
+            Authenticator.Instance.LoggedOut -= OnRenderReset;
+
+            Authenticator.Instance.LoginSuccess -= OpenCharacterSelect;
+        };
     }
 
-    public Authenticator Authenticator { get; set; }
-
+    private IClientConnection _connection { get; set; }
+    
     public async Task Render(){
         await Task.Run(() => {
             get_email:
@@ -87,7 +103,7 @@ public class GuiLoginSignup : Doohickey, IRenderable{
             } while ( key != ConsoleKey.Enter );
             Console.WriteLine();
 
-            Authenticator.Login(email, pass);
+            Authenticator.Instance.Login( _connection, email, pass);
         });
     }
 }

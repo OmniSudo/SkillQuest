@@ -4,6 +4,20 @@ namespace SkillQuest.API.ECS;
 
 public interface IThing{
     public Uri? Uri { get; }
+
+    delegate void DoStuffed(IStuff stuff, IThing thing );
+    
+    /// <summary>
+    /// A Stuff is set
+    /// </summary>
+    public event DoStuffed Stuffed;
+    
+    delegate void DoUnstuffed(IStuff stuff, IThing thing );
+    
+    /// <summary>
+    /// A Stuff is unset
+    /// </summary>
+    public event DoUnstuffed Unstuffed;
     
     public delegate void DoConnectComponent ( IThing thing, IComponent component );
     
@@ -28,6 +42,8 @@ public interface IThing{
     public delegate void DoRemoveChild(IThing parent, IThing child);
     
     public event DoRemoveChild RemoveChild;
+    
+    public IStuff? Stuff { get; set; }
 
     IThing Component<TComponent>(TComponent? component) where TComponent : class, IComponent;
 

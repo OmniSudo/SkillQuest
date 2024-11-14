@@ -6,14 +6,20 @@ namespace SkillQuest.Shared.Game.Network;
 internal class Channel : IChannel {
     public string Name { get; init; }
 
+    const bool DEBUG = false;
+
     public void Send(IClientConnection? connection, Packet packet){
         packet.Channel = Name;
         connection?.Send(packet);
+        if ( DEBUG ) Console.WriteLine( $"{Name} -> {packet.GetType().Name}");
     }
 
     public void Receive(IClientConnection connection, Packet packet){
+        if ( DEBUG ) Console.WriteLine( $"{Name} <- {packet.GetType().Name}");
         if (_handlers.TryGetValue(packet.GetType(), out var handler)) {
             handler.Invoke(connection, packet);
+        } else {
+            Console.WriteLine( $"No handler for {packet.GetType().Name}");
         }
     }
 

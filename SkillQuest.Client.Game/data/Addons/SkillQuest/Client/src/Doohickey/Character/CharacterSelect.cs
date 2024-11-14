@@ -24,10 +24,10 @@ public class CharacterSelect : Doohickey{
         _connection = connection;
         _channel = SH.Net.CreateChannel(Uri);
 
+        Reset();
+        
         _channel.Subscribe<CharacterSelectInfoPacket>(OnCharacterSelectInfoPacket);
         _channel.Subscribe<SelectCharacterResponsePacket>(OnSelectCharacterResponsePacket);
-
-        Reset();
     }
 
     public void Reset(){
@@ -75,7 +75,7 @@ public class CharacterSelect : Doohickey{
 
     public async Task<IPlayerCharacter[]> Characters(){
         _channel.Send(_connection, new CharacterSelectInfoRequestPacket());
-        return await _characters.Task;
+        return await Task.WhenAny( _characters.Task, Task.Delay( 5000 ) ) == _characters.Task ? _characters.Task.Result : null;
     }
 
     public async Task<IPlayerCharacter?> Select(IPlayerCharacter? character){

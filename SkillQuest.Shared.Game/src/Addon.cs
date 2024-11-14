@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using SkillQuest.API;
 using SkillQuest.Shared.Game.ECS;
 
@@ -5,7 +6,7 @@ namespace SkillQuest.Shared.Game;
 
 public class Addon : Doohickey, IAddon{
 
-    public Addon(Stuff? stuff = null) : base( null, stuff){ }
+    public Addon(){ }
 
     public override Uri Uri { get; } = new Uri("sh://addon.skill.quest/null");
 

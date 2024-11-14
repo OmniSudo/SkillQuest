@@ -24,7 +24,7 @@ public class AddonSkillQuestCL : AddonSkillQuestSH{
         var connection = SH.Net.Connect(IPEndPoint.Parse("127.0.0.1:3698")).Result;
 
         if (connection is not null) {
-            _ = new GuiLoginSignup(connection).Render();
+            _ = Stuff.Add( new GuiLoginSignup(connection) ).Render();
         }
     }
 

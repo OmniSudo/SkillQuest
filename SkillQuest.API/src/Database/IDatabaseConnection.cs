@@ -1,5 +1,3 @@
-using System.Text.Json.Nodes;
-
 namespace SkillQuest.API.Database;
 
 public interface IDatabaseConnection{

@@ -8,26 +8,34 @@ using static State;
 
 public class Thing : IThing{
 
-    public Thing(Uri? uri = null, Stuff? stuff = null){
+    public Thing(Uri? uri = null){
         Uri = uri;
-        Stuff = stuff ?? SH.Stuff;
     }
 
-    public Stuff? Stuff {
+    public IStuff? Stuff {
         get {
             return _stuff;
         }
         set {
             if (value == _stuff)
                 return;
-            _stuff?.Remove(this);
+
+            if (_stuff is not null) {
+                Unstuffed?.Invoke(_stuff, this);
+                _stuff.Remove(this);
+            }
             _stuff = value ?? SH.Stuff;
             _stuff.Add(this);
+            Stuffed?.Invoke(_stuff, this);
         }
     }
 
 
     public virtual Uri? Uri { get; }
+
+    public event IThing.DoStuffed Stuffed;
+
+    public event IThing.DoUnstuffed Unstuffed;
 
     public event IThing.DoConnectComponent ConnectComponent;
 
@@ -154,7 +162,7 @@ public class Thing : IThing{
         }
     }
 
-    Stuff _stuff;
+    IStuff? _stuff;
 
     IThing? _parent = null;
 }
