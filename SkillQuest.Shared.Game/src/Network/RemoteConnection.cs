@@ -51,18 +51,16 @@ internal class RemoteConnection : IRemoteConnection{
         var serialized = JsonSerializer.Serialize(packet, packet.GetType());
 
         NetOutgoingMessage message = Client.CreateMessage();
-        var bytes = Encoding.UTF8.GetBytes(packet.GetType().FullName);
-        message.WriteVariableInt32(bytes.Length);
-        message.Write(bytes);
+        var typename = packet.GetType().FullName;
 
-        bytes = Encoding.UTF8.GetBytes(serialized);
-        message.WriteVariableInt32(bytes.Length);
-        message.Write(bytes);
+        var data = typename + (char)0x0 + serialized;
+        message.Write(data);
+
         if (!message.Encrypt(Encryption)) return;
 
         Client.SendMessage(
             message,
-            udp ? NetDeliveryMethod.Unreliable : NetDeliveryMethod.ReliableSequenced,
+            udp ? NetDeliveryMethod.Unreliable : NetDeliveryMethod.ReliableOrdered,
             0
         );
     }
@@ -133,23 +131,20 @@ internal class RemoteConnection : IRemoteConnection{
                 case NetIncomingMessageType.Data:
                     if (!message.Decrypt(Encryption)) break;
 
+                    string typename = "";
+
                     try {
-                        var length = message.ReadVariableInt32();
-                        message.ReadBytes(length, out var bytes);
-                        var typename = Encoding.UTF8.GetString(bytes);
-                        length = message.ReadVariableInt32();
-                        message.ReadBytes(length, out bytes);
-                        var data = Encoding.UTF8.GetString(bytes);
+                        var data = message.ReadString();
+                        var split = data.Split((char)0x0);
+                        var type = Type.GetType(split[0]);
 
-                        var type = Type.GetType(typename);
-
-                        Packet? packet = JsonSerializer.Deserialize(data, type) as Packet;
+                        Packet? packet = JsonSerializer.Deserialize(split[1], type) as Packet;
 
                         if (packet is not null) {
                             Receive(packet);
                             break;
                         }
-                        Console.WriteLine("Unknown packet type {0}", typename); // TODO: Log ERROR
+                        Console.WriteLine("Unknown packet type {0}", split[0]); // TODO: Log ERROR
                     } catch (Exception e) {
                         Console.WriteLine($"Packet Exception:\n{e}");
                     }

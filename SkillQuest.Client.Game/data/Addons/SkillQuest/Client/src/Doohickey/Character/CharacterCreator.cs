@@ -23,12 +23,16 @@ public class CharacterCreator : Doohickey{
     public CharacterCreator(IClientConnection connection){
         _connection = connection;
         _channel = SH.Net.CreateChannel(Uri);
-
-        _channel.Subscribe<CharacterCreatorNameAvailablityResponsePacket>(
-            OnCharacterCreatorNameAvailablityResponsePacket);
-        _channel.Subscribe<CharacterCreatorCreationResponsePacket>(OnCharacterCreatorCreationResponsePacket);
-
+        
         Reset();
+        
+        _channel.Subscribe<CharacterCreatorNameAvailablityResponsePacket>(
+            OnCharacterCreatorNameAvailablityResponsePacket
+        );
+
+        _channel.Subscribe<CharacterCreatorCreationResponsePacket>(
+            OnCharacterCreatorCreationResponsePacket
+        );
     }
 
     void OnCharacterCreatorNameAvailablityResponsePacket(
@@ -51,7 +55,7 @@ public class CharacterCreator : Doohickey{
 
     public void Reset(){
         foreach (var kvp in _available) {
-            kvp.Value.SetCanceled();
+            if ( !kvp.Value.Task.IsCompleted ) kvp.Value.SetCanceled();
         }
         _available.Clear();
         _created = new();
@@ -59,10 +63,6 @@ public class CharacterCreator : Doohickey{
     }
 
     public async Task<CharacterInfo> CreateCharacter(string name){
-        if (!await IsNameAvailable(name)) {
-            return null;
-        }
-
         if (_created.Task.IsCompleted) {
             return _created.Task.Result;
         }
@@ -74,7 +74,7 @@ public class CharacterCreator : Doohickey{
             }
         );
 
-        return await Task.WhenAny(_created.Task, Task.Delay(TimeSpan.FromSeconds(2.5))) == _created.Task
+        return await Task.WhenAny(_created.Task, Task.Delay(TimeSpan.FromSeconds(5))) == _created.Task
             ? await _created.Task
             : null;
     }

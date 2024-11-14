@@ -123,22 +123,17 @@ internal class ServerConnection : IServerConnection{
                     if (!message.Decrypt((connection as LocalConnection)?.Encryption)) break;
                     
                     try {
-                        var length = message.ReadVariableInt32();
-                        message.ReadBytes(length, out var bytes);
-                        var typename = Encoding.UTF8.GetString(bytes);
-                        length = message.ReadVariableInt32();
-                        message.ReadBytes(length, out bytes);
-                        var data = Encoding.UTF8.GetString(bytes);
+                        var data = message.ReadString();
+                        var split = data.Split((char)0x0);
+                        var type = Type.GetType(split[0]);
 
-                        var type = Type.GetType(typename);
-
-                        Packet? packet = JsonSerializer.Deserialize(data, type) as Packet;
+                        Packet? packet = JsonSerializer.Deserialize(split[1], type) as Packet;
 
                         if (packet is not null) {
                             Receive(connection, packet);
                             break;
                         }
-                        Console.WriteLine("Unknown packet type {0}", typename); // TODO: Log ERROR
+                        Console.WriteLine("Unknown packet type {0}", split[0]); // TODO: Log ERROR
                     } catch (Exception e) {
                         Console.WriteLine($"Packet Exception:\n{e}");
                     }

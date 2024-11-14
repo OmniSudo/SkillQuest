@@ -27,7 +27,7 @@ public class GuiCharacterSelection : Doohickey, IRenderable{
             Console.WriteLine("Unable to download character list...");
             // TODO: Recover from this
 
-            var login = new GuiLoginSignup(_connection);
+            var login = Stuff.Add( new GuiLoginSignup(_connection) );
             Authenticator.Instance.Logout(_connection);
 
             return;
@@ -40,7 +40,7 @@ public class GuiCharacterSelection : Doohickey, IRenderable{
             Stuff!.Remove(_characterSelect);
             Stuff!.Remove(this);
 
-            _ = new GuiCharacterCreation(_connection).Render();
+            _ = Stuff.Add( new GuiCharacterCreation(_connection) ).Render();
         } else {
             var selected = await _characterSelect.Select(characters[selection]);
             Console.WriteLine("Selected {0}", selected?.Name);

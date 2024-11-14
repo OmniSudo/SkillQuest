@@ -12,7 +12,7 @@ public class GuiLoginSignup : Doohickey, IRenderable{
 
     private void OpenCharacterSelect(IClientConnection connection){
         Stuff?.Remove(this);
-        _ = new GuiCharacterSelection(_connection)?.Render();
+        _ = Stuff?.Add( new GuiCharacterSelection(_connection) ).Render();
     }
     
     private void OnRenderReset(IClientConnection clientConnection, string reason) => _ = Render();

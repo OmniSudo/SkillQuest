@@ -16,32 +16,38 @@ public class GuiCharacterCreation : Doohickey, IRenderable{
 
     public GuiCharacterCreation(IClientConnection connection){
         _creator = new CharacterCreator(connection);
+        _connection = connection;
     }
 
     public async Task Render(){
-
         create:
-        
         var name = string.Empty;
-        while ( name.Length == 0 ) {
-            Console.Clear();
-            Console.Write("name > ");
-            ConsoleKey key;
+        Console.Clear();
+        Console.Write("name > ");
+        ConsoleKey key;
 
-            do {
-                var keyInfo = Console.ReadKey(intercept: true);
-                key = keyInfo.Key;
+        do {
+            var keyInfo = Console.ReadKey(intercept: true);
+            key = keyInfo.Key;
 
-                if (key == ConsoleKey.Backspace && name.Length > 0) {
-                    Console.Write("\b \b");
-                    name = name[0..^1];
-                } else if (!char.IsControl(keyInfo.KeyChar)) {
-                    Console.Write(keyInfo.KeyChar);
-                    name += keyInfo.KeyChar;
-                }
-            } while ( key != ConsoleKey.Enter );
-        }
+            if (key == ConsoleKey.Backspace && name.Length > 0) {
+                Console.Write("\b \b");
+                name = name[0..^1];
+            } else if (!char.IsControl(keyInfo.KeyChar)) {
+                Console.Write(keyInfo.KeyChar);
+                name += keyInfo.KeyChar;
+            }
+        } while ( key != ConsoleKey.Enter );
 
+        if (name.Length == 0) {
+            Stuff?.Remove( _creator );
+            _creator.Reset();
+            Stuff?.Remove(this);
+        
+            _ = Stuff?.Add( new GuiCharacterSelection( _connection ) ).Render();
+            return;
+        } 
+        
         if (!await _creator.IsNameAvailable(name)) {
             Console.WriteLine();
             Console.WriteLine("Invalid Character Name");
@@ -64,10 +70,10 @@ public class GuiCharacterCreation : Doohickey, IRenderable{
         
         Console.WriteLine("\nCharacter Created: " + character.CharacterId + " (" + character.Name + ")");
 
-        Stuff.Remove( _creator );
+        Stuff?.Remove( _creator );
         _creator.Reset();
-        Stuff.Remove(this);
+        Stuff?.Remove(this);
         
-        _ = new GuiCharacterSelection( _connection ).Render();
+        _ = Stuff?.Add( new GuiCharacterSelection( _connection ) ).Render();
     }
 }

@@ -44,6 +44,8 @@ public class Stuff : IStuff {
         if (thing is null) return null;
         
         ThingRemoved?.Invoke(thing);
+        thing.Stuff = null;
+        
         return thing;
     }
     

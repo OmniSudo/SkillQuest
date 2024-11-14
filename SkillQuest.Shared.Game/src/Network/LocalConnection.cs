@@ -52,13 +52,10 @@ internal class LocalConnection : ILocalConnection{
         var serialized = JsonSerializer.Serialize(packet, packet.GetType());
 
         NetOutgoingMessage message = Connection.Peer.CreateMessage();
-        var bytes = Encoding.UTF8.GetBytes(packet.GetType().FullName);
-        message.WriteVariableInt32(bytes.Length);
-        message.Write(bytes);
-
-        bytes = Encoding.UTF8.GetBytes(serialized);
-        message.WriteVariableInt32(bytes.Length);
-        message.Write(bytes);
+        var typename = packet.GetType().FullName;
+        
+        var data = typename + (char)0x0 + serialized;
+        message.Write(data);
 
         if (message.Encrypt(Encryption)) {
             Connection.SendMessage(
