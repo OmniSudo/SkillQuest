@@ -5,10 +5,6 @@ namespace SkillQuest.API;
 public interface IApplication{
     public bool Running { get; set; }
 
-    public uint TicksPerSecond();
-
-    public TimeSpan TickFrequency();
-
     public IApplication Mount(IAddon addon);
 
     public IApplication Unmount(IAddon? addon);

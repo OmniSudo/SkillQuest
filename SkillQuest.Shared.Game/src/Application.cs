@@ -36,10 +36,6 @@ public class Application : IApplication{
 
     public Application(){ }
 
-    uint IApplication.TicksPerSecond() => 100;
-
-    TimeSpan IApplication.TickFrequency() => TimeSpan.FromSeconds(1) / TicksPerSecond;
-
     public IApplication Mount(IAddon addon){
         SH.Stuff.Add(addon);
         addon.Application = this;
@@ -62,29 +58,17 @@ public class Application : IApplication{
     public void Run(){
         Start?.Invoke();
 
-        var previous = DateTime.Now;
-        var total = TimeSpan.Zero;
-
         _running = true;
 
-        while ( Running ) {
-            var delta = DateTime.Now - previous;
-            total += delta;
-
-            while ( total > TickFrequency ) {
-                if (total > TimeSpan.FromSeconds(1)) {
-                    total = TimeSpan.FromSeconds(1);
-                }
-
-                Update?.Invoke();
-
-                total -= TickFrequency;
-            }
-
-            previous = DateTime.Now;
-        }
+        Loop();
 
         Stop?.Invoke();
+    }
+
+    public virtual void Loop(){
+        while ( Running ) {
+            Update?.Invoke();
+        }
     }
 
     public event IApplication.DoStart? Start;
