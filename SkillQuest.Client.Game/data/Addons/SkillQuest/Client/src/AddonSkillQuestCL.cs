@@ -26,16 +26,10 @@ public class AddonSkillQuestCL : AddonSkillQuestSH{
     }
 
     void OnMounted(IAddon addon, IApplication? application){
-        Commands = Stuff.Add(new CommandRegistry());
-        
-        var connection = SH.Net.Connect(IPEndPoint.Parse("127.0.0.1:3698")).Result;
+        var gls = Stuff!.Add(new GuiLoginSignup());
 
-        if (connection is not null) {
-            Stuff.Add(new GuiLoginSignup(connection)).Render().Wait();
-        }
-
-        application.Update += () => {
-            Commands.Listen().Wait();
+        application!.Render += () => {
+            gls.Render();
         };
     }
 

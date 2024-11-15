@@ -3,7 +3,7 @@ using SkillQuest.Client.Game.Addons.SkillQuest.Client.Doohickey.Command;
 
 namespace SkillQuest.Client.Game.Addons.SkillQuest.Client.Doohickey.Gui;
 
-public class GuiMine : Shared.Game.ECS.Doohickey, IRenderable {
+public class GuiMine : Shared.Game.ECS.Doohickey{
     public GuiMine (){
         AddonSkillQuestCL.Commands.Subscribe( "mine", DoMineCommand);
     }

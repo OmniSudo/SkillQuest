@@ -8,7 +8,7 @@ namespace SkillQuest.Client.Game.Addons.SkillQuest.Client.Doohickey.Gui.Characte
 
 using Doohickey = Shared.Game.ECS.Doohickey;
 
-public class GuiCharacterSelection : Doohickey, IRenderable{
+public class GuiCharacterSelection : Doohickey{
     public override Uri? Uri { get; } = new Uri("gui://skill.quest/character/select");
 
     readonly IClientConnection _connection;
@@ -27,7 +27,7 @@ public class GuiCharacterSelection : Doohickey, IRenderable{
             Console.WriteLine("Unable to download character list...");
             // TODO: Recover from this
 
-            var login = Stuff.Add( new GuiLoginSignup(_connection) );
+            var login = Stuff.Add( new GuiLoginSignup() );
             Authenticator.Instance.Logout(_connection);
 
             return;

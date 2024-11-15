@@ -7,7 +7,7 @@ namespace SkillQuest.Client.Game.Addons.SkillQuest.Client.Doohickey.Gui.Characte
 
 using Doohickey = Shared.Game.ECS.Doohickey;
 
-public class GuiCharacterCreation : Doohickey, IRenderable{
+public class GuiCharacterCreation : Doohickey{
     public override Uri? Uri { get; } = new Uri("gui://skill.quest/character/create");
 
     private CharacterCreator _creator;

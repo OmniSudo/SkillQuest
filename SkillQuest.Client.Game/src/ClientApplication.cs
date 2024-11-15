@@ -21,7 +21,7 @@ public class ClientApplication : Application {
         };
 
         window.Update += d => {
-            Update?.Invoke();
+            OnUpdate();
         };
 
         window.Render += d => {
@@ -29,8 +29,9 @@ public class ClientApplication : Application {
 
             gl.ClearColor(0, 0, 0, 255);
             gl.Clear( ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit );
-            
-            Render?.Invoke();
+
+
+            OnRender();
             
             imgui.Render();
         };
@@ -43,16 +44,6 @@ public class ClientApplication : Application {
 
         window.Run();
     }
-
-    public delegate void DoRender();
-    
-    public event DoRender Render;
-    
-    public event IApplication.DoStart? Start;
-
-    public event IApplication.DoUpdate? Update;
-
-    public event IApplication.DoStop? Stop;
     
     IWindow window;
     ImGuiController imgui;

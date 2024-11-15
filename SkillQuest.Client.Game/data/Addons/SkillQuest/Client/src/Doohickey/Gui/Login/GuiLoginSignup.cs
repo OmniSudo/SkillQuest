@@ -1,3 +1,5 @@
+using System.Net;
+using ImGuiNET;
 using SkillQuest.API.ECS;
 using SkillQuest.API.Network;
 using SkillQuest.Client.Game.Addons.SkillQuest.Client.Doohickey.Gui.CharacterSelect;
@@ -6,6 +8,7 @@ using SkillQuest.Client.Game.Addons.SkillQuest.Client.Doohickey.Users;
 namespace SkillQuest.Client.Game.Addons.SkillQuest.Client.Doohickey.Gui.Login;
 
 using Doohickey = Shared.Game.ECS.Doohickey;
+using static Shared.Game.State;
 
 public class GuiLoginSignup : Doohickey, IRenderable{
     public override Uri? Uri { get; } = new Uri( "gui://skill.quest/login" );
@@ -14,96 +17,35 @@ public class GuiLoginSignup : Doohickey, IRenderable{
         Stuff?.Remove(this);
         _ = Stuff?.Add( new GuiCharacterSelection(_connection) ).Render();
     }
+
+    private IClientConnection? _connection { get; set; }
+
+    private string _serveraddress = "127.0.0.1:3698";
+    private string _username = "root@skill.quest";
+    private string _password = "";
     
-    private void OnRenderReset(IClientConnection clientConnection, string reason) => _ = Render();
-
-    public GuiLoginSignup(IClientConnection connection){
-        _connection = connection;
+    public void Render(){
+        ImGui.Begin("Login");
         
-        Stuffed += (_, _) => {
-            Authenticator.Instance.AuthenticationFailure += OnRenderReset;
+        ImGui.InputText( "address", ref _serveraddress, 256 );
+        ImGui.InputText( "username", ref _username, 256 );
+        ImGui.InputText( "password", ref _password, 256, ImGuiInputTextFlags.Password );
 
-            Authenticator.Instance.LoginFailure += OnRenderReset;
+        if (ImGui.Button("Login")){
+            if (_connection is null){
+                Task.Run(() => {
+                    _connection = SH.Net.Connect(IPEndPoint.Parse(_serveraddress)).Result;
 
-            Authenticator.Instance.LoginSuccess += OpenCharacterSelect;
-
-            Authenticator.Instance.LoggedOut += OnRenderReset;
-        };
-
-        Unstuffed += (_, _) => {
-            Authenticator.Instance.AuthenticationFailure -= OnRenderReset;
-
-            Authenticator.Instance.LoginFailure -= OnRenderReset;
-
-            Authenticator.Instance.LoggedOut -= OnRenderReset;
-
-            Authenticator.Instance.LoginSuccess -= OpenCharacterSelect;
-        };
+                    Authenticator.Instance.AuthenticationSuccess += InstanceOnAuthenticationSuccess;
+                    Authenticator.Instance.Login(_connection, _username, _password);
+                });
+            }
+        }
+        
+        ImGui.End();
     }
 
-    private IClientConnection _connection { get; set; }
-    
-    public async Task Render(){
-        await Task.Run(() => {
-            get_email:
-            Console.Write("email > ");
-            var email = string.Empty;
-            ConsoleKey key;
-
-            do {
-                var keyInfo = Console.ReadKey(intercept: true);
-                key = keyInfo.Key;
-
-                if (key == ConsoleKey.Backspace && email.Length > 0) {
-                    Console.Write("\b \b");
-                    email = email[0..^1];
-                } else if (!char.IsControl(keyInfo.KeyChar)) {
-                    Console.Write(keyInfo.KeyChar);
-                    email += keyInfo.KeyChar;
-                }
-            } while ( key != ConsoleKey.Enter );
-
-            var trimmed = email.Trim();
-
-            if (trimmed.EndsWith(".")) {
-                Console.WriteLine("Invalid Email");
-                goto get_email;
-            }
-
-            Console.WriteLine();
-
-            try {
-                var addr = new System.Net.Mail.MailAddress(trimmed);
-
-                if (addr.Address != trimmed) {
-                    Console.WriteLine("Invalid Email");
-                    goto get_email;
-                }
-            } catch {
-                Console.WriteLine("Invalid Email");
-                goto get_email;
-            }
-
-            email = trimmed;
-
-            Console.Write("password > ");
-            var pass = string.Empty;
-
-            do {
-                var keyInfo = Console.ReadKey(intercept: true);
-                key = keyInfo.Key;
-
-                if (key == ConsoleKey.Backspace && pass.Length > 0) {
-                    Console.Write("\b \b");
-                    pass = pass[0..^1];
-                } else if (!char.IsControl(keyInfo.KeyChar)) {
-                    Console.Write("*");
-                    pass += keyInfo.KeyChar;
-                }
-            } while ( key != ConsoleKey.Enter );
-            Console.WriteLine();
-
-            Authenticator.Instance.Login( _connection, email, pass);
-        });
+    private void InstanceOnAuthenticationSuccess(IClientConnection connection){
+        throw new NotImplementedException();
     }
 }

@@ -66,8 +66,8 @@ public class Application : IApplication{
     }
 
     public virtual void Loop(){
-        while ( Running ) {
-            Update?.Invoke();
+        while ( Running ){
+            OnUpdate();
         }
     }
 
@@ -75,6 +75,16 @@ public class Application : IApplication{
 
     public event IApplication.DoUpdate? Update;
 
+    protected void OnUpdate(){
+        Update?.Invoke();
+    }
+    
+    public event IApplication.DoRender? Render;
+
+    protected void OnRender(){
+        Render?.Invoke();
+    }
+    
     public event IApplication.DoStop? Stop;
 
     public ImmutableDictionary<Uri, IAddon> Addons => SH.Stuff.Things

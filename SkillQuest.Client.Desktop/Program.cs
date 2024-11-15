@@ -8,10 +8,12 @@ using static State;
 
 class Program{
     static void Main(string[] args){
-        ( SH.Application = new ClientApplication() ).Run();
+        SH.Application = new ClientApplication();
 
         SH.Application.Mount(
             new AddonSkillQuestCL()
         );
+        
+        SH.Application.Run();
     }
 }

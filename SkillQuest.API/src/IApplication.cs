@@ -18,6 +18,10 @@ public interface IApplication{
     public delegate void DoUpdate();
 
     public event DoUpdate Update;
+    
+    public delegate void DoRender();
+    
+    public event DoRender Render;
 
     public delegate bool DoStop();
 
