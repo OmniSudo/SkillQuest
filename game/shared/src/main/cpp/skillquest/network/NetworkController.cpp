@@ -175,7 +175,7 @@ namespace skillquest::network {
 						_channel->process( connection, new packet::handshake::ConnectedPacket{} );
 					} else {
 						auto exists = !this->servers().authenticator()->uid( connection->email() ).value.empty();
-						sq::shared()->logger()->trace( "User {0} failed to create account.", connection->email() );
+						sq::shared()->logger()->trace( "User {0} failed to create account: {1}", connection->email(), exists ? "email already taken" : "invalid password" );
 						_channel->send(
 								connection, new packet::handshake::AuthenticationStatusPacket(
 										false, exists ? "email already taken" : "invalid password"
@@ -185,7 +185,7 @@ namespace skillquest::network {
 						connection->authenticated( false );
 					}
 				} else {
-					sq::shared()->logger()->trace( "User {0} failed to create account.", connection->email() );
+					sq::shared()->logger()->trace( "User {0} failed to create account: invalid email", connection->email() );
 					_channel->send(
 							connection, new packet::handshake::AuthenticationStatusPacket(
 									false, "invalid email"
