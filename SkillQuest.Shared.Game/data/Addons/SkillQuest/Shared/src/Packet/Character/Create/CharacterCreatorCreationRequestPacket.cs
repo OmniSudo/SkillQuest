@@ -1,8 +1,5 @@
-using SkillQuest.API.Network;
-using SkillQuest.Shared.Game.Addons.SkillQuest.Shared.Packet.Character;
+namespace SkillQuest.Shared.Game.Addons.SkillQuest.Shared.Packet.Character.Create;
 
-namespace SkillQuest.Client.Game.Addons.SkillQuest.Client.Doohickey.Character;
-
-public class CharacterCreatorCreationRequestPacket : Packet{
+public class CharacterCreatorCreationRequestPacket : API.Network.Packet{
     public CharacterInfo Character { get; set; }
 }

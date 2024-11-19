@@ -1,8 +1,7 @@
 using System.Collections.Concurrent;
 using System.Collections.Immutable;
-using SkillQuest.Shared.Game.Addons.SkillQuest.Shared.Thing.Item;
 
-namespace SkillQuest.Shared.Game.Addons.SkillQuest.Shared.Thing.Inventory;
+namespace SkillQuest.Shared.Game.Addons.SkillQuest.Shared.Thing;
 
 public class Inventory(Uri uri) : ECS.Thing(uri){
     public ImmutableDictionary< Uri, ItemStack > Stacks => _stacks.ToImmutableDictionary();

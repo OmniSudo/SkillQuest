@@ -1,7 +1,5 @@
-using SkillQuest.API;
+namespace SkillQuest.Shared.Game.Addons.Mining.Shared.src.Doohickey.Addon;
 
-namespace SkillQuest.Shared.Game.Addons.Mining.Shared.src;
-
-public class AddonMiningSH : Addon {
+public class AddonMiningSH : Game.Addon {
     
 }
