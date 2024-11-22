@@ -18,7 +18,13 @@
 
     <ItemGroup>
       <Folder Include="data\Addons\Mining\Shared\assets\Item\Ore\" />
-      <Folder Include="data\Addons\SkillQuest\Shared\" />
+      <Folder Include="data\Addons\SkillQuestMP\Shared\" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Reference Include="Microsoft.Data.Sqlite">
+        <HintPath>..\..\..\..\..\.nuget\packages\microsoft.data.sqlite.core\9.0.0-rc.2.24474.1\lib\net8.0\Microsoft.Data.Sqlite.dll</HintPath>
+      </Reference>
     </ItemGroup>
 
 </Project>

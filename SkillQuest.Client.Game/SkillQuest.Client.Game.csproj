@@ -12,14 +12,13 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="data\Addons\SkillQuest\Client\" />
-      <Folder Include="data\Addons\SkillQuest\Client\src\Thing\Item\" />
-    </ItemGroup>
-
-    <ItemGroup>
       <PackageReference Include="Silk.NET.Input.Glfw" Version="2.22.0" />
       <PackageReference Include="Silk.NET.OpenGL.Extensions.ImGui" Version="2.22.0" />
       <PackageReference Include="Silk.NET.Windowing.Glfw" Version="2.22.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="data\Addons\SkillQuest\Client\Thing\" />
     </ItemGroup>
 
 </Project>

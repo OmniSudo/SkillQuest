@@ -28,9 +28,7 @@ public class ClientApplication : Application {
             imgui.Update((float)d);
 
             gl.ClearColor(0, 0, 0, 255);
-            gl.Clear( ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit );
-
-
+            gl.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
             OnRender();
             
             imgui.Render();
