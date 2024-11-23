@@ -14,6 +14,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\SkillQuest.API\SkillQuest.API.csproj" />
+      <ProjectReference Include="..\SkillQuest.Shared.Engine\SkillQuest.Shared.Engine.csproj" />
     </ItemGroup>
 
     <ItemGroup>
