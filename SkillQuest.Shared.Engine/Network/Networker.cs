@@ -1,12 +1,9 @@
 using System.Collections.Concurrent;
 using System.Collections.Immutable;
 using System.Net;
-using System.Runtime.InteropServices.JavaScript;
-using System.Security.Cryptography;
-using System.Text;
 using SkillQuest.API.Network;
 
-namespace SkillQuest.Shared.Game.Network;
+namespace SkillQuest.Shared.Engine.Network;
 
 public sealed class Networker : INetworker{
 

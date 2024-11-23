@@ -6,6 +6,6 @@ public interface IItem : IThing{
     
 }
 
-public class Item < TItem > : ECS.Thing, IItem where TItem : Item< TItem >{
+public class Item < TItem > : Engine.ECS.Thing, IItem where TItem : Item< TItem >{
     
 }

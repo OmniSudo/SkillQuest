@@ -1,7 +1,6 @@
-using Microsoft.Data.Sqlite;
 using SkillQuest.API.Database;
 
-namespace SkillQuest.Shared.Game.Database;
+namespace SkillQuest.Shared.Engine.Database;
 
 public class SqliteDatabase : IDatabaseConnection{
     SqliteConnection _connection;

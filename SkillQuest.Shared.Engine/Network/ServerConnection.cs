@@ -2,16 +2,10 @@ using System.Collections.Concurrent;
 using System.Collections.Immutable;
 using System.Net;
 using System.Security.Cryptography;
-using System.Text;
 using System.Text.Json;
-using System.Text.Json.Nodes;
-using Lidgren.Network;
 using SkillQuest.API.Network;
-using Timer = System.Timers.Timer;
 
-namespace SkillQuest.Shared.Game.Network;
-
-using static State;
+namespace SkillQuest.Shared.Engine.Network;
 
 internal class ServerConnection : IServerConnection{
 

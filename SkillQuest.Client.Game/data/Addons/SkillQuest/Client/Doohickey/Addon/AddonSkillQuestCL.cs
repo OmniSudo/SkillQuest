@@ -4,7 +4,6 @@ using SkillQuest.API.Network;
 using SkillQuest.Client.Game.Addons.SkillQuest.Client.Doohickey.Gui;
 using SkillQuest.Shared.Game.Addons.SkillQuestMP.Shared.Doohickey.Addon;
 using SkillQuest.Shared.Game.Addons.SkillQuestMP.Shared.Packet.Character;
-using SkillQuest.Shared.Game.Assets;
 
 namespace SkillQuest.Client.Game.Addons.SkillQuest.Client.Doohickey.Addon;
 

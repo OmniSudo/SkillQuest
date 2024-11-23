@@ -1,6 +1,6 @@
 using SkillQuest.API;
 
-namespace SkillQuest.Shared.Game.Assets;
+namespace SkillQuest.Shared.Engine.Assets;
 
 public class Location{
     public Location(IAddon addon, string path){

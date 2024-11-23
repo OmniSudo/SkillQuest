@@ -1,10 +1,7 @@
-using System.Collections.Concurrent;
 using System.Collections.Immutable;
-using System.Data;
 using SkillQuest.API;
-using SkillQuest.Shared.Game.ECS;
 
-namespace SkillQuest.Shared.Game;
+namespace SkillQuest.Shared.Engine;
 
 using static State;
 

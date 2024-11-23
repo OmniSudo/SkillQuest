@@ -1,7 +1,7 @@
 using System.Collections.Concurrent;
 using SkillQuest.API.Network;
 
-namespace SkillQuest.Shared.Game.Network;
+namespace SkillQuest.Shared.Engine.Network;
 
 internal class Channel : IChannel {
     public string Name { get; init; }

@@ -1,6 +1,6 @@
 using SkillQuest.API.ECS;
 
-namespace SkillQuest.Shared.Game.ECS;
+namespace SkillQuest.Shared.Engine.ECS;
 
 public class Component<TAttached> : IComponent where TAttached : class, IComponent{
     public IThing? Thing {

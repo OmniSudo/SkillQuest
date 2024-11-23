@@ -1,8 +1,7 @@
-using System.Runtime.CompilerServices;
 using SkillQuest.API;
-using SkillQuest.Shared.Game.ECS;
+using SkillQuest.Shared.Engine.ECS;
 
-namespace SkillQuest.Shared.Game;
+namespace SkillQuest.Shared.Engine;
 
 public class Addon : Doohickey, IAddon{
 

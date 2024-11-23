@@ -4,6 +4,7 @@ using Silk.NET.OpenGL;
 using Silk.NET.OpenGL.Extensions.ImGui;
 using Silk.NET.Windowing;
 using SkillQuest.API;
+using SkillQuest.Shared.Engine;
 using SkillQuest.Shared.Game;
 
 namespace SkillQuest.Client.Game;

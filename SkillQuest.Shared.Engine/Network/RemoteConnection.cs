@@ -1,13 +1,9 @@
 using System.Net;
-using System.Net.Sockets;
 using System.Security.Cryptography;
-using System.Text;
 using System.Text.Json;
-using System.Text.Json.Nodes;
-using Lidgren.Network;
 using SkillQuest.API.Network;
 
-namespace SkillQuest.Shared.Game.Network;
+namespace SkillQuest.Shared.Engine.Network;
 
 internal class RemoteConnection : IRemoteConnection{
 

@@ -1,7 +1,7 @@
-using SkillQuest.Shared.Game.ECS;
-using SkillQuest.Shared.Game.Network;
+using SkillQuest.Shared.Engine.ECS;
+using SkillQuest.Shared.Engine.Network;
 
-namespace SkillQuest.Shared.Game;
+namespace SkillQuest.Shared.Engine;
 
 public class State {
     public static State SH { get; set; } = new State();

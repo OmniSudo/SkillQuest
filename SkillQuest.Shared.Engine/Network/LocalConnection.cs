@@ -1,13 +1,9 @@
 using System.Net;
-using System.Security.Cryptography;
-using System.Text;
 using System.Text.Json;
-using System.Text.Json.Nodes;
-using Lidgren.Network;
 using SkillQuest.API.Network;
 using Timer = System.Timers.Timer;
 
-namespace SkillQuest.Shared.Game.Network;
+namespace SkillQuest.Shared.Engine.Network;
 
 using static State;
 

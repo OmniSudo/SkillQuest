@@ -2,7 +2,7 @@ using SkillQuest.API.Thing.Character;
 
 namespace SkillQuest.Shared.Game.Addons.SkillQuest.Shared.Thing;
 
-public class ItemStack : ECS.Thing {
+public class ItemStack : Engine.ECS.Thing {
     public IItem Item {
         get {
             return _item;
