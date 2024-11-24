@@ -1,6 +1,7 @@
 using System.Collections.Concurrent;
 using System.Collections.Immutable;
 using System.Net;
+using System.Net.Sockets;
 using System.Security.Cryptography;
 using System.Text.Json;
 using SkillQuest.API.Network;
@@ -11,12 +12,10 @@ internal class ServerConnection : IServerConnection{
 
     public INetworker Networker { get; }
 
-    public IPEndPoint EndPoint => new IPEndPoint(IPAddress.Any, Port);
-
-    public short Port { get; }
+    public IPEndPoint EndPoint { get; }
 
     public void Stop(){
-        Server.Shutdown( "STOPPING SERVER NET" );
+        
     }
 
     public ImmutableDictionary<IPEndPoint, IClientConnection> Clients => _clients.ToImmutableDictionary();
@@ -25,137 +24,45 @@ internal class ServerConnection : IServerConnection{
 
     public ServerConnection(Networker networker, short port){
         Networker = networker;
-        Port = port;
+        EndPoint = new IPEndPoint(IPAddress.Any, port);
     }
 
-    public NetServer Server { get; set; }
+    public TcpListener Server { get; private set; }
 
-    RSA RSA { get; } = new RSACryptoServiceProvider();
+    public RSA RSA { get; } = new RSACryptoServiceProvider();
 
     public async Task Listen(){
-        NetPeerConfiguration config = new NetPeerConfiguration("SkillQuest");
-        config.MaximumConnections = 25; // TODO: Change max connections
-        config.LocalAddress = EndPoint.Address;
-        config.Port = EndPoint.Port;
-        config.EnableMessageType(NetIncomingMessageType.DiscoveryRequest);
-        RSA.Create();
-
-        Server = new NetServer(config);
-        SynchronizationContext.SetSynchronizationContext(new SynchronizationContext());
-        Server.RegisterReceivedCallback(new SendOrPostCallback(Received));
+        Server = new TcpListener( EndPoint );
         Server.Start();
+        Accept();
     }
 
-    void Received(object? state){
-        var message = Server.ReadMessage();
-
-        if (message is not null) {
-            switch (message.MessageType) {
-                case NetIncomingMessageType.DiscoveryRequest:
-                    var response = Server.CreateMessage();
-                    response.Write(Convert.ToBase64String( RSA.ExportRSAPublicKey()));
-
-                    Server.SendDiscoveryResponse(
-                        response, message.SenderEndPoint
-                    );
-                    break;
-                case NetIncomingMessageType.DiscoveryResponse:
-                    var key64 = message.ReadString();
-                    var key = RSA.Decrypt(Convert.FromBase64String(key64), RSAEncryptionPadding.Pkcs1);
-
-                    var client = _clients[message.SenderEndPoint] =
-                        new LocalConnection(
-                            this,
-                            message.SenderEndPoint
-                        ) {
-                            Key = key,
-                        };
-                    
-                    Console.WriteLine( $"Received Key from {client.EndPoint}");
-
-                    var connect = Server.CreateMessage();
-                    connect.Write("");
-
-                    Server.SendDiscoveryResponse(
-                        connect, message.SenderEndPoint
-                    );
-                    
-                    break;
-                case NetIncomingMessageType.StatusChanged:
-                    var status = message.SenderConnection.Status;
-
-                    switch (status) {
-                        case NetConnectionStatus.Connected:
-                            
-                            var connected = _clients[message.SenderEndPoint];
-
-                            if (connected is not null) {
-                                Console.WriteLine($"Connected @ {message.SenderEndPoint}");
-
-                                (connected as LocalConnection)?.Connect(message.SenderConnection);
-                                connected.InterruptTimeout();
-                                Connected?.Invoke(this, connected);
-                            }
-                            break;
-                        case NetConnectionStatus.Disconnected:
-                            Disconnect( _clients[ message.SenderEndPoint ] );
-                            break;
-                        default:
-                            break;
-                    }
-                    break;
-                case NetIncomingMessageType.DebugMessage:
-                case NetIncomingMessageType.ErrorMessage:
-                case NetIncomingMessageType.WarningMessage:
-                case NetIncomingMessageType.VerboseDebugMessage:
-                    string text = message.ReadString();
-                    Console.WriteLine(text); // TODO: Proper logger
-                    break;
-                case NetIncomingMessageType.Data:
-                    var connection = this._clients[message.SenderEndPoint];
-
-                    if (!message.Decrypt((connection as LocalConnection)?.Encryption)) break;
-                    
-                    try {
-                        var data = message.ReadString();
-                        var split = data.Split((char)0x0);
-                        var type = Type.GetType(split[0]);
-
-                        Packet? packet = JsonSerializer.Deserialize(split[1], type) as Packet;
-
-                        if (packet is not null) {
-                            Receive(connection, packet);
-                            break;
-                        }
-                        Console.WriteLine("Unknown packet type {0}", split[0]); // TODO: Log ERROR
-                    } catch (Exception e) {
-                        Console.WriteLine($"Packet Exception:\n{e}");
-                    }
-                    break;
-                default:
-                    Console.WriteLine("Unhandled Message Type: {0}", message.MessageType);
-                    break;
-            }
+    public bool Running { get; set; }
+    
+    private async Task Accept(){
+        Running = true;
+        Console.WriteLine($"Listening @ {EndPoint}");
+        while ( Running ) {
+            var client = Server.AcceptTcpClient();
+            Console.WriteLine($"Accepted @ {client.Client.RemoteEndPoint}");
+            var connection = _clients[client.Client.RemoteEndPoint as IPEndPoint] = new LocalConnection(this, client);
+            
+            connection.Receive();
+            Networker.CreateChannel( new("packet://skill.quest/system") ).Send( connection, new RSAPacket() { PublicKey = RSA.ExportRSAPublicKeyPem() } );
         }
     }
-
-    /// <summary>
-    /// Broadcasts to all clients
-    /// </summary>
-    /// <param name="jsonObject"></param>
-    /// <exception cref="NotImplementedException"></exception>
-    public void Broadcast(Packet packet){
-        foreach (var client in Clients) {
-            Send(client.Value.EndPoint, packet);
-        }
-    }
-
-    public void Send(IPEndPoint endpoint, Packet packet){
-        _clients.TryGetValue( endpoint, out var client );
-        client?.Send(packet);
+    
+    protected internal async Task OnConnected( IClientConnection connection ){
+        Connected?.Invoke(this, connection);
+        Console.WriteLine($"Connected @ {connection.EndPoint}");
     }
 
     public event IServerConnection.DoConnected? Connected;
+    
+    protected internal async Task OnDisconnected( IClientConnection connection ){
+        Disconnected?.Invoke(this, connection);
+        Console.WriteLine($"Disconnected @ {connection.EndPoint}");
+    }
 
     public event IServerConnection.DoDisconnected? Disconnected;
 
@@ -164,8 +71,8 @@ internal class ServerConnection : IServerConnection{
     public void Disconnect(IClientConnection connection){
         _clients.TryRemove(connection.EndPoint, out _);
 
-        Console.WriteLine($"Disconnected @ {connection.EndPoint}");
         Disconnected?.Invoke(this, connection);
+        Console.WriteLine($"Disconnected @ {connection.EndPoint}");
     }
 
     public async Task Receive(IClientConnection connection, Packet packet){

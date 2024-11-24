@@ -7,7 +7,7 @@ namespace SkillQuest.API.Network;
 /// A connection located on the client
 /// </summary>
 public interface IRemoteConnection: IClientConnection {
-    public void Send(Packet packet, bool udp = false );
+    public void Send(Packet packet, bool encrypt = true );
     
-    public void Connect(IPEndPoint endpoint);
+    public void Connect();
 }

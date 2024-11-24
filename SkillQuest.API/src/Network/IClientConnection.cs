@@ -1,4 +1,5 @@
 using System.Net;
+using System.Net.Sockets;
 using System.Security.Cryptography;
 
 namespace SkillQuest.API.Network;
@@ -17,10 +18,12 @@ public interface IClientConnection : IConnection {
     /// Unique for every login; Only allows for one login at a time
     /// </summary>
     Guid Session { get; set; }
+    
+    public RSA RSA { get; }
 
-    public byte[] Key { get; set; }
+    public Aes AES { get; set; }
 
-    public void Send(Packet packet, bool udp = false );
+    public void Send(Packet packet, bool encrypt = false );
 
     /// <summary>
     /// Interrupt the timeout
@@ -37,7 +40,7 @@ public interface IClientConnection : IConnection {
     
     public event DoDisconnect Disconnected;
 
-    void Connect(IPEndPoint endpoint);
+    Task Receive();
     
     void Receive( Packet packet );
 }

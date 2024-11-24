@@ -1,3 +1,4 @@
+using Microsoft.Data.Sqlite;
 using SkillQuest.API.Database;
 
 namespace SkillQuest.Shared.Engine.Database;

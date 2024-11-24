@@ -1,5 +1,7 @@
 using System.Net;
+using System.Net.Sockets;
 using System.Security.Cryptography;
+using System.Text;
 using System.Text.Json;
 using SkillQuest.API.Network;
 
@@ -11,26 +13,16 @@ internal class RemoteConnection : IRemoteConnection{
 
     public IPEndPoint EndPoint { get; }
 
-    public NetClient Client { get; set; } = null;
+    public TcpClient Connection { get; set; } = null;
 
-    RSA RSA { get; } = new RSACryptoServiceProvider();
+    public RSA RSA { get; } = new RSACryptoServiceProvider();
 
-    internal NetEncryption Encryption { get; set; }
+    public Aes AES { get; set; }
 
     public RemoteConnection(INetworker networker, IPEndPoint endpoint){
         Networker = networker;
         EndPoint = endpoint;
-        Key = new byte[16];
-        new Random().NextBytes(Key);
-
-        var config = new NetPeerConfiguration("SkillQuest");
-        config.EnableMessageType(NetIncomingMessageType.DiscoveryResponse);
-        Client = new NetClient(config);
-        SynchronizationContext.SetSynchronizationContext(new SynchronizationContext());
-        Client.RegisterReceivedCallback(new SendOrPostCallback(Received));
-
-        Client.Start();
-        Client.DiscoverKnownPeer(EndPoint);
+        Connection = new TcpClient();
     }
 
     public string EMail { get; set; }
@@ -41,119 +33,126 @@ internal class RemoteConnection : IRemoteConnection{
 
     public Guid Session { get; set; }
 
-    public byte[] Key { get; set; }
-
-    public void Send(Packet packet, bool udp = false){
+    public void Send(Packet packet, bool encrypt = true){
         var serialized = JsonSerializer.Serialize(packet, packet.GetType());
 
-        NetOutgoingMessage message = Client.CreateMessage();
         var typename = packet.GetType().FullName;
 
         var data = typename + (char)0x0 + serialized;
-        message.Write(data);
+        byte[] ciphertext;
 
-        if (!message.Encrypt(Encryption)) return;
+        if (encrypt) {
+            ICryptoTransform encryptor = AES.CreateEncryptor(AES.Key, AES.IV);
 
-        Client.SendMessage(
-            message,
-            udp ? NetDeliveryMethod.Unreliable : NetDeliveryMethod.ReliableOrdered,
-            0
-        );
+            using (var msEncrypt = new MemoryStream()) {
+                using (var csEncrypt = new CryptoStream(msEncrypt, encryptor, CryptoStreamMode.Write)) {
+                    byte[] plainBytes = Encoding.UTF8.GetBytes(data);
+                    csEncrypt.Write(plainBytes, 0, plainBytes.Length);
+                }
+                ciphertext = msEncrypt.ToArray();
+            }
+        } else {
+            ciphertext = Encoding.UTF8.GetBytes(data);
+        }
+        byte[] len = BitConverter.GetBytes(IPAddress.HostToNetworkOrder(ciphertext.Length));
+
+        _stream.Write([encrypt ? (byte)0xFF : (byte)0x00], 0, 1);
+        _stream.Write(len, 0, len.Length);
+        _stream.Write(ciphertext, 0, ciphertext.Length);
     }
 
     public void InterruptTimeout(){
-        Encryption = new NetXtea(Client, Key);
+        AES = Aes.Create();
+        var key = new byte[16];
+        new Random().NextBytes(key);
+        var iv = new byte[16];
+        new Random().NextBytes(iv);
+        AES.Key = key;
+        AES.IV = iv;
     }
 
     public void Disconnect(){
-        if (Client.ConnectionStatus == NetConnectionStatus.Connected) {
-            Disconnected?.Invoke(this);
-        }
+        OnDisconnect();
+        Connection.Close();
     }
 
     public event IClientConnection.DoConnect? Connected;
 
     public event IClientConnection.DoDisconnect? Disconnected;
 
-    public void Connect(IPEndPoint endpoint){
-        Client?.Connect(endpoint);
+    NetworkStream _stream;
+
+    public void Connect(){
+        Connection?.Connect(EndPoint);
+        _stream = Connection.GetStream();
+        Receive();
     }
 
-    void Received(object? peer){
-        NetIncomingMessage message;
+    public async Task Receive(){
+        while ( Connection.Connected ) {
+            try {
+                byte[] enc = new byte[1];
+                var lengthRead = await _stream.ReadAsync(enc, 0, enc.Length);
 
-        while ( (message = Client.ReadMessage()) != null ) {
-            switch (message.MessageType) {
-                case NetIncomingMessageType.DiscoveryResponse:
-                    var publicKey = Convert.FromBase64String(message.ReadString());
+                var len = new byte[sizeof(int)];
 
-                    if (publicKey.Length > 0) {
-                        RSA.Create();
-                        RSA.ImportRSAPublicKey(publicKey, out _);
+                if (await _stream.ReadAsync(len, 0, len.Length) != len.Length) {
+                    // TODO: Send disconnect message
+                    _stream.Close();
+                    return;
+                }
+                ;
+                var data = new byte[IPAddress.NetworkToHostOrder(BitConverter.ToInt32(len, 0))];
 
-                        var response = Client.CreateMessage();
-                        response.Write(Convert.ToBase64String(RSA.Encrypt(Key, RSAEncryptionPadding.Pkcs1)));
+                if (await _stream.ReadAsync(data, 0, data.Length) != data.Length) {
+                    // TODO: Send disconnect message
+                    _stream.Close();
+                    return;
+                }
 
-                        Client.SendDiscoveryResponse(
-                            response,
-                            message.SenderEndPoint
-                        );
-                    } else {
-                        Connect(message.SenderEndPoint);
-                    }
-                    break;
-                case NetIncomingMessageType.DebugMessage:
-                case NetIncomingMessageType.WarningMessage:
-                case NetIncomingMessageType.ErrorMessage:
-                case NetIncomingMessageType.VerboseDebugMessage:
-                    string text = message.ReadString();
-                    Console.WriteLine(text); // TODO: Proper logger
-                    break;
-                case NetIncomingMessageType.StatusChanged:
-                    var status = message.SenderConnection.Status;
+                string plaintext = "{}";
 
-                    switch (status) {
-                        case NetConnectionStatus.Connected:
-                            InterruptTimeout();
-                            Connected?.Invoke(this);
-                            break;
-                        case NetConnectionStatus.Disconnected:
-                            Disconnected?.Invoke(this);
-                            break;
-                        default:
-                            break;
-                    }
-                    break;
-                case NetIncomingMessageType.Data:
-                    if (!message.Decrypt(Encryption)) break;
+                if (len[0] != 0x00) {
+                    ICryptoTransform decryptor = AES.CreateDecryptor(AES.Key, AES.IV);
+                    byte[] decryptedBytes;
 
-                    string typename = "";
-
-                    try {
-                        var data = message.ReadString();
-                        var split = data.Split((char)0x0);
-                        var type = Type.GetType(split[0]);
-
-                        Packet? packet = JsonSerializer.Deserialize(split[1], type) as Packet;
-
-                        if (packet is not null) {
-                            Receive(packet);
-                            break;
+                    using (var msDecrypt = new MemoryStream(data)) {
+                        using (var csDecrypt =
+                               new CryptoStream(msDecrypt, decryptor, CryptoStreamMode.Read)) {
+                            using (var msPlain = new MemoryStream()) {
+                                csDecrypt.CopyTo(msPlain);
+                                decryptedBytes = msPlain.ToArray();
+                            }
                         }
-                        Console.WriteLine("Unknown packet type {0}", split[0]); // TODO: Log ERROR
-                    } catch (Exception e) {
-                        Console.WriteLine($"Packet Exception:\n{e}");
                     }
-                    break;
-                default:
-                    Console.WriteLine("Unhandled Message Type: {0}", message.MessageType);
-                    break;
+                    plaintext = Encoding.UTF8.GetString(decryptedBytes);
+                } else {
+                    plaintext = Encoding.UTF8.GetString(data);
+                }
+                var split = plaintext.Split((char)0x0);
+                var type = Type.GetType(split[0]);
+                Packet? packet = JsonSerializer.Deserialize(split[1], type) as Packet;
+
+                Receive(packet);
+            } catch (Exception e) {
+                Console.WriteLine($"Packet Exception:\n{e}");
             }
         }
     }
 
     public void Receive(Packet packet){
+        if (packet.Channel == null) return;
         Networker.Channels.TryGetValue(packet.Channel, out var channel);
         channel?.Receive(this, packet);
+    }
+
+    protected internal void OnConnected(){
+        Connected?.Invoke(this);
+        Console.WriteLine($"Connected @ {EndPoint}");
+    }
+
+    protected internal void OnDisconnect(){
+        Disconnected?.Invoke(this);
+        Console.WriteLine($"Disconnected @ {EndPoint}");
     }
 }

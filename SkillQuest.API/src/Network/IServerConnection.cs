@@ -6,9 +6,6 @@ using System.Text.Json.Nodes;
 namespace SkillQuest.API.Network;
 
 public interface IServerConnection : IConnection{
-    public void Broadcast(Packet packet);
-    public void Send(IPEndPoint endpoint, Packet packet);
-    
     public delegate void DoConnected(IServerConnection server, IClientConnection client);
 
     public event DoConnected Connected;
@@ -26,4 +23,8 @@ public interface IServerConnection : IConnection{
     void Stop();
     
     public ImmutableDictionary<IPEndPoint, IClientConnection> Clients { get; }
+
+    public RSA RSA { get; }
+
+    bool Running { get; set; }
 }
