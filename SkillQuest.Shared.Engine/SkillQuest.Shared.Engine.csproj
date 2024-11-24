@@ -11,6 +11,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <PackageReference Include="Silk.NET.Maths" Version="2.22.0" />
       <PackageReference Include="System.Data.SQLite" Version="1.0.119" />
     </ItemGroup>
 

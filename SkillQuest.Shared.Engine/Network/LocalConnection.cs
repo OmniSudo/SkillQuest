@@ -52,7 +52,7 @@ internal class LocalConnection : ILocalConnection{
 
     public Aes AES { get; set; }
 
-    public void Send(Packet packet, bool encrypt = true){
+    public void Send(API.Network.Packet packet, bool encrypt = true){
         var serialized = JsonSerializer.Serialize(packet, packet.GetType());
 
         var typename = packet.GetType().FullName;
@@ -140,7 +140,7 @@ internal class LocalConnection : ILocalConnection{
                 }
                 var split = plaintext.Split((char)0x0);
                 var type = Type.GetType(split[0]);
-                Packet? packet = JsonSerializer.Deserialize(split[1], type) as Packet;
+                API.Network.Packet? packet = JsonSerializer.Deserialize(split[1], type) as API.Network.Packet;
 
                 Receive(packet);
             } catch (Exception e) {
@@ -149,7 +149,7 @@ internal class LocalConnection : ILocalConnection{
         }
     }
 
-    public void Receive(Packet packet){
+    public void Receive(API.Network.Packet packet){
         Networker.Channels.TryGetValue(packet.Channel, out var channel);
         channel?.Receive(this, packet);
     }

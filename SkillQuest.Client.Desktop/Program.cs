@@ -1,4 +1,5 @@
-﻿using SkillQuest.Client.Game;
+﻿using SkillQuest.Client.Engine;
+using SkillQuest.Client.Game;
 using SkillQuest.Client.Game.Addons.SkillQuest.Client.Doohickey.Addon;
 using State = SkillQuest.Shared.Engine.State;
 

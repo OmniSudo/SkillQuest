@@ -5,6 +5,7 @@ using System.Net.Sockets;
 using System.Security.Cryptography;
 using System.Text.Json;
 using SkillQuest.API.Network;
+using SkillQuest.Shared.Engine.Network.Packet;
 
 namespace SkillQuest.Shared.Engine.Network;
 
@@ -75,7 +76,7 @@ internal class ServerConnection : IServerConnection{
         Console.WriteLine($"Disconnected @ {connection.EndPoint}");
     }
 
-    public async Task Receive(IClientConnection connection, Packet packet){
+    public async Task Receive(IClientConnection connection, API.Network.Packet packet){
         try {
             connection.Receive(packet);
         } catch (Exception e) {

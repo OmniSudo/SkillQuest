@@ -4,6 +4,7 @@ using System.Net;
 using System.Security.Cryptography;
 using System.Text;
 using SkillQuest.API.Network;
+using SkillQuest.Shared.Engine.Network.Packet;
 
 namespace SkillQuest.Shared.Engine.Network;
 
