@@ -34,6 +34,8 @@ public class GuiMainMenu : Shared.Engine.ECS.Doohickey, IRenderable{
         Stuff?.Add( new GuiCharacterSelection(connection) );
     }
 
+    Task? _connect = null;
+
     public void Render(){
         if (
             ImGui.Begin(
@@ -52,7 +54,7 @@ public class GuiMainMenu : Shared.Engine.ECS.Doohickey, IRenderable{
             if (
                 ImGui.Button("Login")
             ) {
-                _ = Task.Run(async () => {
+                _connect = Task.Run(async () => {
                     var trimmed = email.Trim();
 
                     if (trimmed.EndsWith(".")) {
@@ -73,7 +75,6 @@ public class GuiMainMenu : Shared.Engine.ECS.Doohickey, IRenderable{
                     }
 
                     email = trimmed;
-                    
                     connection = await SH.Net.Connect(IPEndPoint.Parse(address));
                     
                     Authenticator.Instance.Login(connection, email, password);

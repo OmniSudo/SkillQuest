@@ -43,16 +43,18 @@ class ServerConnection : IServerConnection{
 
             Running = true;
             while ( Running ) {
-                var client = Server.AcceptTcpClient();
-                Console.WriteLine($"Accepted @ {client.Client.RemoteEndPoint}");
+                Server.BeginAcceptTcpClient(ar => {
+                    var client = Server.EndAcceptTcpClient(ar );
+                    Console.WriteLine($"Accepted @ {client.Client.RemoteEndPoint}");
 
-                var connection = _clients[client.Client.RemoteEndPoint as IPEndPoint] =
-                    new LocalClientConnection(this, client);
+                    var connection = _clients[client.Client.RemoteEndPoint as IPEndPoint] =
+                        new LocalClientConnection(this, client);
 
-                connection.Listen();
+                    connection.Listen();
 
-                Networker.SystemChannel.Send(connection,
-                    new RSAPacket() { PublicKey = RSA.ExportRSAPublicKeyPem() });
+                    Networker.SystemChannel.Send(connection,
+                        new RSAPacket() { PublicKey = RSA.ExportRSAPublicKeyPem() });
+                }, null);
             }
         });
         _thread.Start();
