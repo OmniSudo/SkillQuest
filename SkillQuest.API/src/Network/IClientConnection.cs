@@ -22,8 +22,12 @@ public interface IClientConnection : IConnection {
     public RSA RSA { get; }
 
     public Aes AES { get; set; }
-
-    public void Send(Packet packet, bool encrypt = false );
+    
+    public bool Running { get; set; }
+    
+    public IPEndPoint? EndPoint { get; }
+    
+    public Task Send(Packet packet, bool encrypt = false );
 
     /// <summary>
     /// Interrupt the timeout
@@ -40,7 +44,7 @@ public interface IClientConnection : IConnection {
     
     public event DoDisconnect Disconnected;
 
-    Task Receive();
+    Task Listen();
     
-    void Receive( Packet packet );
+    Task Receive( Packet packet );
 }

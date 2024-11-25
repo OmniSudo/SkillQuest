@@ -18,7 +18,6 @@
 
     <ItemGroup>
       <Folder Include="data\Addons\Mining\Shared\assets\Item\Ore\" />
-      <Folder Include="data\Addons\SkillQuestMP\Shared\" />
       <Folder Include="src\" />
     </ItemGroup>
 

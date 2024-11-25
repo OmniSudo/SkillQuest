@@ -2,12 +2,13 @@ namespace SkillQuest.API.Network;
 
 public interface IChannel{
     public string Name { get; }
+    
 
     // TODO: public bool Encrypt { get; set; }
     
-    public void Send ( IClientConnection? connection, Packet packet );
+    public Task Send ( IClientConnection? connection, Packet packet );
 
-    public void Receive(IClientConnection connection, Packet packet);
+    public Task Receive(IClientConnection connection, Packet packet);
 
     public delegate void DoPacket< TPacket >( IClientConnection connection, TPacket packet ) where TPacket : Packet;
 

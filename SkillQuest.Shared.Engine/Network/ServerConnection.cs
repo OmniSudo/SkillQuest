@@ -1,5 +1,6 @@
 using System.Collections.Concurrent;
 using System.Collections.Immutable;
+using System.IO.Pipes;
 using System.Net;
 using System.Net.Sockets;
 using System.Security.Cryptography;
@@ -9,14 +10,14 @@ using SkillQuest.Shared.Engine.Network.Packet;
 
 namespace SkillQuest.Shared.Engine.Network;
 
-internal class ServerConnection : IServerConnection{
+class ServerConnection : IServerConnection{
 
     public INetworker Networker { get; }
 
     public IPEndPoint EndPoint { get; }
 
     public void Stop(){
-        
+        Running = false;
     }
 
     public ImmutableDictionary<IPEndPoint, IClientConnection> Clients => _clients.ToImmutableDictionary();
@@ -32,35 +33,41 @@ internal class ServerConnection : IServerConnection{
 
     public RSA RSA { get; } = new RSACryptoServiceProvider();
 
-    public async Task Listen(){
-        Server = new TcpListener( EndPoint );
-        Server.Start();
-        Accept();
+    Thread _thread;
+    
+    public void Listen(){
+        _thread = new Thread(() => {
+            Server = new TcpListener(EndPoint);
+            Server.Start();
+            Console.WriteLine($"Listening @ {EndPoint}");
+
+            Running = true;
+            while ( Running ) {
+                var client = Server.AcceptTcpClient();
+                Console.WriteLine($"Accepted @ {client.Client.RemoteEndPoint}");
+
+                var connection = _clients[client.Client.RemoteEndPoint as IPEndPoint] =
+                    new LocalClientConnection(this, client);
+
+                connection.Listen();
+
+                Networker.SystemChannel.Send(connection,
+                    new RSAPacket() { PublicKey = RSA.ExportRSAPublicKeyPem() });
+            }
+        });
+        _thread.Start();
     }
 
     public bool Running { get; set; }
     
-    private async Task Accept(){
-        Running = true;
-        Console.WriteLine($"Listening @ {EndPoint}");
-        while ( Running ) {
-            var client = Server.AcceptTcpClient();
-            Console.WriteLine($"Accepted @ {client.Client.RemoteEndPoint}");
-            var connection = _clients[client.Client.RemoteEndPoint as IPEndPoint] = new LocalConnection(this, client);
-            
-            connection.Receive();
-            Networker.CreateChannel( new("packet://skill.quest/system") ).Send( connection, new RSAPacket() { PublicKey = RSA.ExportRSAPublicKeyPem() } );
-        }
-    }
-    
-    protected internal async Task OnConnected( IClientConnection connection ){
+    protected internal void OnConnected(IClientConnection connection){
         Connected?.Invoke(this, connection);
         Console.WriteLine($"Connected @ {connection.EndPoint}");
     }
 
     public event IServerConnection.DoConnected? Connected;
-    
-    protected internal async Task OnDisconnected( IClientConnection connection ){
+
+    protected internal void OnDisconnected(IClientConnection connection){
         Disconnected?.Invoke(this, connection);
         Console.WriteLine($"Disconnected @ {connection.EndPoint}");
     }
@@ -70,17 +77,9 @@ internal class ServerConnection : IServerConnection{
     public event IServerConnection.DoDeafen? Deafen;
 
     public void Disconnect(IClientConnection connection){
-        _clients.TryRemove(connection.EndPoint, out _);
-
+        _clients.TryRemove(connection.EndPoint, out var client);
+        
         Disconnected?.Invoke(this, connection);
-        Console.WriteLine($"Disconnected @ {connection.EndPoint}");
-    }
-
-    public async Task Receive(IClientConnection connection, API.Network.Packet packet){
-        try {
-            connection.Receive(packet);
-        } catch (Exception e) {
-            Console.WriteLine( $"Unable to handle {packet.Channel} {packet.GetType().Name}:\n{e}" );
-        }
+        client.Disconnect();
     }
 }

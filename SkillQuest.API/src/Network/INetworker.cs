@@ -10,12 +10,15 @@ public interface INetworker{
     
     public ImmutableDictionary< string, IChannel > Channels { get; }
 
-
+    public ImmutableDictionary< string, Type > Packets { get; }
+    
     public Task<IClientConnection?> Connect(IPEndPoint endpoint);
 
     public void Listen(ILocalConnection connection);
 
-    public Task<IServerConnection?> Host(short port);
+    public IServerConnection? Host(short port);
+    
+    public IChannel SystemChannel { get; }
     
     public IChannel CreateChannel( Uri uri );
     

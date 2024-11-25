@@ -7,4 +7,5 @@ public interface IConnection{
     public INetworker Networker { get; }
 
     public IPEndPoint EndPoint { get; }
+    
 }

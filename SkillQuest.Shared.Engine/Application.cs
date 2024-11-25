@@ -34,10 +34,13 @@ public class Application : IApplication{
     public Application(){ }
 
     public IApplication Mount(IAddon addon){
-        SH.Stuff.Add(addon);
+        SH.Net.LoadPacketsFromAssembly( addon.GetType().Assembly );
+        _addons[ addon.Uri ] = SH.Stuff.Add(addon);
         addon.Application = this;
         return this;
     }
+    
+    private Dictionary< Uri, IAddon > _addons = new();
 
     public IApplication Unmount(IAddon? addon){
         if (addon is null) {

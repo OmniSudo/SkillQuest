@@ -3,18 +3,18 @@ using SkillQuest.API.Network;
 
 namespace SkillQuest.Shared.Engine.Network;
 
-internal class Channel : IChannel {
+class Channel : IChannel {
     public string Name { get; init; }
 
-    const bool DEBUG = false;
+    const bool DEBUG = true;
 
-    public void Send(IClientConnection? connection, API.Network.Packet packet){
+    public async Task Send(IClientConnection? connection, API.Network.Packet packet){
         packet.Channel = Name;
-        connection?.Send(packet);
         if ( DEBUG ) Console.WriteLine( $"{Name} -> {packet.GetType().Name}");
+        await connection?.Send(packet);
     }
 
-    public void Receive(IClientConnection connection, API.Network.Packet packet){
+    public async Task Receive(IClientConnection connection, API.Network.Packet packet){
         if ( DEBUG ) Console.WriteLine( $"{Name} <- {packet.GetType().Name}");
         if (_handlers.TryGetValue(packet.GetType(), out var handler)) {
             handler.Invoke(connection, packet);

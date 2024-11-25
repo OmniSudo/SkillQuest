@@ -2,8 +2,8 @@ using SkillQuest.API;
 using SkillQuest.API.ECS;
 using SkillQuest.API.Network;
 using SkillQuest.Client.Game.Addons.SkillQuest.Client.Doohickey.Gui;
-using SkillQuest.Shared.Game.Addons.SkillQuestMP.Shared.Doohickey.Addon;
-using SkillQuest.Shared.Game.Addons.SkillQuestMP.Shared.Packet.Character;
+using SkillQuest.Client.Game.Addons.SkillQuest.Client.Doohickey.Gui.LoginSignup;
+using SkillQuest.Shared.Game.Addons.SkillQuest.Shared.Doohickey.Addon;
 
 namespace SkillQuest.Client.Game.Addons.SkillQuest.Client.Doohickey.Addon;
 
