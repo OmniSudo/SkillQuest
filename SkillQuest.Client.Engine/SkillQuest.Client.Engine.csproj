@@ -9,7 +9,9 @@
     <ItemGroup>
       <ProjectReference Include="..\SkillQuest.API\SkillQuest.API.csproj" />
       <ProjectReference Include="..\SkillQuest.Client.Engine.Audio.API\SkillQuest.Client.Engine.Audio.API.csproj" />
+      <ProjectReference Include="..\SkillQuest.Client.Engine.Audio.OpenAL\SkillQuest.Client.Engine.Audio.OpenAL.csproj" />
       <ProjectReference Include="..\SkillQuest.Client.Engine.Graphics.API\SkillQuest.Client.Engine.Graphics.API.csproj" />
+      <ProjectReference Include="..\SkillQuest.Client.Engine.Graphics.Vulkan\SkillQuest.Client.Engine.Graphics.Vulkan.csproj" />
       <ProjectReference Include="..\SkillQuest.Shared.Engine\SkillQuest.Shared.Engine.csproj" />
     </ItemGroup>
 

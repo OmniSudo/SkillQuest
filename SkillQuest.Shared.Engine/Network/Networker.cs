@@ -33,7 +33,7 @@ public sealed class Networker : INetworker{
         SystemChannel.Subscribe<AESPacket>(OnAESPacket);
     }
 
-    void OnUpdate(){
+    void OnUpdate(DateTime now, TimeSpan delta){
         var clone = _clients;
         foreach (var (endpoint, client) in clone) {
             try {

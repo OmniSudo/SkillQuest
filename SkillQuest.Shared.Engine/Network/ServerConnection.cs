@@ -47,7 +47,7 @@ class ServerConnection : IServerConnection{
 
     Thread _thread;
 
-    public void Update(){
+    public void Update(DateTime now, TimeSpan delta){
         if (Server.Pending()) {
             try {
                 var client = Server.AcceptTcpClient();

@@ -15,11 +15,11 @@ public interface IApplication{
 
     public event DoStart Start;
 
-    public delegate void DoUpdate();
+    public delegate void DoUpdate( DateTime now, TimeSpan delta );
 
     public event DoUpdate Update;
     
-    public delegate void DoRender();
+    public delegate void DoRender( DateTime now, TimeSpan delta );
     
     public event DoRender Render;
 

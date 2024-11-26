@@ -41,10 +41,10 @@ public class AddonSkillQuestCL : AddonSkillQuestSH {
         }
     }
 
-    void OnRender(){
+    void OnRender(DateTime now, TimeSpan delta){
         var clone = _renderables.ToImmutableDictionary();
         foreach (var pair in clone) {
-            pair.Value.Render();
+            // pair.Value.Render();
         }
     }
 

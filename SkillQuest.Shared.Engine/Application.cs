@@ -1,4 +1,5 @@
 using System.Collections.Immutable;
+using System.Reflection;
 using SkillQuest.API;
 
 namespace SkillQuest.Shared.Engine;
@@ -23,11 +24,13 @@ public class Application : IApplication{
         }
     }
 
-    public uint TicksPerSecond => 100;
+    public virtual uint TicksPerSecond => 100;
 
+    TimeSpan? _freq = null;
+    
     public TimeSpan TickFrequency {
         get {
-            return TimeSpan.FromSeconds(1) / TicksPerSecond;
+            return _freq ??= TimeSpan.FromSeconds(1) / TicksPerSecond;
         }
     }
 
@@ -59,29 +62,30 @@ public class Application : IApplication{
 
         _running = true;
 
-        Loop();
+        var prev = DateTime.Now;
+        var delta = TimeSpan.Zero;
+        while ( Running ) {
+            var current = DateTime.Now;
+            delta = current - prev;
+            prev = current;
+            OnUpdate(current, delta);
+        }
 
         Stop?.Invoke();
     }
-
-    public virtual void Loop(){
-        while ( Running ){
-            OnUpdate();
-        }
-    }
-
+    
     public event IApplication.DoStart? Start;
 
     public event IApplication.DoUpdate? Update;
 
-    protected void OnUpdate(){
-        Update?.Invoke();
+    protected virtual void OnUpdate( DateTime now, TimeSpan delta ){
+        Update?.Invoke(now, delta);
     }
     
     public event IApplication.DoRender? Render;
 
-    protected void OnRender(){
-        Render?.Invoke();
+    protected virtual void OnRender( DateTime now, TimeSpan delta ){
+        Render?.Invoke(now, delta);
     }
     
     public event IApplication.DoStop? Stop;
