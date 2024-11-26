@@ -8,6 +8,10 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\SkillQuest.Client.Engine.Audio.API\SkillQuest.Client.Engine.Audio.API.csproj" />
+      <ProjectReference Include="..\SkillQuest.Client.Engine.Audio.OpenAL\SkillQuest.Client.Engine.Audio.OpenAL.csproj" />
+      <ProjectReference Include="..\SkillQuest.Client.Engine.Graphics.API\SkillQuest.Client.Engine.Graphics.API.csproj" />
+      <ProjectReference Include="..\SkillQuest.Client.Engine.Graphics.Vulkan\SkillQuest.Client.Engine.Graphics.Vulkan.csproj" />
       <ProjectReference Include="..\SkillQuest.Client.Game\SkillQuest.Client.Game.csproj" />
       <ProjectReference Include="..\SkillQuest.Shared.Game\SkillQuest.Shared.Game.csproj" />
     </ItemGroup>
@@ -15,10 +19,6 @@
     <ItemGroup>
       <PackageReference Include="Silk.NET.Assimp" Version="2.22.0" />
       <PackageReference Include="Silk.NET.GLFW" Version="2.22.0" />
-      <PackageReference Include="Silk.NET.OpenAL" Version="2.22.0" />
-      <PackageReference Include="Silk.NET.OpenGL" Version="2.22.0" />
-      <PackageReference Include="Silk.NET.Vulkan" Version="2.22.0" />
-      <PackageReference Include="Silk.NET.Vulkan.Extensions.KHR" Version="2.22.0" />
     </ItemGroup>
 
 </Project>

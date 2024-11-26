@@ -7,10 +7,11 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\SkillQuest.API\SkillQuest.API.csproj" />
       <ProjectReference Include="..\SkillQuest.Client.Engine.Audio.API\SkillQuest.Client.Engine.Audio.API.csproj" />
-      <ProjectReference Include="..\SkillQuest.Client.Engine.Graphics.API\SkillQuest.Client.Engine.Graphics.API.csproj" />
-      <ProjectReference Include="..\SkillQuest.Shared.Engine\SkillQuest.Shared.Engine.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Silk.NET.OpenAL" Version="2.22.0" />
     </ItemGroup>
 
 </Project>
