@@ -6,6 +6,8 @@ using SkillQuest.API.Thing.Character;
 using SkillQuest.Client.Game.Addons.SkillQuest.Client.Doohickey.Gui.Character;
 using SkillQuest.Client.Game.Addons.SkillQuest.Client.Doohickey.Gui.LoginSignup;
 using SkillQuest.Client.Game.Addons.SkillQuest.Client.Doohickey.Users;
+using SkillQuest.Shared.Engine.Thing.Character;
+using SkillQuest.Shared.Engine.Thing.Universe;
 using static SkillQuest.Shared.Engine.State;
 
 namespace SkillQuest.Client.Game.Addons.SkillQuest.Client.Doohickey.Gui.InGame;
@@ -13,10 +15,13 @@ namespace SkillQuest.Client.Game.Addons.SkillQuest.Client.Doohickey.Gui.InGame;
 public class GuiInGame : Shared.Engine.ECS.Doohickey, IRenderable{
     public override Uri? Uri { get; } = new Uri("ui://skill.quest/ingame");
     
-    private IPlayerCharacter _localhost;
+    private WorldPlayer _localhost;
+
+    public World World;
     
-    public GuiInGame( IPlayerCharacter localhost ){
+    public GuiInGame( WorldPlayer localhost ){
         _localhost = localhost;
+        World = new World(_localhost);
     }
 
     public void Render(){

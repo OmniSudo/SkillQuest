@@ -1,6 +1,6 @@
 using SkillQuest.API.ECS;
 
-namespace SkillQuest.Shared.Game.Addons.SkillQuest.Shared.Thing;
+namespace SkillQuest.Shared.Engine.Thing;
 
 public interface IItem : IThing{
     

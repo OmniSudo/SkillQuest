@@ -1,5 +1,7 @@
+using SkillQuest.API.Procedural.World;
 using SkillQuest.Shared.Engine.ECS;
 using SkillQuest.Shared.Engine.Network;
+using SkillQuest.Shared.Engine.Procedural.World;
 
 namespace SkillQuest.Shared.Engine;
 
@@ -11,6 +13,10 @@ public class State {
     public Stuff Stuff { get; } = new Stuff();
     
     public Networker Net { get; }
+
+    public IWorldGenPipeline WorldGenerationPipeline {
+        get;
+    } = new WorldGenerationPipeline();
 
     private State(){
         Net = new Networker( Application );

@@ -1,5 +1,5 @@
 namespace SkillQuest.Shared.Game.Addons.Mining.Shared.src.Thing.Structure.Vein;
 
-public class StructureVeinCoal : SkillQuest.Shared.Thing.Structure {
+public class StructureVeinCoal : Engine.Thing.Structure {
     
 }

@@ -5,6 +5,7 @@ using SkillQuest.API.Thing.Character;
 using SkillQuest.Client.Game.Addons.SkillQuest.Client.Doohickey.Gui.InGame;
 using SkillQuest.Client.Game.Addons.SkillQuest.Client.Doohickey.Gui.LoginSignup;
 using SkillQuest.Client.Game.Addons.SkillQuest.Client.Doohickey.Users;
+using SkillQuest.Shared.Engine.Thing.Character;
 
 namespace SkillQuest.Client.Game.Addons.SkillQuest.Client.Doohickey.Gui.Character;
 
@@ -60,11 +61,15 @@ public class GuiCharacterSelection : Doohickey, IRenderable{
                 var selected = await _characterSelect.Select(selection);
                 if (selected is null) return;
                 
-                selected.Connection = _connection;
-                
                 Console.WriteLine("Selected {0}", selected?.Name);
 
-                Stuff!.Add(new GuiInGame(selected!));
+                var character = new WorldPlayer() {
+                    CharacterId = selected?.CharacterId ?? Guid.Empty,
+                    Connection = _connection,
+                    Name = selected?.Name ?? "ERROR"
+                };
+                
+                Stuff!.Add(new GuiInGame(character!));
                 
                 _characterSelect.Reset();
                 Stuff!.Remove(_characterSelect);

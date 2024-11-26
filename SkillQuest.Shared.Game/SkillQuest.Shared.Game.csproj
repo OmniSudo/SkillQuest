@@ -18,6 +18,8 @@
 
     <ItemGroup>
       <Folder Include="data\Addons\Mining\Shared\assets\Item\Ore\" />
+      <Folder Include="data\Addons\SkillQuest\Shared\src\Procedural\World\Terrain\" />
+      <Folder Include="data\Addons\SkillQuest\Shared\src\Thing\" />
       <Folder Include="src\" />
     </ItemGroup>
 
