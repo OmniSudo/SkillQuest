@@ -1,18 +1,33 @@
 ﻿using Silk.NET.GLFW;
 using Silk.NET.Maths;
+using Silk.NET.SDL;
 using SkillQuest.Client.Engine.Graphics.API;
+using Monitor = Silk.NET.GLFW.Monitor;
 
 namespace SkillQuest.Client.Engine.Graphics.Vulkan;
 
 public class VkInstance : IInstance {
-    public VkInstance( string name, Vector2D<int> size, bool fullscreen = false, Vector2D<int>? position = null ){
-        Name = name;
-        Size = size;
+    private unsafe WindowHandle* _window = null;
+
+    public VkInstance( string name, Vector2D<int> size, bool fullscreen = false ){
+        unsafe {
+            Name = name;
+            Size = size;
         
-        Glfw = Glfw.GetApi();
-        if ( !Glfw.Init() ) throw new ArgumentNullException( nameof( Glfw ) );
+            Glfw = Glfw.GetApi();
+            
+            Glfw.SetErrorCallback(ErrorCallback);
+            
+            if ( !Glfw.Init() ) throw new ArgumentNullException( nameof( Glfw ) );
         
-        Position = position ?? Vector2D<int>.Zero;
+            Glfw.WindowHint( WindowHintClientApi.ClientApi, ClientApi.NoApi );
+            
+            _window = Glfw.CreateWindow( size.X, size.Y, name, default, default );
+        }
+    }
+
+    void ErrorCallback(ErrorCode error, string description){
+        Console.WriteLine( $"{error}: {description}" );
     }
 
     public void CreateDevice(){
@@ -28,6 +43,11 @@ public class VkInstance : IInstance {
     public Glfw Glfw { get; }
 
     public void Dispose(){
-        Glfw.Dispose();
+        unsafe {
+            Glfw.DestroyWindow( _window );
+            _window = null;
+            Glfw.Terminate();
+            Glfw.Dispose();
+        }
     }
 }
