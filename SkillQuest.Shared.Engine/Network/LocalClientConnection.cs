@@ -18,21 +18,16 @@ class LocalClientConnection : ClientConnection, ILocalConnection{
         Server = server;
         Connection = tcpconnection;
         _timeout = new Timer(TimeSpan.FromSeconds(10));
-        _stream = Connection.GetStream();
-
+        
         _timeout.Elapsed += (sender, args) => {
             Server.Disconnect(this);
             _timeout.Enabled = false;
         };
     }
 
-    NetworkStream _stream;
-
-    public TcpClient Connection { get; set; }
-
     public IServerConnection Server { get; }
 
-    public INetworker Networker => Server?.Networker ?? SH.Net;
+    public override INetworker Networker => Server?.Networker ?? SH.Net;
 
     public override IPEndPoint? EndPoint => Connection.Client.RemoteEndPoint as IPEndPoint;
 
@@ -42,5 +37,6 @@ class LocalClientConnection : ClientConnection, ILocalConnection{
     
     public void InterruptTimeout(){
         _timeout.Enabled = false;
+        _stream = Connection.GetStream();
     }
 }

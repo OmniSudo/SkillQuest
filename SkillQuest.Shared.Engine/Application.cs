@@ -34,7 +34,6 @@ public class Application : IApplication{
     public Application(){ }
 
     public IApplication Mount(IAddon addon){
-        SH.Net.LoadPacketsFromAssembly( addon.GetType().Assembly );
         _addons[ addon.Uri ] = SH.Stuff.Add(addon);
         addon.Application = this;
         return this;

@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Net;
 using System.Net.Sockets;
 using System.Security.Cryptography;
@@ -26,7 +27,9 @@ public interface IClientConnection : IConnection {
     public bool Running { get; set; }
     
     public IPEndPoint? EndPoint { get; }
-    
+
+    Queue<Packet> Pending { get; set; }
+
     public Task Send(Packet packet, bool encrypt = false );
 
     /// <summary>
@@ -43,8 +46,22 @@ public interface IClientConnection : IConnection {
     public delegate void DoDisconnect(IClientConnection connection);
     
     public event DoDisconnect Disconnected;
-
-    Task Listen();
     
-    Task Receive( Packet packet );
+    public bool IsOpen { get; }
+
+    public bool Receive();
+    
+    public Task Receive( Packet packet );
+    
+    public enum EnumState
+    {
+        NotInitialized,
+        NotReady,
+        Idle,
+        Connecting,
+        Connected,
+        Disconnecting
+    }
+
+    EnumState State { get; }
 }

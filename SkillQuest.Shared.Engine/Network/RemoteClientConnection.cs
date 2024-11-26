@@ -8,12 +8,6 @@ using SkillQuest.API.Network;
 namespace SkillQuest.Shared.Engine.Network;
 
 class RemoteClientConnection : ClientConnection, IRemoteConnection{
-    public INetworker Networker { get; }
-
-    public IPEndPoint EndPoint { get; }
-
-    public bool Running { get; set; } = false;
-
     public RemoteClientConnection(INetworker networker, IPEndPoint endpoint){
         Networker = networker;
         EndPoint = endpoint;
@@ -30,30 +24,8 @@ class RemoteClientConnection : ClientConnection, IRemoteConnection{
         AES.IV = iv;
     }
 
-    public void Disconnect(){
-        OnDisconnect();
-        Connection.Close();
-    }
-
-    public event IClientConnection.DoConnect? Connected;
-
-    public event IClientConnection.DoDisconnect? Disconnected;
-
-
     public void Connect(){
         Connection.Connect(EndPoint);
-        Console.WriteLine($"Connected to {EndPoint}");
         _stream = Connection.GetStream();
-        Listen();
-    }
-
-    protected internal void OnConnected(){
-        Connected?.Invoke(this);
-        Console.WriteLine($"Connected @ {EndPoint}");
-    }
-
-    protected internal void OnDisconnect(){
-        Disconnected?.Invoke(this);
-        Console.WriteLine($"Disconnected @ {EndPoint}");
     }
 }

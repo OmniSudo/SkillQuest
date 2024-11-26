@@ -14,13 +14,15 @@ public interface INetworker{
     
     public Task<IClientConnection?> Connect(IPEndPoint endpoint);
 
-    public void Listen(ILocalConnection connection);
-
     public IServerConnection? Host(short port);
     
     public IChannel SystemChannel { get; }
     
+    IApplication Application { get; }
+
     public IChannel CreateChannel( Uri uri );
     
     public void DestroyChannel(IChannel channel);
+
+    public void AddPacket<TPacket>() where TPacket : API.Network.Packet;
 }

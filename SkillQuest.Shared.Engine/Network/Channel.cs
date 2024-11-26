@@ -6,12 +6,28 @@ namespace SkillQuest.Shared.Engine.Network;
 class Channel : IChannel {
     public string Name { get; init; }
 
-    const bool DEBUG = true;
+    public INetworker Networker { get; }
 
-    public async Task Send(IClientConnection? connection, API.Network.Packet packet){
+    const bool DEBUG = true;
+    
+    public Channel(INetworker networker, string name){
+        Networker = networker;
+        Name = name;
+    }
+
+    public async Task Send(IClientConnection? connection, API.Network.Packet packet, bool encrypt = true){
         packet.Channel = Name;
         if ( DEBUG ) Console.WriteLine( $"{Name} -> {packet.GetType().Name}");
-        await connection?.Send(packet);
+
+        try {
+            await connection?.Send(packet, encrypt);
+        } catch (Exception e) {
+            Console.WriteLine( $"Unable to send packet {packet.GetType().Name} {e}");
+
+            if (connection.State == IClientConnection.EnumState.Disconnecting) {
+                connection.Disconnect();
+            }
+        }
     }
 
     public async Task Receive(IClientConnection connection, API.Network.Packet packet){
@@ -26,6 +42,7 @@ class Channel : IChannel {
     ConcurrentDictionary<Type, Action<IClientConnection, API.Network.Packet>> _handlers = new();
 
     public void Subscribe<TPacket>(IChannel.DoPacket<TPacket> handler) where TPacket : API.Network.Packet{
+        Networker.AddPacket< TPacket >();
         _handlers[ typeof(TPacket) ] = ( clientConnection, packet ) => handler( clientConnection, packet as TPacket ?? throw new ArgumentNullException( nameof(packet) ) );
     }
 

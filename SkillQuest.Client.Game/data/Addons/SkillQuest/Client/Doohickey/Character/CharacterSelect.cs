@@ -24,7 +24,7 @@ public class CharacterSelect : Doohickey{
         _channel = SH.Net.CreateChannel(Uri);
 
         Reset();
-        
+
         _channel.Subscribe<CharacterSelectInfoPacket>(OnCharacterSelectInfoPacket);
         _channel.Subscribe<SelectCharacterResponsePacket>(OnSelectCharacterResponsePacket);
     }
@@ -36,17 +36,19 @@ public class CharacterSelect : Doohickey{
     }
 
     void OnCharacterSelectInfoPacket(IClientConnection connection, CharacterSelectInfoPacket packet){
-        _characters.SetResult(
-            packet.Characters?.Select(
-                character => new CharacterSelectPlayer(
-                    character.CharacterId ?? Guid.Empty,
-                    character.Name!,
-                    character.World!,
-                    character.Uri!,
-                    _connection
-                )
-            ).ToArray<IPlayerCharacter>() ?? Array.Empty<IPlayerCharacter>()
-        );
+        if (!_characters.Task.IsCompleted) {
+            _characters.SetResult(
+                packet.Characters?.Select(
+                    character => new CharacterSelectPlayer(
+                        character.CharacterId ?? Guid.Empty,
+                        character.Name!,
+                        character.World!,
+                        character.Uri!,
+                        _connection
+                    )
+                ).ToArray<IPlayerCharacter>() ?? Array.Empty<IPlayerCharacter>()
+            );
+        }
     }
 
     void OnSelectCharacterResponsePacket(IClientConnection connection, SelectCharacterResponsePacket packet){
@@ -67,14 +69,17 @@ public class CharacterSelect : Doohickey{
         }
     }
 
-    async Task< IPlayerCharacter? > Character(Guid character){
+    async Task<IPlayerCharacter?> Character(Guid character){
         var characters = await _characters.Task;
-        return characters.FirstOrDefault( player => player.CharacterId == character);
+        return characters.FirstOrDefault(player => player.CharacterId == character);
     }
 
     public async Task<IPlayerCharacter[]> Characters(){
         _channel.Send(_connection, new CharacterSelectInfoRequestPacket());
-        return await Task.WhenAny( _characters.Task, Task.Delay( 5000 ) ) == _characters.Task ? _characters.Task.Result : null;
+
+        return await Task.WhenAny(_characters.Task, Task.Delay(5000)) == _characters.Task
+            ? _characters.Task.Result
+            : null;
     }
 
     public async Task<IPlayerCharacter?> Select(IPlayerCharacter? character){

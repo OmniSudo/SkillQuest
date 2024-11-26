@@ -28,6 +28,9 @@ public class Authenticator : Doohickey{
         _channel.Subscribe<LoginAuthenticationStatusPacket>(OnAuthStatusPacket);
         _channel.Subscribe<LogoutStatusPacket>(OnLogoutStatusPacket);
         _channel.Subscribe<SessionCreateStatusPacket>(OnLoginStatusPacket);
+
+        connection.EMail = email;
+        connection.AuthToken = authtoken;
         
         _channel.Send(connection, new LoginRequestPacket() {
             Email = email,
@@ -37,6 +40,8 @@ public class Authenticator : Doohickey{
 
     void OnAuthStatusPacket(IClientConnection sender, LoginAuthenticationStatusPacket packet){
         Console.WriteLine($"Auth Successful: {packet.Success}");
+        
+        sender.Id = packet.User;
 
         if (!packet.Success) {
             Console.WriteLine($">  {packet.Reason}");
@@ -48,6 +53,8 @@ public class Authenticator : Doohickey{
 
     void OnLoginStatusPacket(IClientConnection sender, SessionCreateStatusPacket packet){
         Console.WriteLine($"Session Created: {packet.Success}");
+
+        sender.Session = packet.Session;
 
         if (!packet.Success) {
             Console.WriteLine($">  {packet.Reason}");
