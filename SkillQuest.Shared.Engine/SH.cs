@@ -10,5 +10,9 @@ public class State {
     
     public Stuff Stuff { get; } = new Stuff();
     
-    public Networker Net { get; } = new Networker();
+    public Networker Net { get; }
+
+    private State(){
+        Net = new Networker( Application );
+    }
 }

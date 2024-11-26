@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using SkillQuest.API;
 using SkillQuest.API.ECS;
 using SkillQuest.API.Network;
@@ -41,7 +42,8 @@ public class AddonSkillQuestCL : AddonSkillQuestSH {
     }
 
     void OnRender(){
-        foreach (var pair in _renderables) {
+        var clone = _renderables.ToImmutableDictionary();
+        foreach (var pair in clone) {
             pair.Value.Render();
         }
     }

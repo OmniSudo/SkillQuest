@@ -15,7 +15,7 @@ public class GuiMainMenu : Shared.Engine.ECS.Doohickey, IRenderable{
     string email = "omni@skill.quest";
     string password = "";
 
-    IClientConnection? connection = null;
+    IClientConnection? connection;
 
     public GuiMainMenu(){
         Stuffed += (_, _) => {
@@ -29,9 +29,9 @@ public class GuiMainMenu : Shared.Engine.ECS.Doohickey, IRenderable{
 
     void OpenCharacterSelect(IClientConnection clientConnection){
         if (connection is null) return;
-        
-        Stuff?.Remove(this);
+
         Stuff?.Add( new GuiCharacterSelection(connection) );
+        Stuff?.Remove(this);
     }
 
     Task? _connect = null;

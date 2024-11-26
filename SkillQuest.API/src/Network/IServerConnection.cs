@@ -14,10 +14,6 @@ public interface IServerConnection : IConnection{
 
     public event DoDisconnected Disconnected;
 
-    public delegate void DoDeafen( IServerConnection connection );
-    
-    public event DoDeafen Deafen;
-
     void Disconnect(IClientConnection connection);
 
     void Stop();
@@ -25,6 +21,4 @@ public interface IServerConnection : IConnection{
     public ImmutableDictionary<IPEndPoint, IClientConnection> Clients { get; }
 
     public RSA RSA { get; }
-
-    bool Running { get; set; }
 }

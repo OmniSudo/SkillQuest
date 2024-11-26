@@ -2,6 +2,7 @@ using ImGuiNET;
 using SkillQuest.API.ECS;
 using SkillQuest.API.Network;
 using SkillQuest.API.Thing.Character;
+using SkillQuest.Client.Game.Addons.SkillQuest.Client.Doohickey.Gui.InGame;
 using SkillQuest.Client.Game.Addons.SkillQuest.Client.Doohickey.Gui.LoginSignup;
 using SkillQuest.Client.Game.Addons.SkillQuest.Client.Doohickey.Users;
 
@@ -24,7 +25,7 @@ public class GuiCharacterSelection : Doohickey, IRenderable{
         _characters = _characterSelect.Characters();
     }
 
-    public async void Render(){
+    public void Render(){
         
 
         if (_characters.IsCanceled) {
@@ -46,17 +47,24 @@ public class GuiCharacterSelection : Doohickey, IRenderable{
 
         if (ImGui.Button("Create")) {
             _characterSelect.Reset();
+            Stuff.Add( new GuiCharacterCreation(_connection) );
+            
             Stuff!.Remove(_characterSelect);
             Stuff!.Remove(this);
 
-            Stuff.Add( new GuiCharacterCreation(_connection) );
             return;
         }
         
         if (selection != null) {
             Task.Run( async () => {
                 var selected = await _characterSelect.Select(selection);
+                if (selected is null) return;
+                
+                selected.Connection = _connection;
+                
                 Console.WriteLine("Selected {0}", selected?.Name);
+
+                Stuff!.Add(new GuiInGame(selected!));
                 
                 _characterSelect.Reset();
                 Stuff!.Remove(_characterSelect);
@@ -67,6 +75,11 @@ public class GuiCharacterSelection : Doohickey, IRenderable{
 
     public IPlayerCharacter DoSelect(IPlayerCharacter[] characters){
         IPlayerCharacter? ret = null;
+        
+        if ((characters?.Length ?? 0 )== 0) {
+            return ret;
+        }
+        
         foreach (var character in characters) {
             if (ImGui.Button(character.Name)) {
                 ret = character;

@@ -24,9 +24,12 @@ public class Thing : IThing{
                 Unstuffed?.Invoke(_stuff, this);
                 _stuff.Remove(this);
             }
-            _stuff = value ?? SH.Stuff;
-            _stuff.Add(this);
-            Stuffed?.Invoke(_stuff, this);
+            _stuff = value;
+
+            if (_stuff is not null) {
+                _stuff.Add(this);
+                Stuffed?.Invoke(_stuff, this);
+            }
         }
     }
 
