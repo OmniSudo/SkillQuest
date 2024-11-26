@@ -28,4 +28,6 @@ public interface IStuff{
     public TThing Add< TThing >(TThing thing) where TThing : IThing;
 
     public IThing? Remove(IThing thing);
+    
+    public IThing? Remove(Uri uri);
 }

@@ -9,7 +9,7 @@ using static State;
 public class Thing : IThing{
 
     public Thing(Uri? uri = null){
-        Uri = uri;
+        Uri = uri ?? Uri;
     }
 
     public IStuff? Stuff {
@@ -34,7 +34,7 @@ public class Thing : IThing{
     }
 
 
-    public virtual Uri? Uri { get; }
+    public virtual Uri? Uri { get; set; }
 
     public event IThing.DoStuffed Stuffed;
 

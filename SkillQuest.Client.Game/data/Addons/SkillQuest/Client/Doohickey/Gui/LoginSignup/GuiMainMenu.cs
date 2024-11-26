@@ -9,7 +9,7 @@ using static SkillQuest.Shared.Engine.State;
 namespace SkillQuest.Client.Game.Addons.SkillQuest.Client.Doohickey.Gui.LoginSignup;
 
 public class GuiMainMenu : Shared.Engine.ECS.Doohickey, IRenderable{
-    public override Uri? Uri { get; } = new Uri("ui://skill.quest/mainmenu");
+    public override Uri? Uri { get; set; } = new Uri("ui://skill.quest/mainmenu");
 
     string address = "127.0.0.1:3698";
     string email = "omni@skill.quest";

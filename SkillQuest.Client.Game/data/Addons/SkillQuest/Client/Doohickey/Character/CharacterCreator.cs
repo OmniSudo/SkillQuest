@@ -9,7 +9,7 @@ using Doohickey = Shared.Engine.ECS.Doohickey;
 using static Shared.Engine.State;
 
 public class CharacterCreator : Doohickey{
-    public override Uri? Uri { get; } = new Uri("cl://control.skill.quest/character/create");
+    public override Uri? Uri { get; set; } = new Uri("cl://control.skill.quest/character/create");
 
     IClientConnection _connection;
 

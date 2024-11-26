@@ -12,7 +12,7 @@ namespace SkillQuest.Client.Game.Addons.SkillQuest.Client.Doohickey.Gui.Characte
 using Doohickey = Shared.Engine.ECS.Doohickey;
 
 public class GuiCharacterSelection : Doohickey, IRenderable{
-    public override Uri? Uri { get; } = new Uri("gui://skill.quest/character/select");
+    public override Uri? Uri { get; set; } = new Uri("gui://skill.quest/character/select");
 
     readonly IClientConnection _connection;
 

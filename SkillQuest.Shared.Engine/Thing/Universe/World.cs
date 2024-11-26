@@ -13,11 +13,11 @@ public class World : IWorld {
         _localhost = localhost;
     }
 
-    public IRegion? Generate(Vector3D<long> position){
+    public Task< IRegion? > Generate(Vector3D<long> position){
         return Generate(position, SH.WorldGenerationPipeline);
     }
     
-    public IRegion? Generate(Vector3D<long> position, IWorldGenPipeline pipeline ){
+    public Task< IRegion? > Generate(Vector3D<long> position, IWorldGenPipeline pipeline ){
         return pipeline.Generate(this, position);
     }
 }

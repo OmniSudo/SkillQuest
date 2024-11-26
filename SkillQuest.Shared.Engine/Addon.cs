@@ -7,7 +7,7 @@ public class Addon : Doohickey, IAddon{
 
     public Addon(){ }
 
-    public override Uri Uri { get; } = new Uri("sh://addon.skill.quest/null");
+    public override Uri Uri { get; set; } = new Uri("sh://addon.skill.quest/null");
 
     public virtual string Name { get; } = "null";
 

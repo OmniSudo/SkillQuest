@@ -1,30 +1,33 @@
-using System.Net;
+using System.Numerics;
 using ImGuiNET;
+using Silk.NET.Maths;
 using SkillQuest.API.ECS;
-using SkillQuest.API.Network;
-using SkillQuest.API.Thing.Character;
-using SkillQuest.Client.Game.Addons.SkillQuest.Client.Doohickey.Gui.Character;
+using SkillQuest.API.Geometry;
+using SkillQuest.API.Geometry.Random;
 using SkillQuest.Client.Game.Addons.SkillQuest.Client.Doohickey.Gui.LoginSignup;
-using SkillQuest.Client.Game.Addons.SkillQuest.Client.Doohickey.Users;
 using SkillQuest.Shared.Engine.Thing.Character;
 using SkillQuest.Shared.Engine.Thing.Universe;
-using static SkillQuest.Shared.Engine.State;
 
 namespace SkillQuest.Client.Game.Addons.SkillQuest.Client.Doohickey.Gui.InGame;
 
 public class GuiInGame : Shared.Engine.ECS.Doohickey, IRenderable{
-    public override Uri? Uri { get; } = new Uri("ui://skill.quest/ingame");
-    
+    public override Uri? Uri { get; set; } = new Uri("ui://skill.quest/ingame");
+
     private WorldPlayer _localhost;
 
     public World World;
-    
-    public GuiInGame( WorldPlayer localhost ){
+
+    public VoronoiPolygons Voronoi = new VoronoiPolygons(0, 25);
+
+    public GuiInGame(WorldPlayer localhost){
         _localhost = localhost;
         World = new World(_localhost);
     }
 
     public void Render(){
+        ImGui.SetNextWindowSize(ImGui.GetIO().DisplaySize);
+        ImGui.SetNextWindowPos(new Vector2(0, 0));
+
         if (
             ImGui.Begin(
                 Uri.ToString(),
@@ -36,11 +39,30 @@ public class GuiInGame : Shared.Engine.ECS.Doohickey, IRenderable{
         ) {
 
             if (ImGui.Button($"WIN @ {_localhost.Name}")) {
-                Console.WriteLine( $"YOU WON {_localhost.Name}");
+                Console.WriteLine($"YOU WON {_localhost.Name}");
                 _localhost.Connection.Disconnect();
                 Stuff.Add(new GuiMainMenu());
                 Stuff?.Remove(this);
             }
+
+            if (Voronoi.Polygons.Count == 0) {
+                var io = ImGui.GetIO();
+                
+                Voronoi.Add(
+                    new Rect(
+                        new Vector2D<float>(100, 100),
+                        new Vector2D<float>(io.DisplaySize.X - 100, io.DisplaySize.Y - 100
+                        )
+                    )
+                ).Wait();
+            }
+
+            foreach (var polygon in Voronoi.Polygons) {
+                foreach (var edge in polygon.Edges) {
+                    ImGui.GetWindowDrawList().AddLine(edge.PointA.ToSystem(), edge.PointB.ToSystem(), 0xFFFF00FF);
+                }
+            }
+
             ImGui.End();
         }
     }
