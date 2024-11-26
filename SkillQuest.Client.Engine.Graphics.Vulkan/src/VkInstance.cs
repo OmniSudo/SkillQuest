@@ -29,6 +29,22 @@ public class VkInstance : IInstance {
     void ErrorCallback(ErrorCode error, string description){
         Console.WriteLine( $"{error}: {description}" );
     }
+    
+    public void Update( DateTime now, TimeSpan delta ){
+        unsafe {
+            if (Glfw.WindowShouldClose(_window)) {
+                Quit?.Invoke();
+            }
+            
+            Glfw.PollEvents();
+        }
+    }
+
+    public void Render(DateTime now, TimeSpan delta){
+        
+    }
+
+    public event IInstance.DoQuit? Quit;
 
     public void CreateDevice(){
         

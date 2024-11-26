@@ -25,6 +25,10 @@ public class ClientApplication : Application{
             fullscreen: false
         );
 
+        Update += CL.Graphics.Update;
+        Render += CL.Graphics.Render;
+        CL.Graphics.Quit += () => Running = false;
+
         return true;
     }
 
@@ -41,16 +45,8 @@ public class ClientApplication : Application{
         OnRender(now, delta);
     }
 
-    protected override void OnRender( DateTime now, TimeSpan delta ){
-        // Draw
-        base.OnRender(now, delta);
-    }
-
     bool OnStop(){
-        Graphics.Dispose();
+        CL.Graphics.Dispose();
         return true;
     }
-
-    Graphics.API.IInstance Graphics { get; set; }
-
 }
