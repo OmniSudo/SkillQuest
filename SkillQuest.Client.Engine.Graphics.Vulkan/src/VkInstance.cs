@@ -1,9 +1,13 @@
 ﻿using System.Runtime.InteropServices;
+using System.Runtime.InteropServices.JavaScript;
+using ImGuiNET;
 using Silk.NET.Core;
+using Silk.NET.Core.Native;
 using Silk.NET.GLFW;
 using Silk.NET.Maths;
 using Silk.NET.SDL;
 using Silk.NET.Vulkan;
+using Silk.NET.Vulkan.Extensions.EXT;
 using SkillQuest.Client.Engine.Graphics.API;
 using Monitor = Silk.NET.GLFW.Monitor;
 using Version = System.Version;
@@ -12,12 +16,16 @@ namespace SkillQuest.Client.Engine.Graphics.Vulkan;
 
 public class VkInstance : IInstance{
 
-    public VkInstance(string name, Vector2D<int> size, bool fullscreen = false){
+    public VkInstance(string name, Vector2D<int> size, bool fullscreen = false, bool validate = false){
         Name = name;
         Size = size;
+        EnableValidationLayers = validate;
+        Fullscreen = fullscreen;
 
         InitializeWindow();
     }
+
+    public bool Fullscreen { get; set; }
 
     private void InitializeWindow(){
         InitializeGLFW();
@@ -42,7 +50,7 @@ public class VkInstance : IInstance{
     private unsafe void InitializeVulkan(){
         Vk = Vk.GetApi();
 
-        var appInfo = new ApplicationInfo() with {
+        var appInfo = new ApplicationInfo() {
             SType = StructureType.ApplicationInfo,
             ApiVersion = Vk.Version12,
             ApplicationVersion = new Version32(0, 0, 0),
@@ -51,28 +59,81 @@ public class VkInstance : IInstance{
             PEngineName = (byte*)Marshal.StringToHGlobalAnsi(Name)
         };
 
-        var instanceCreateInfo = new InstanceCreateInfo() with {
+        byte** requiredExtensions =
+            (byte**)SilkMarshal.StringArrayToPtr(GetRequiredExtensions(out uint extensionCount));
+
+        byte** validationLayers = (byte**)SilkMarshal.StringArrayToPtr(
+            GetValidationLayers(
+                new[] {
+                    "VK_LAYER_KHRONOS_validation"
+                },
+                out uint layerCount
+            )
+        );
+
+        var instanceCreateInfo = new InstanceCreateInfo() {
             SType = StructureType.InstanceCreateInfo,
             PApplicationInfo = &appInfo,
-            EnabledExtensionCount = 0,
-            PpEnabledExtensionNames = null,
-            EnabledLayerCount = 0,
-            PpEnabledLayerNames = null
+            EnabledExtensionCount = extensionCount,
+            PpEnabledExtensionNames = requiredExtensions,
+            EnabledLayerCount = layerCount,
+            PpEnabledLayerNames = validationLayers
         };
 
         var result = Vk.CreateInstance(&instanceCreateInfo, null, out vkInstance);
 
         if (result != Result.Success) {
+            SilkMarshal.Free((IntPtr)instanceCreateInfo.PpEnabledExtensionNames);
+            SilkMarshal.Free((IntPtr)instanceCreateInfo.PpEnabledLayerNames);
             Marshal.FreeHGlobal((IntPtr)appInfo.PApplicationName);
             Marshal.FreeHGlobal((IntPtr)appInfo.PEngineName);
 
             throw new Exception($"Failed to create Vulkan instance: {result}");
-        } else {
-            Console.WriteLine("Vulkan instance created successfully");
         }
 
+        Console.WriteLine("Vulkan instance created successfully");
+
+        SilkMarshal.Free((IntPtr)instanceCreateInfo.PpEnabledExtensionNames);
+        SilkMarshal.Free((IntPtr)instanceCreateInfo.PpEnabledLayerNames);
         Marshal.FreeHGlobal((IntPtr)appInfo.PApplicationName);
         Marshal.FreeHGlobal((IntPtr)appInfo.PEngineName);
+    }
+
+    string[] GetValidationLayers(string[] requested, out uint count){
+        unsafe {
+            uint available = 0;
+            Vk.EnumerateInstanceLayerProperties(&available, null);
+            LayerProperties[] availableLayers = new LayerProperties[(int)available];
+
+            fixed (LayerProperties* availableLayersPtr = availableLayers) {
+                Vk.EnumerateInstanceLayerProperties(&available, availableLayersPtr);
+            }
+
+            var names = availableLayers.Select(layer => Marshal.PtrToStringAnsi((IntPtr)layer.LayerName)).ToHashSet();
+
+            if (requested.All(names.Contains)) {
+                count = (uint)requested.Length;
+                return requested;
+            }
+
+            count = 0;
+            return [];
+        }
+    }
+
+    public bool EnableValidationLayers { get; set; } = false;
+
+    unsafe string[] GetRequiredExtensions(out uint count){
+        var extensions = Glfw.GetRequiredInstanceExtensions(out count);
+        var result = new List<string>((int)count + 1);
+
+        for (int i = 0; i < count; i++) {
+            result.Add(Marshal.PtrToStringAnsi((IntPtr)extensions[i]));
+        }
+        result.Add(ExtDebugUtils.ExtensionName);
+
+        SilkMarshal.Free((IntPtr)extensions);
+        return result.ToArray();
     }
 
     void ErrorCallback(ErrorCode error, string description){
@@ -99,7 +160,21 @@ public class VkInstance : IInstance{
 
     public Vector2D<int> Position { get; set; }
 
-    public Vector2D<int> Size { get; set; }
+    public Vector2D<int> Size {
+        get {
+            return _size;
+        }
+        set {
+            unsafe {
+                _size = value;
+                if (_window is not null && !Fullscreen) {
+                    Glfw.SetWindowSize(_window, _size.X, _size.Y);
+                }
+            }
+        }
+    }
+    
+    private Vector2D<int> _size = Vector2D<int>.Zero;
 
     public Glfw Glfw { get; private set; }
 
@@ -117,6 +192,13 @@ public class VkInstance : IInstance{
             _window = null;
             Glfw.Terminate();
             Glfw.Dispose();
+        }
+    }
+
+    public void CheckSuccess(Result result, Action<Result> onFail = null){
+        if (result != Result.Success) {
+            onFail?.Invoke(result);
+            throw new Exception($"Vulkan error: {result}");
         }
     }
 }
