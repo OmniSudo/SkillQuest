@@ -71,13 +71,17 @@ public class VkInstance : IInstance{
             )
         );
 
+        DebugUtilsMessengerCreateInfoEXT? debugCreateInfo = null;
+        PopulateDebugInfo(ref debugCreateInfo);
+
         var instanceCreateInfo = new InstanceCreateInfo() {
             SType = StructureType.InstanceCreateInfo,
             PApplicationInfo = &appInfo,
             EnabledExtensionCount = extensionCount,
             PpEnabledExtensionNames = requiredExtensions,
             EnabledLayerCount = layerCount,
-            PpEnabledLayerNames = validationLayers
+            PpEnabledLayerNames = validationLayers,
+            PNext = debugCreateInfo is null ? null : &debugCreateInfo
         };
 
         var result = Vk.CreateInstance(&instanceCreateInfo, null, out vkInstance);
@@ -97,9 +101,50 @@ public class VkInstance : IInstance{
         SilkMarshal.Free((IntPtr)instanceCreateInfo.PpEnabledLayerNames);
         Marshal.FreeHGlobal((IntPtr)appInfo.PApplicationName);
         Marshal.FreeHGlobal((IntPtr)appInfo.PEngineName);
+
+        if (debugCreateInfo is not null) {
+            Vk.TryGetInstanceExtension(vkInstance, out ExtDebugUtils debugUtilsMessengerEXT);
+
+            debugUtilsMessengerEXT!.CreateDebugUtilsMessenger(vkInstance, debugCreateInfo!.Value, null,
+                out var debugMessenger);
+            
+            Console.WriteLine( "Debug layer initialized successfully" );
+        }
+    }
+
+    unsafe void PopulateDebugInfo(ref DebugUtilsMessengerCreateInfoEXT? createInfo){
+#if DEBUG
+        if (!EnableValidationLayers) {
+            return;
+        }
+        
+        unsafe {
+            createInfo = new() {
+                SType = StructureType.DebugUtilsMessengerCreateInfoExt,
+                MessageSeverity = DebugUtilsMessageSeverityFlagsEXT.WarningBitExt |
+                                  DebugUtilsMessageSeverityFlagsEXT.ErrorBitExt,
+                MessageType = DebugUtilsMessageTypeFlagsEXT.GeneralBitExt |
+                              DebugUtilsMessageTypeFlagsEXT.PerformanceBitExt |
+                              DebugUtilsMessageTypeFlagsEXT.ValidationBitExt,
+                PfnUserCallback = (DebugUtilsMessengerCallbackFunctionEXT)VulkanDebugCallback
+            };
+        }
+#endif
+    }
+
+    private unsafe uint VulkanDebugCallback(DebugUtilsMessageSeverityFlagsEXT messageSeverity, DebugUtilsMessageTypeFlagsEXT messageTypes, DebugUtilsMessengerCallbackDataEXT* pCallbackData, void* pUserData){
+        Console.WriteLine($"validation layer:" + Marshal.PtrToStringAnsi((nint)pCallbackData->PMessage));
+
+        return Vk.False;
     }
 
     string[] GetValidationLayers(string[] requested, out uint count){
+#if DEBUG
+        if (!EnableValidationLayers) {
+            count = 0;
+            return [];
+        }
+
         unsafe {
             uint available = 0;
             Vk.EnumerateInstanceLayerProperties(&available, null);
@@ -111,14 +156,14 @@ public class VkInstance : IInstance{
 
             var names = availableLayers.Select(layer => Marshal.PtrToStringAnsi((IntPtr)layer.LayerName)).ToHashSet();
 
-            if (requested.All(names.Contains)) {
-                count = (uint)requested.Length;
-                return requested;
-            }
+            if (!requested.All(names.Contains)) throw new Exception("Failed to find all validation layers");
 
-            count = 0;
-            return [];
+            count = (uint)requested.Length;
+            return requested;
         }
+#endif
+        count = 0;
+        return [];
     }
 
     public bool EnableValidationLayers { get; set; } = false;
@@ -167,13 +212,14 @@ public class VkInstance : IInstance{
         set {
             unsafe {
                 _size = value;
+
                 if (_window is not null && !Fullscreen) {
                     Glfw.SetWindowSize(_window, _size.X, _size.Y);
                 }
             }
         }
     }
-    
+
     private Vector2D<int> _size = Vector2D<int>.Zero;
 
     public Glfw Glfw { get; private set; }
