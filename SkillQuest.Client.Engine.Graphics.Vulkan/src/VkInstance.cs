@@ -24,8 +24,52 @@ public class VkInstance : IInstance{
 
         InitializeWindow();
     }
+    public string Name { get; set; }
+
+    public Vector2D<int> Position { get; set; }
+
+    public Vector2D<int> Size {
+        get {
+            return _size;
+        }
+        set {
+            unsafe {
+                _size = value;
+
+                if (_window is not null && !Fullscreen) {
+                    Glfw.SetWindowSize(_window, _size.X, _size.Y);
+                }
+            }
+        }
+    }
+    
+    public Glfw Glfw { get; private set; }
+
+    public unsafe IntPtr WindowHandle => (IntPtr)_window;
+
+    public Vk Vk { get; private set; }
 
     public bool Fullscreen { get; set; }
+
+    public VkPhysicalDevice ChooseDevice( /* TODO: DEVICE SELECTOR FUNCTION */ ){
+        return null;
+    }
+    
+    public VkDevice? CreateDevice(VkPhysicalDevice physicalDevice){
+        return null;
+    }
+    
+    public void Update(DateTime now, TimeSpan delta){
+        unsafe {
+            if (Glfw.WindowShouldClose(_window)) {
+                Quit?.Invoke();
+            }
+
+            Glfw.PollEvents();
+        }
+    }
+
+    public void Render(DateTime now, TimeSpan delta){ }
 
     private void InitializeWindow(){
         InitializeGLFW();
@@ -42,7 +86,7 @@ public class VkInstance : IInstance{
     private void InitializeGLFW(){
         Glfw = Glfw.GetApi();
 
-        Glfw.SetErrorCallback(ErrorCallback);
+        Glfw.SetErrorCallback(GlfwErrorCallback);
 
         if (!Glfw.Init()) throw new ArgumentNullException(nameof(Glfw));
     }
@@ -103,40 +147,28 @@ public class VkInstance : IInstance{
         Marshal.FreeHGlobal((IntPtr)appInfo.PEngineName);
 
         if (debugCreateInfo is not null) {
-            Vk.TryGetInstanceExtension(vkInstance, out ExtDebugUtils debugUtilsMessengerEXT);
+            Vk.TryGetInstanceExtension(vkInstance, out debugUtils);
 
-            debugUtilsMessengerEXT!.CreateDebugUtilsMessenger(vkInstance, debugCreateInfo!.Value, null,
-                out var debugMessenger);
+            debugUtils!.CreateDebugUtilsMessenger(vkInstance, debugCreateInfo!.Value, null, out debugMessenger);
             
             Console.WriteLine( "Debug layer initialized successfully" );
         }
     }
 
-    unsafe void PopulateDebugInfo(ref DebugUtilsMessengerCreateInfoEXT? createInfo){
-#if DEBUG
-        if (!EnableValidationLayers) {
-            return;
+    unsafe string[] GetRequiredExtensions(out uint count){
+        var extensions = Glfw.GetRequiredInstanceExtensions(out count);
+        var result = new List<string>((int)count + 1);
+
+        for (int i = 0; i < count; i++) {
+            result.Add(Marshal.PtrToStringAnsi((IntPtr)extensions[i]));
         }
-        
-        unsafe {
-            createInfo = new() {
-                SType = StructureType.DebugUtilsMessengerCreateInfoExt,
-                MessageSeverity = DebugUtilsMessageSeverityFlagsEXT.WarningBitExt |
-                                  DebugUtilsMessageSeverityFlagsEXT.ErrorBitExt,
-                MessageType = DebugUtilsMessageTypeFlagsEXT.GeneralBitExt |
-                              DebugUtilsMessageTypeFlagsEXT.PerformanceBitExt |
-                              DebugUtilsMessageTypeFlagsEXT.ValidationBitExt,
-                PfnUserCallback = (DebugUtilsMessengerCallbackFunctionEXT)VulkanDebugCallback
-            };
-        }
-#endif
+        result.Add(ExtDebugUtils.ExtensionName);
+
+        SilkMarshal.Free((IntPtr)extensions);
+        return result.ToArray();
     }
 
-    private unsafe uint VulkanDebugCallback(DebugUtilsMessageSeverityFlagsEXT messageSeverity, DebugUtilsMessageTypeFlagsEXT messageTypes, DebugUtilsMessengerCallbackDataEXT* pCallbackData, void* pUserData){
-        Console.WriteLine($"validation layer:" + Marshal.PtrToStringAnsi((nint)pCallbackData->PMessage));
-
-        return Vk.False;
-    }
+    public bool EnableValidationLayers { get; set; } = false;
 
     string[] GetValidationLayers(string[] requested, out uint count){
 #if DEBUG
@@ -166,76 +198,57 @@ public class VkInstance : IInstance{
         return [];
     }
 
-    public bool EnableValidationLayers { get; set; } = false;
-
-    unsafe string[] GetRequiredExtensions(out uint count){
-        var extensions = Glfw.GetRequiredInstanceExtensions(out count);
-        var result = new List<string>((int)count + 1);
-
-        for (int i = 0; i < count; i++) {
-            result.Add(Marshal.PtrToStringAnsi((IntPtr)extensions[i]));
+    unsafe void PopulateDebugInfo(ref DebugUtilsMessengerCreateInfoEXT? createInfo){
+#if DEBUG
+        if (!EnableValidationLayers) {
+            return;
         }
-        result.Add(ExtDebugUtils.ExtensionName);
-
-        SilkMarshal.Free((IntPtr)extensions);
-        return result.ToArray();
+        
+        unsafe {
+            createInfo = new() {
+                SType = StructureType.DebugUtilsMessengerCreateInfoExt,
+                MessageSeverity = DebugUtilsMessageSeverityFlagsEXT.WarningBitExt |
+                                  DebugUtilsMessageSeverityFlagsEXT.ErrorBitExt,
+                MessageType = DebugUtilsMessageTypeFlagsEXT.GeneralBitExt |
+                              DebugUtilsMessageTypeFlagsEXT.PerformanceBitExt |
+                              DebugUtilsMessageTypeFlagsEXT.ValidationBitExt,
+                PfnUserCallback = (DebugUtilsMessengerCallbackFunctionEXT)VulkanDebugCallback
+            };
+        }
+#endif
     }
 
-    void ErrorCallback(ErrorCode error, string description){
+    private unsafe uint VulkanDebugCallback(DebugUtilsMessageSeverityFlagsEXT messageSeverity, DebugUtilsMessageTypeFlagsEXT messageTypes, DebugUtilsMessengerCallbackDataEXT* pCallbackData, void* pUserData){
+        Console.WriteLine($"validation layer:" + Marshal.PtrToStringAnsi((nint)pCallbackData->PMessage));
+
+        return Vk.False;
+    }
+
+    void GlfwErrorCallback(ErrorCode error, string description){
         Console.WriteLine($"{error}: {description}");
     }
-
-    public void Update(DateTime now, TimeSpan delta){
-        unsafe {
-            if (Glfw.WindowShouldClose(_window)) {
-                Quit?.Invoke();
-            }
-
-            Glfw.PollEvents();
-        }
-    }
-
-    public void Render(DateTime now, TimeSpan delta){ }
-
+    
     public event IInstance.DoQuit? Quit;
-
-    public void CreateDevice(){ }
-
-    public string Name { get; set; }
-
-    public Vector2D<int> Position { get; set; }
-
-    public Vector2D<int> Size {
-        get {
-            return _size;
-        }
-        set {
-            unsafe {
-                _size = value;
-
-                if (_window is not null && !Fullscreen) {
-                    Glfw.SetWindowSize(_window, _size.X, _size.Y);
-                }
-            }
-        }
-    }
-
-    private Vector2D<int> _size = Vector2D<int>.Zero;
-
-    public Glfw Glfw { get; private set; }
-
-    public Vk Vk { get; private set; }
-
+    
     private unsafe WindowHandle* _window = null;
 
     public Instance vkInstance;
-
-    public unsafe IntPtr WindowHandle => (IntPtr)_window;
-
+    ExtDebugUtils debugUtils;
+    DebugUtilsMessengerEXT debugMessenger;
+    private Vector2D<int> _size = Vector2D<int>.Zero;
+    
     public void Dispose(){
         unsafe {
+            if (EnableValidationLayers) {
+                debugUtils.DestroyDebugUtilsMessenger( vkInstance, debugMessenger, null );
+            }
+            
+            Vk.DestroyInstance(vkInstance, null);
+            Vk.Dispose();
+            
             Glfw.DestroyWindow(_window);
             _window = null;
+            
             Glfw.Terminate();
             Glfw.Dispose();
         }
