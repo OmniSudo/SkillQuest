@@ -7,6 +7,8 @@ public interface IInstance : IDisposable {
     public Vector2D<int> Position { get; set; }
     public Vector2D<int> Size { get; set; }
 
+    public IntPtr WindowHandle { get; }
+
     public void Update(DateTime now, TimeSpan delta);
     public void Render(DateTime now, TimeSpan delta);
 

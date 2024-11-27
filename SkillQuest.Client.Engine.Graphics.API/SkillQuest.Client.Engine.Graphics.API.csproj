@@ -4,6 +4,7 @@
         <TargetFramework>net8.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     </PropertyGroup>
 
     <ItemGroup>
@@ -16,6 +17,10 @@
       <PackageReference Include="Silk.NET.Windowing" Version="2.22.0" />
       <PackageReference Include="Silk.NET.Windowing.Common" Version="2.22.0" />
       <PackageReference Include="Silk.NET.Windowing.Sdl" Version="2.22.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\SkillQuest.API\SkillQuest.API.csproj" />
     </ItemGroup>
 
 </Project>
