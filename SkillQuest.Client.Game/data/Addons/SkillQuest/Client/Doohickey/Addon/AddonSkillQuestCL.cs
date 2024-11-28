@@ -19,34 +19,9 @@ public class AddonSkillQuestCL : AddonSkillQuestSH {
     }
 
     void OnMounted(IAddon addon, IApplication? application){
-        Stuff.ThingAdded += StuffOnThingAdded;
-        Stuff.ThingRemoved += StuffOnThingRemoved;
-        
-        application.Render += OnRender;
-
         Stuff.Add(new GuiMainMenu());
     }
 
-    Dictionary<Uri, IRenderable> _renderables = new();
-    
-    void StuffOnThingRemoved(IThing thing){
-        if (thing is IRenderable) {
-            _renderables.Remove( thing.Uri );
-        }
-    }
-
-    void StuffOnThingAdded(IThing thing){
-        if (thing is IRenderable renderable) {
-            _renderables[ thing.Uri ] = renderable;
-        }
-    }
-
-    void OnRender(DateTime now, TimeSpan delta){
-        var clone = _renderables.ToImmutableDictionary();
-        foreach (var pair in clone) {
-            // pair.Value.Render();
-        }
-    }
 
     void OnUnmounted(IAddon addon, IApplication? application){ }
 }

@@ -2,7 +2,7 @@ using System.Collections.Immutable;
 
 namespace SkillQuest.API.ECS;
 
-public interface IThing{
+public interface IThing : IDisposable {
     public Uri? Uri { get; set; }
 
     delegate void DoStuffed(IStuff stuff, IThing thing );

@@ -2,6 +2,7 @@ using ImGuiNET;
 using SkillQuest.API.ECS;
 using SkillQuest.API.Network;
 using SkillQuest.API.Thing.Character;
+using SkillQuest.Client.Engine.Graphics.API;
 using SkillQuest.Client.Game.Addons.SkillQuest.Client.Doohickey.Gui.InGame;
 using SkillQuest.Client.Game.Addons.SkillQuest.Client.Doohickey.Gui.LoginSignup;
 using SkillQuest.Client.Game.Addons.SkillQuest.Client.Doohickey.Users;
@@ -11,7 +12,7 @@ namespace SkillQuest.Client.Game.Addons.SkillQuest.Client.Doohickey.Gui.Characte
 
 using Doohickey = Shared.Engine.ECS.Doohickey;
 
-public class GuiCharacterSelection : Doohickey, IRenderable{
+public class GuiCharacterSelection : Doohickey, IDrawable{
     public override Uri? Uri { get; set; } = new Uri("gui://skill.quest/character/select");
 
     readonly IClientConnection _connection;
@@ -26,9 +27,7 @@ public class GuiCharacterSelection : Doohickey, IRenderable{
         _characters = _characterSelect.Characters();
     }
 
-    public void Render(){
-        
-
+    public void Draw(){
         if (_characters.IsCanceled) {
             Console.WriteLine("Unable to download character list...");
             // TODO: Recover from this

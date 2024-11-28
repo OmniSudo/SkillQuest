@@ -1,9 +1,12 @@
 using System.Collections.Immutable;
+using SkillQuest.API.ECS;
 
 namespace SkillQuest.API;
 
 public interface IApplication{
     public bool Running { get; set; }
+    
+    public IStuff Stuff { get; set; }
 
     public IApplication Mount(IAddon addon);
 

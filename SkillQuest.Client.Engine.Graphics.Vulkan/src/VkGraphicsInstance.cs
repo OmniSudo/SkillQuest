@@ -1,22 +1,19 @@
 ﻿using System.Runtime.InteropServices;
-using System.Runtime.InteropServices.JavaScript;
-using ImGuiNET;
 using Silk.NET.Core;
 using Silk.NET.Core.Native;
 using Silk.NET.GLFW;
 using Silk.NET.Maths;
-using Silk.NET.SDL;
 using Silk.NET.Vulkan;
 using Silk.NET.Vulkan.Extensions.EXT;
+using SkillQuest.API;
 using SkillQuest.Client.Engine.Graphics.API;
-using Monitor = Silk.NET.GLFW.Monitor;
-using Version = System.Version;
 
 namespace SkillQuest.Client.Engine.Graphics.Vulkan;
 
-public class VkInstance : IInstance{
+public class VkGraphicsInstance : IGraphicsInstance{
 
-    public VkInstance(string name, Vector2D<int> size, bool fullscreen = false, bool validate = false){
+    public VkGraphicsInstance(IApplication application, string name, Vector2D<int> size, bool fullscreen = false, bool validate = false){
+        Application = application;
         Name = name;
         Size = size;
         EnableValidationLayers = validate;
@@ -24,6 +21,9 @@ public class VkInstance : IInstance{
 
         InitializeWindow();
     }
+
+    public IApplication Application { get; set; }
+
     public string Name { get; set; }
 
     public Vector2D<int> Position { get; set; }
@@ -62,7 +62,7 @@ public class VkInstance : IInstance{
     public void Update(DateTime now, TimeSpan delta){
         unsafe {
             if (Glfw.WindowShouldClose(_window)) {
-                Quit?.Invoke();
+                Quit?.Invoke( Application );
             }
 
             Glfw.PollEvents();
@@ -228,8 +228,24 @@ public class VkInstance : IInstance{
         Console.WriteLine($"{error}: {description}");
     }
     
-    public event IInstance.DoQuit? Quit;
-    
+    public event IGraphicsInstance.DoQuit? Quit;
+
+    public void Draw(RenderPacket packet){
+        throw new NotImplementedException();
+    }
+
+    public ITexture CreateTexture(string imagepath){
+        throw new NotImplementedException();
+    }
+
+    public IModule CreateModule(string vertexPath, string fragmentPath){
+        throw new NotImplementedException();
+    }
+
+    public ISurface CreateSurface(string gltfPath){
+        throw new NotImplementedException();
+    }
+
     private unsafe WindowHandle* _window = null;
 
     public Instance vkInstance;

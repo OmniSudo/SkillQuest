@@ -34,8 +34,7 @@ public sealed class Networker : INetworker{
     }
 
     void OnUpdate(DateTime now, TimeSpan delta){
-        var clone = _clients;
-        foreach (var (endpoint, client) in clone) {
+        foreach (var (endpoint, client) in _clients) {
             try {
                 client.Receive();
             } catch (Exception e) {
@@ -43,7 +42,7 @@ public sealed class Networker : INetworker{
                 if ( client.IsOpen ) client.Disconnect();
             }
         }
-
+        
         if (_clients.Count == 0 && _servers.Count == 0) {
             Application.Update -= OnUpdate;
             installedUpdate = false;

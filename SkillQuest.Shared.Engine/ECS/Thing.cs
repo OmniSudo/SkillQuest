@@ -168,4 +168,11 @@ public class Thing : IThing{
     IStuff? _stuff;
 
     IThing? _parent = null;
+    public void Dispose(){
+        Stuff.Remove(this);
+        
+        foreach (var child in _children) {
+            child.Value.Dispose();
+        }
+    }
 }

@@ -1,14 +1,19 @@
 using System.Net;
+using System.Numerics;
 using ImGuiNET;
+using Silk.NET.Maths;
 using SkillQuest.API.ECS;
 using SkillQuest.API.Network;
+using SkillQuest.Client.Engine.Graphics.API;
+using SkillQuest.Client.Engine.Graphics.OpenGL;
 using SkillQuest.Client.Game.Addons.SkillQuest.Client.Doohickey.Gui.Character;
 using SkillQuest.Client.Game.Addons.SkillQuest.Client.Doohickey.Users;
 using static SkillQuest.Shared.Engine.State;
+using static SkillQuest.Client.Engine.State;
 
 namespace SkillQuest.Client.Game.Addons.SkillQuest.Client.Doohickey.Gui.LoginSignup;
 
-public class GuiMainMenu : Shared.Engine.ECS.Doohickey, IRenderable{
+public class GuiMainMenu : Shared.Engine.ECS.Doohickey, IDrawable{
     public override Uri? Uri { get; set; } = new Uri("ui://skill.quest/mainmenu");
 
     string address = "127.0.0.1:3698";
@@ -36,7 +41,25 @@ public class GuiMainMenu : Shared.Engine.ECS.Doohickey, IRenderable{
 
     Task? _connect = null;
 
-    public void Render(){
+    IModule? shader;
+    ITexture?  texture;
+    ISurface?  surface;
+    Matrix4X4<float> projection = Matrix4x4.CreatePerspective(10, 10, 0.01F, 1000).ToGeneric();
+
+    public void Draw(){
+        shader ??= CL.Graphics.CreateModule( "default.vert", "default.frag");
+        texture ??= CL.Graphics.CreateTexture("default.png");
+        surface ??= CL.Graphics.CreateSurface("default.gltf");
+
+        CL.Graphics.Draw( new RenderPacket {
+            Texture = texture,
+            Surface = surface,
+            Shader = shader,
+            Model = Matrix4X4<float>.Identity,
+            View = Matrix4X4<float>.Identity,
+            Projection = projection
+        });
+        
         if (
             ImGui.Begin(
                 Uri.ToString(),

@@ -99,6 +99,13 @@ public class ClientConnection : IClientConnection{
 
     protected internal void OnConnected(){
         _stream = Connection.GetStream();
+
+        _keepalive = new Timer( state => {
+            if (State == IClientConnection.EnumState.Disconnecting) {
+                Disconnect();
+                _keepalive.Dispose();
+            }
+        }, null, TimeSpan.FromSeconds(20), TimeSpan.FromSeconds(20));
         Connected?.Invoke(this);
     }
 
@@ -112,6 +119,7 @@ public class ClientConnection : IClientConnection{
 
     private IEnumerable<byte> buffer = Array.Empty<byte>();
     int delimiters = 0;
+    Timer _keepalive;
 
     private bool PendingSplit(byte b){
         return b != 0x00;
@@ -119,11 +127,6 @@ public class ClientConnection : IClientConnection{
     
     public bool Receive(){
         bool completed = false;
-
-        if (State == IClientConnection.EnumState.Disconnecting || _stream is null) {
-            Disconnect();
-            return false;
-        }
         
         while ( _stream?.DataAvailable ?? false ) {
             var data = new byte[1024];
@@ -135,8 +138,7 @@ public class ClientConnection : IClientConnection{
                 if (take.Count() == 0) break;
 
                 var leftover = len - take.Count();
-
-
+                
                 buffer = buffer.Concat(take).Concat(leftover >= 1 ? [0x00] : Array.Empty<byte>() );
                 data = data.Skip(take.Count()).Skip(leftover >= 1 ? 1 : 0).ToArray();
 
@@ -258,7 +260,7 @@ public class ClientConnection : IClientConnection{
             var tcpConnInfos = ipGlobProp.GetActiveTcpConnections();
             TcpConnectionInformation tcpConnInfo = null;
 
-            tcpConnInfo = tcpConnInfos.FirstOrDefault(conn => {
+            tcpConnInfo = tcpConnInfos.AsParallel().FirstOrDefault(conn => {
                     return conn.LocalEndPoint.Port == ( Connection?.Client.LocalEndPoint as IPEndPoint )?.Port && 
                            conn.RemoteEndPoint.Port == ( Connection?.Client.RemoteEndPoint as IPEndPoint )?.Port;
                 }

@@ -1,6 +1,8 @@
 using System.Collections.Immutable;
 using System.Reflection;
 using SkillQuest.API;
+using SkillQuest.API.ECS;
+using SkillQuest.Shared.Engine.ECS;
 
 namespace SkillQuest.Shared.Engine;
 
@@ -84,6 +86,11 @@ public class Application : IApplication{
     
     public event IApplication.DoRender? Render;
 
+    /// <summary>
+    /// Raw render event, use at your own peril, does not have any Gl or Vulkan context linked to it
+    /// </summary>
+    /// <param name="now"></param>
+    /// <param name="delta"></param>
     protected virtual void OnRender( DateTime now, TimeSpan delta ){
         Render?.Invoke(now, delta);
     }
@@ -98,6 +105,8 @@ public class Application : IApplication{
             pair => pair.Key, pair => pair.Value as IAddon
         )!;
 
+    public IStuff Stuff { get; set; } = new Stuff();
+    
     public IAddon? this[Uri uri] {
         get {
             return Addons.GetValueOrDefault(uri) as IAddon;

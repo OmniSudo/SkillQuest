@@ -2,13 +2,14 @@ using System.Numerics;
 using ImGuiNET;
 using SkillQuest.API.ECS;
 using SkillQuest.API.Network;
+using SkillQuest.Client.Engine.Graphics.API;
 using SkillQuest.Client.Game.Addons.SkillQuest.Client.Doohickey.Character;
 
 namespace SkillQuest.Client.Game.Addons.SkillQuest.Client.Doohickey.Gui.Character;
 
 using Doohickey = Shared.Engine.ECS.Doohickey;
 
-public class GuiCharacterCreation : Doohickey, IRenderable{
+public class GuiCharacterCreation : Doohickey, IDrawable{
     public override Uri? Uri { get; set; } = new Uri("gui://skill.quest/character/create");
 
     private CharacterCreator _creator;
@@ -24,7 +25,7 @@ public class GuiCharacterCreation : Doohickey, IRenderable{
 
     Task<bool> Created;
 
-    public void Render(){
+    public void Draw(){
         if (
             ImGui.Begin(
                 Uri.ToString(),
@@ -55,7 +56,7 @@ public class GuiCharacterCreation : Doohickey, IRenderable{
 
                     Console.WriteLine("\nCharacter Created: " + character.CharacterId + " (" + character.Name + ")");
 
-                    Stuff?.Add(new GuiCharacterSelection(_connection)).Render();
+                    Stuff?.Add(new GuiCharacterSelection(_connection));
 
                     Stuff?.Remove(_creator);
                     _creator.Reset();

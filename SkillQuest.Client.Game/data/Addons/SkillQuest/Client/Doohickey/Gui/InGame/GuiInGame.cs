@@ -4,13 +4,14 @@ using Silk.NET.Maths;
 using SkillQuest.API.ECS;
 using SkillQuest.API.Geometry;
 using SkillQuest.API.Geometry.Random;
+using SkillQuest.Client.Engine.Graphics.API;
 using SkillQuest.Client.Game.Addons.SkillQuest.Client.Doohickey.Gui.LoginSignup;
 using SkillQuest.Shared.Engine.Thing.Character;
 using SkillQuest.Shared.Engine.Thing.Universe;
 
 namespace SkillQuest.Client.Game.Addons.SkillQuest.Client.Doohickey.Gui.InGame;
 
-public class GuiInGame : Shared.Engine.ECS.Doohickey, IRenderable{
+public class GuiInGame : Shared.Engine.ECS.Doohickey, IDrawable{
     public override Uri? Uri { get; set; } = new Uri("ui://skill.quest/ingame");
 
     private WorldPlayer _localhost;
@@ -18,13 +19,14 @@ public class GuiInGame : Shared.Engine.ECS.Doohickey, IRenderable{
     public World World;
 
     public VoronoiPolygons Voronoi = new VoronoiPolygons(0, 25);
+    bool initVoronoi = false;
 
     public GuiInGame(WorldPlayer localhost){
         _localhost = localhost;
         World = new World(_localhost);
     }
 
-    public void Render(){
+    public void Draw(){
         ImGui.SetNextWindowSize(ImGui.GetIO().DisplaySize);
         ImGui.SetNextWindowPos(new Vector2(0, 0));
 
@@ -45,16 +47,20 @@ public class GuiInGame : Shared.Engine.ECS.Doohickey, IRenderable{
                 Stuff?.Remove(this);
             }
 
-            if (Voronoi.Polygons.Count == 0) {
-                var io = ImGui.GetIO();
-                
-                Voronoi.Add(
-                    new Rect(
-                        new Vector2D<float>(100, 100),
-                        new Vector2D<float>(io.DisplaySize.X - 100, io.DisplaySize.Y - 100
+            if (!initVoronoi) {
+                initVoronoi = true;
+
+                Task.Run(() => {
+                    var io = ImGui.GetIO();
+
+                    Voronoi.Add(
+                        new Rect(
+                            new Vector2D<float>(100, 100),
+                            new Vector2D<float>(io.DisplaySize.X - 100, io.DisplaySize.Y - 100
+                            )
                         )
-                    )
-                ).Wait();
+                    );
+                });
             }
 
             foreach (var polygon in Voronoi.Polygons) {
