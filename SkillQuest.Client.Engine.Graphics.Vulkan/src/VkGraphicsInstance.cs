@@ -2,9 +2,11 @@
 using Silk.NET.Core;
 using Silk.NET.Core.Native;
 using Silk.NET.GLFW;
+using Silk.NET.Input;
 using Silk.NET.Maths;
 using Silk.NET.Vulkan;
 using Silk.NET.Vulkan.Extensions.EXT;
+using Silk.NET.Windowing;
 using SkillQuest.API;
 using SkillQuest.Client.Engine.Graphics.API;
 
@@ -58,7 +60,11 @@ public class VkGraphicsInstance : IGraphicsInstance{
     public VkDevice? CreateDevice(VkPhysicalDevice physicalDevice){
         return null;
     }
-    
+
+    public IWindow Window => null;
+
+    public IInputContext Input => null;
+
     public void Update(DateTime now, TimeSpan delta){
         unsafe {
             if (Glfw.WindowShouldClose(_window)) {

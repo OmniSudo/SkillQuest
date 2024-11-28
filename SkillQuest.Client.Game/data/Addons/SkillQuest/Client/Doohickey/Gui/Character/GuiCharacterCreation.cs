@@ -25,7 +25,7 @@ public class GuiCharacterCreation : Doohickey, IDrawable{
 
     Task<bool> Created;
 
-    public void Draw(){
+    public void Draw(DateTime now, TimeSpan delta){
         if (
             ImGui.Begin(
                 Uri.ToString(),

@@ -1,15 +1,13 @@
-#version 330 core
+#version 330
 
-in vec4 color;    // Input texture coordinates from the vertex shader
-in vec2 uv;
+in vec2 f_vecUv;
 
-out vec4 out_color;   // Output color of the fragment
+out vec4 r_vecUv;
 
-uniform sampler2D textureSampler; // Uniform for the texture
+uniform sampler2D textureSampler;
 
-void main()
-{
-    // Sample the texture using the provided texture coordinates
-//    out_color = texture(textureSampler, uv);
-    out_color = color;    
+void main ( void ) {
+    r_vecUv = texture( textureSampler, f_vecUv );
+    // fragmentColor = vec4( 1, 1, 0, 1 );
+    // fragmentColor = voxelColor;
 }

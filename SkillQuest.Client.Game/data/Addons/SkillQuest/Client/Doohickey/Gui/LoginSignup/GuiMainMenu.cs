@@ -1,6 +1,8 @@
 using System.Net;
 using System.Numerics;
 using ImGuiNET;
+using Silk.NET.GLFW;
+using Silk.NET.Input;
 using Silk.NET.Maths;
 using SkillQuest.API.ECS;
 using SkillQuest.API.Network;
@@ -23,43 +25,21 @@ public class GuiMainMenu : Shared.Engine.ECS.Doohickey, IDrawable{
     IClientConnection? connection;
 
     public GuiMainMenu(){
-        Stuffed += (_, _) => {
-            Authenticator.Instance.LoginSuccess += OpenCharacterSelect;
-        };
+        Stuffed += (_, _) => { Authenticator.Instance.LoginSuccess += OpenCharacterSelect; };
 
-        Unstuffed += (_, _) => {
-            Authenticator.Instance.LoginSuccess -= OpenCharacterSelect;
-        };
+        Unstuffed += (_, _) => { Authenticator.Instance.LoginSuccess -= OpenCharacterSelect; };
     }
 
     void OpenCharacterSelect(IClientConnection clientConnection){
         if (connection is null) return;
 
-        Stuff?.Add( new GuiCharacterSelection(connection) );
+        Stuff?.Add(new GuiCharacterSelection(connection));
         Stuff?.Remove(this);
     }
 
     Task? _connect = null;
-
-    IModule? shader;
-    ITexture?  texture;
-    ISurface?  surface;
-    Matrix4X4<float> projection = Matrix4x4.CreatePerspective(10, 10, 0.01F, 1000).ToGeneric();
-
-    public void Draw(){
-        shader ??= CL.Graphics.CreateModule( "default.vert", "default.frag");
-        texture ??= CL.Graphics.CreateTexture("default.png");
-        surface ??= CL.Graphics.CreateSurface("default.gltf");
-
-        CL.Graphics.Draw( new RenderPacket {
-            Texture = texture,
-            Surface = surface,
-            Shader = shader,
-            Model = Matrix4X4<float>.Identity,
-            View = Matrix4X4<float>.Identity,
-            Projection = projection
-        });
-        
+    
+    public void Draw(DateTime now, TimeSpan delta){
         if (
             ImGui.Begin(
                 Uri.ToString(),
@@ -69,11 +49,12 @@ public class GuiMainMenu : Shared.Engine.ECS.Doohickey, IDrawable{
                 ImGuiWindowFlags.NoSavedSettings
             )
         ) {
-            ImGui.InputTextWithHint( "Address", "address", ref address, 128 );
-            ImGui.InputTextWithHint( "Email", "email", ref email, 128 );
-            ImGui.InputTextWithHint( "Password", "password", ref password, 128, ImGuiInputTextFlags.Password );
-            
+            ImGui.InputTextWithHint("Address", "address", ref address, 128);
+            ImGui.InputTextWithHint("Email", "email", ref email, 128);
+            ImGui.InputTextWithHint("Password", "password", ref password, 128, ImGuiInputTextFlags.Password);
+
             ImGui.Separator();
+
             if (
                 ImGui.Button("Login")
             ) {
@@ -84,7 +65,7 @@ public class GuiMainMenu : Shared.Engine.ECS.Doohickey, IDrawable{
                         Console.WriteLine("Invalid Email");
                         return;
                     }
-                    
+
                     try {
                         var addr = new System.Net.Mail.MailAddress(trimmed);
 
@@ -99,7 +80,7 @@ public class GuiMainMenu : Shared.Engine.ECS.Doohickey, IDrawable{
 
                     email = trimmed;
                     connection = await SH.Net.Connect(IPEndPoint.Parse(address));
-                    
+
                     Authenticator.Instance.Login(connection, email, password);
                 });
             }

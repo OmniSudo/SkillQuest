@@ -29,7 +29,6 @@ public class GlTexture : IHasGl, ITexture, IDisposable {
     public GL gl { get; }
 
     public void Bind(){
-        gl.ActiveTexture(TextureUnit.Texture0);
         gl.BindTexture(TextureTarget.Texture2D, this._id);
     }
 

@@ -60,15 +60,24 @@ public class GlGraphicsInstance : IGraphicsInstance {
     public void Draw(RenderPacket packet){
         packet.Texture.Bind();
         packet.Shader.Bind();
-        packet.Shader.Attribute( "g_cameraPosition", Vector2D<float>.Zero );
-        packet.Shader.Attribute( "g_cameraDirection", Vector3D<float>.UnitY );
-        packet.Shader.Attribute("g_model", packet.Model);
-        packet.Shader.Attribute("g_view", packet.View);
-        packet.Shader.Attribute("g_projection", packet.Projection);
+        packet.Shader.Uniform( "g_cameraPosision", Vector2D<float>.Zero );
+        packet.Shader.Uniform( "g_cameraDirection", Vector3D<float>.UnitY );
+        packet.Shader.Uniform( "g_viewToProjection", packet.Projection * packet.View );
+        packet.Shader.Uniform( "g_worldToView", packet.View );
+        // Invert the projection matrix
+        if (!Matrix4X4.Invert(packet.Projection, out var inverseProjection))
+            throw new InvalidOperationException("Projection matrix inversion failed.");
+
+        // Invert the view matrix
+        if (!Matrix4X4.Invert(packet.View, out var inverseView))
+            throw new InvalidOperationException("View matrix inversion failed.");
+        packet.Shader.Uniform( "g_projectionToWorld", inverseView * inverseProjection );
+        packet.Shader.Uniform( "g_worldToProjection", packet.Projection * packet.View );
+        packet.Shader.Uniform( "g_modelToWorld", packet.Model );
         
         packet.Surface.Draw();
         
-        // TODO: Unbind?
+        
     }
 
     public ITexture CreateTexture(string imagepath){
@@ -129,7 +138,7 @@ public class GlGraphicsInstance : IGraphicsInstance {
             
             var clone = _renderables.ToImmutableDictionary();
             foreach (var pair in clone) {
-                pair.Value.Draw();
+                pair.Value.Draw(now, delta);
             }
             
             Gui.Render();

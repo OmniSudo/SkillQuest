@@ -27,7 +27,7 @@ public class GuiCharacterSelection : Doohickey, IDrawable{
         _characters = _characterSelect.Characters();
     }
 
-    public void Draw(){
+    public void Draw(DateTime now, TimeSpan delta){
         if (_characters.IsCanceled) {
             Console.WriteLine("Unable to download character list...");
             // TODO: Recover from this

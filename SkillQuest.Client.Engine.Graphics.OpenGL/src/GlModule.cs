@@ -34,7 +34,7 @@ public class GlModule : IHasGl, IModule, IDisposable{
     public uint ID => this._id;
 
 
-    public GlModule enable(String attributeName, uint attributeID){
+    public GlModule Enable(String attributeName, uint attributeID){
         unsafe {
             var name = (byte*)Marshal.StringToHGlobalAnsi(attributeName);
             gl.BindAttribLocation(_id, attributeID, name);
@@ -51,154 +51,154 @@ public class GlModule : IHasGl, IModule, IDisposable{
         gl.UseProgram(0);
     }
 
-    public void Attribute(String name, int value){
-        attribute(location(name), value);
+    public void Uniform(String name, int value){
+        Uniform(location(name), value);
     }
 
 
-    public void Attribute(String name, float value){
-        attribute(location(name), value);
+    public void Uniform(String name, float value){
+        Uniform(location(name), value);
     }
 
 
-    public void Attribute(String name, bool value){
-        attribute(location(name), value);
+    public void Uniform(String name, bool value){
+        Uniform(location(name), value);
     }
 
 
-    public void Attribute(String name, Vector2D<int> value){
-        attribute(location(name), value);
+    public void Uniform(String name, Vector2D<int> value){
+        Uniform(location(name), value);
     }
 
 
-    public void Attribute(String name, Vector2D<float> value){
-        attribute(location(name), value);
+    public void Uniform(String name, Vector2D<float> value){
+        Uniform(location(name), value);
     }
 
 
-    public void Attribute(String name, Vector3D<int> value){
-        attribute(location(name), value);
+    public void Uniform(String name, Vector3D<int> value){
+        Uniform(location(name), value);
     }
 
 
-    public void Attribute(String name, Vector3D<float> value){
-        attribute(location(name), value);
+    public void Uniform(String name, Vector3D<float> value){
+        Uniform(location(name), value);
     }
 
 
-    public void Attribute(String name, Vector4D<int> value){
-        attribute(location(name), value);
+    public void Uniform(String name, Vector4D<int> value){
+        Uniform(location(name), value);
     }
 
 
-    public void Attribute(String name, Vector4D<float> value){
-        attribute(location(name), value);
+    public void Uniform(String name, Vector4D<float> value){
+        Uniform(location(name), value);
     }
 
 
-    public void Attribute(String name, Matrix3X3<float> value){
-        attribute(location(name), value);
+    public void Uniform(String name, Matrix3X3<float> value){
+        Uniform(location(name), value);
     }
 
 
-    public void Attribute(String name, Matrix4X4<float> value){
-        attribute(location(name), value);
+    public void Uniform(String name, Matrix4X4<float> value){
+        Uniform(location(name), value);
     }
 
 
-    public void attribute(int id, int value){
+    public void Uniform(int id, int value){
         gl.Uniform1(id, value);
     }
 
 
-    public void attribute(int id, float value){
+    public void Uniform(int id, float value){
         gl.Uniform1(id, value);
     }
 
 
-    public void attribute(int id, double value){
+    public void Uniform(int id, double value){
         gl.Uniform1(id, value);
     }
 
 
-    public void attribute(int id, bool value){
+    public void Uniform(int id, bool value){
         gl.Uniform1(id, value ? 1 : 0);
     }
 
 
-    public void attribute(int id, Vector2D<int> value){
+    public void Uniform(int id, Vector2D<int> value){
         gl.Uniform2(id, value.X, value.Y);
     }
 
 
-    public void attribute(int id, Vector2D<float> value){
+    public void Uniform(int id, Vector2D<float> value){
         gl.Uniform2(id, value.X, value.Y);
     }
 
 
-    public void attribute(int id, Vector2D<double> value){
+    public void Uniform(int id, Vector2D<double> value){
         gl.Uniform2(id, value.X, value.Y);
     }
 
 
-    public void attribute(int id, Vector2D<uint> value){
+    public void Uniform(int id, Vector2D<uint> value){
         gl.Uniform2(id, value.X, value.Y);
     }
 
-    public void attribute(int id, Vector3D<int> value){
+    public void Uniform(int id, Vector3D<int> value){
         gl.Uniform3(id, value.X, value.Y, value.Z);
     }
 
 
-    public void attribute(int id, Vector3D<float> value){
+    public void Uniform(int id, Vector3D<float> value){
         gl.Uniform3(id, value.X, value.Y, value.Z);
     }
 
 
-    public void attribute(int id, Vector3D<double> value){
+    public void Uniform(int id, Vector3D<double> value){
         gl.Uniform3(id, value.X, value.Y, value.Z);
     }
 
 
-    public void attribute(int id, Vector3D<uint> value){
+    public void Uniform(int id, Vector3D<uint> value){
         gl.Uniform3(id, value.X, value.Y, value.Z);
     }
 
 
-    public void attribute(int id, Vector4D<int> value){
+    public void Uniform(int id, Vector4D<int> value){
         gl.Uniform4(id, value.X, value.Y, value.Z, value.W);
     }
 
 
-    public void attribute(int id, Vector4D<float> value){
+    public void Uniform(int id, Vector4D<float> value){
         gl.Uniform4(id, value.X, value.Y, value.Z, value.W);
     }
 
 
-    public void attribute(int id, Vector4D<double> value){
+    public void Uniform(int id, Vector4D<double> value){
         gl.Uniform4(id, value.X, value.Y, value.Z, value.W);
     }
 
 
-    public void attribute(int id, Vector4D<uint> value){
+    public void Uniform(int id, Vector4D<uint> value){
         gl.Uniform4(id, value.X, value.Y, value.Z, value.W);
     }
 
-    public void attribute(int id, Matrix3X3<float> value){
+    public void Uniform(int id, Matrix3X3<float> value){
         // TODO: Verify
         gl.UniformMatrix3(id, false,
             MemoryMarshal.CreateReadOnlySpan(ref Unsafe.As<Matrix3X3<float>, float>(ref value), 9));
     }
 
 
-    public void attribute(int id, Matrix4X4<float> value){
+    public void Uniform(int id, Matrix4X4<float> value){
         // TODO: Verify
         gl.UniformMatrix3(id, false,
             MemoryMarshal.CreateReadOnlySpan(ref Unsafe.As<Matrix4X4<float>, float>(ref value), 16));
     }
 
     private int location(String name){
-        int location = gl.GetAttribLocation(_id, name);
+        int location = gl.GetUniformLocation(_id, name);
         return location;
     }
 
@@ -244,6 +244,7 @@ public class GlModuleFactory : IDisposable{
                 gl.DeleteShader(fragmentShader);
                 
                 var shader = new GlModule( gl, program, [ vertexShader, fragmentShader] );
+                
                 _shaders.Add(shader);
                 return shader;
             }

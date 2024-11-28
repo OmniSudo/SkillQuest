@@ -1,9 +1,19 @@
-﻿using Silk.NET.Maths;
+﻿using Silk.NET.Input;
+using Silk.NET.Maths;
+using Silk.NET.Windowing;
 using SkillQuest.API;
 
 namespace SkillQuest.Client.Engine.Graphics.API;
 
 public interface IGraphicsInstance : IDisposable {
+    public IWindow Window { get; }
+    public IInputContext Input { get; }
+
+    public IKeyboard Keyboard => Input.Keyboards.First();
+    public IMouse Mouse => Input.Mice.First();
+    
+    public IGamepad[] Gamepads => Input.Gamepads.ToArray();
+
     public void Update(DateTime now, TimeSpan delta);
     public void Render(DateTime now, TimeSpan delta);
 
@@ -36,17 +46,17 @@ public class RenderPacket {
 public interface IModule : IDisposable{
     public void Bind();
     public void Unbind();
-    public void Attribute(String name, int value);
-    public void Attribute(String name, float value);
-    public void Attribute(String name, bool value);
-    public void Attribute(String name, Vector2D<int> value);
-    public void Attribute(String name, Vector2D<float> value);
-    public void Attribute(String name, Vector3D<int> value);
-    public void Attribute(String name, Vector3D<float> value);
-    public void Attribute(String name, Vector4D<int> value);
-    public void Attribute(String name, Vector4D<float> value);
-    public void Attribute(String name, Matrix3X3<float> value);
-    public void Attribute(String name, Matrix4X4<float> value);
+    public void Uniform(String name, int value);
+    public void Uniform(String name, float value);
+    public void Uniform(String name, bool value);
+    public void Uniform(String name, Vector2D<int> value);
+    public void Uniform(String name, Vector2D<float> value);
+    public void Uniform(String name, Vector3D<int> value);
+    public void Uniform(String name, Vector3D<float> value);
+    public void Uniform(String name, Vector4D<int> value);
+    public void Uniform(String name, Vector4D<float> value);
+    public void Uniform(String name, Matrix3X3<float> value);
+    public void Uniform(String name, Matrix4X4<float> value);
 }
 
 public interface ITexture : IDisposable {

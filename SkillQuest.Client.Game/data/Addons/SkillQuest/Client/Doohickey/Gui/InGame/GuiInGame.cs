@@ -26,7 +26,7 @@ public class GuiInGame : Shared.Engine.ECS.Doohickey, IDrawable{
         World = new World(_localhost);
     }
 
-    public void Draw(){
+    public void Draw(DateTime now, TimeSpan delta){
         ImGui.SetNextWindowSize(ImGui.GetIO().DisplaySize);
         ImGui.SetNextWindowPos(new Vector2(0, 0));
 
