@@ -17,12 +17,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="data\Addons\SkillQuest\Shared\src\Procedural\World\Terrain\" />
-      <Folder Include="data\Addons\SkillQuest\Shared\src\Thing\" />
-      <Folder Include="src\" />
-    </ItemGroup>
-
-    <ItemGroup>
       <Reference Include="Microsoft.Data.Sqlite">
         <HintPath>..\..\..\..\..\.nuget\packages\microsoft.data.sqlite.core\9.0.0-rc.2.24474.1\lib\net8.0\Microsoft.Data.Sqlite.dll</HintPath>
       </Reference>

@@ -3,11 +3,11 @@ using SkillQuest.Shared.Engine.ECS;
 
 namespace SkillQuest.Shared.Engine;
 
-public class Addon : Doohickey, IAddon{
+public class Addon : ECS.Doohickey, IAddon{
 
     public Addon(){ }
 
-    public override Uri Uri { get; set; } = new Uri("sh://addon.skill.quest/null");
+    public virtual Uri? Uri { get; set; } = null;
 
     public virtual string Name { get; } = "null";
 

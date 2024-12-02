@@ -7,7 +7,7 @@ using SkillQuest.Shared.Engine.ECS;
 
 namespace SkillQuest.Shared.Engine.Procedural;
 
-public class ProceduralGenerationPipeline : Doohickey, IProcGenPipeline{
+public class ProceduralGenerationPipeline : ECS.Doohickey, IProcGenPipeline{
     public IStuff Stuff {
         get;
     } = new Stuff();

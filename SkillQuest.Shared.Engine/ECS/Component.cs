@@ -13,7 +13,7 @@ public class Component<TAttached> : IComponent where TAttached : class, ICompone
                 
                 if ( old is not null ) {
                     DisconnectThing?.Invoke(old, this);
-                    old.Component( null, this.GetType() );
+                    old.Connect( null, this.GetType() );
                 }
                 
                 _thing = value;

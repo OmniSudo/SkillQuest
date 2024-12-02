@@ -12,4 +12,11 @@
       <ProjectReference Include="..\SkillQuest.Shared.Game\SkillQuest.Shared.Game.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="Addons\Metallurgy\Resources\Doohickey\Material\Metallurgy\" />
+      <Folder Include="Addons\Mining\Client\Thing\Item\" />
+      <Folder Include="Addons\Mining\Resources\Thing\" />
+      <Folder Include="res\" />
+    </ItemGroup>
+
 </Project>

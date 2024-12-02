@@ -26,6 +26,8 @@ public class Application : IApplication{
         }
     }
 
+    public IStuff Stuff { get; set; }
+
     public virtual uint TicksPerSecond => 100;
 
     TimeSpan? _freq = null;
@@ -36,7 +38,9 @@ public class Application : IApplication{
         }
     }
 
-    public Application(){ }
+    public Application(){
+        Stuff = new Stuff();
+    }
 
     public IApplication Mount(IAddon addon){
         _addons[ addon.Uri ] = SH.Stuff.Add(addon);
@@ -104,8 +108,6 @@ public class Application : IApplication{
         .ToImmutableDictionary(
             pair => pair.Key, pair => pair.Value as IAddon
         )!;
-
-    public IStuff Stuff { get; set; } = new Stuff();
     
     public IAddon? this[Uri uri] {
         get {

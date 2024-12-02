@@ -50,4 +50,10 @@ public class Stuff : IStuff {
     }
     
     private ConcurrentDictionary<Uri, IThing> _things = new();
+    public void Dispose(){
+        var old = new ConcurrentDictionary<Uri,IThing>(_things);
+        foreach (var thing in old) {
+            thing.Value.Dispose();
+        }
+    }
 }

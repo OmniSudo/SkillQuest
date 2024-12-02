@@ -52,30 +52,31 @@ public class Thing : IThing{
 
     public event IThing.DoRemoveChild RemoveChild;
 
-    public IThing Component<TComponent>(TComponent? component) where TComponent : class, IComponent{
-        return Component(component, typeof(TComponent));
+    public IThing Connect<TComponent>(TComponent? component) where TComponent : class, IComponent{
+        return Connect(component, typeof(TComponent));
     }
 
-    public IThing Component(IComponent? component, Type? type = null){
+    public IThing Connect(IComponent? component, Type? type = null){
         type ??= component?.GetType();
 
-        if (type is not null) {
-            if (component is not null) {
-                var old = Components.GetValueOrDefault(type);
+        if (type is null)
+            return this;
 
-                if (old == component) {
-                    return this;
-                }
+        if (component is not null) {
+            var old = Components.GetValueOrDefault(type);
 
-                component.Thing = this;
-                _components[type] = component;
-
-                ConnectComponent?.Invoke(this, component);
-            } else {
-                _components.TryRemove( type, out var removed );
-                if (removed is null) return this;
-                DisconnectComponent?.Invoke(this, removed);
+            if (old == component) {
+                return this;
             }
+
+            component.Thing = this;
+            _components[type] = component;
+
+            ConnectComponent?.Invoke(this, component);
+        } else {
+            _components.TryRemove( type, out var removed );
+            if (removed is null) return this;
+            DisconnectComponent?.Invoke(this, removed);
         }
         return this;
     }
@@ -88,7 +89,7 @@ public class Thing : IThing{
 
     public IComponent? this[Type type] {
         get => Component(type);
-        set => Component(value, type);
+        set => Connect(value, type);
     }
 
     public ImmutableDictionary<Type, IComponent> Components => _components.ToImmutableDictionary();
