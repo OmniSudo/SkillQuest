@@ -21,17 +21,18 @@ public class Addon : ECS.Doohickey, IAddon{
 
     public virtual string Category { get; } = "";
 
-    public IApplication? Application { 
+    public IApplication? Application {
         get {
             return _application;
         }
         set {
-            if (value != _application) {
-                Unmounted?.Invoke(this, _application);
-                _application = value;
-                Mounted?.Invoke(this, _application);
-            }
-        } }
+            if (value == _application)
+                return;
+            Unmounted?.Invoke(this, _application);
+            _application = value;
+            Mounted?.Invoke(this, _application);
+        }
+    }
 
     public event IAddon.DoMounted? Mounted;
 

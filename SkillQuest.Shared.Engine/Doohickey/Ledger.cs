@@ -3,29 +3,10 @@ using SkillQuest.API.ECS;
 using SkillQuest.Shared.Engine.ECS;
 using SkillQuest.Shared.Engine.Thing;
 
-namespace SkillQuest.Shared.Engine.Doohickey.Ledger;
+namespace SkillQuest.Shared.Engine.Doohickey;
 
-using static Engine.State;
-
-public class Ledger < TTracked > : IDisposable where TTracked : class, IThing, new(){
-    Stuff _stuff = new();
-    
-    public Ledger(){
-        _stuff.ThingAdded += StuffOnThingAdded;
-        _stuff.ThingRemoved += StuffOnThingRemoved;
-    }
-
-    void StuffOnThingAdded(IThing thing){
-        if (thing is TTracked tracked) {
-            Added?.Invoke(this, tracked);
-        }
-    }
-
-    void StuffOnThingRemoved(IThing thing){
-        if (thing is TTracked tracked) {
-            Removed?.Invoke(this, tracked);
-        }
-    }
+public abstract class Ledger<TTracked> : IDisposable where TTracked : class, IThing, new(){
+    IStuff _stuff => Engine.State.SH.Stuff;
 
     public TTracked? this[Uri uri] {
         get {
@@ -41,29 +22,46 @@ public class Ledger < TTracked > : IDisposable where TTracked : class, IThing, n
         }
         set {
             if (value is null) {
+                var old = _stuff.Things.GetValueOrDefault(uri);
+
+                if (old is not TTracked thing)
+                    return;
                 _stuff.Remove(uri);
+                Removed?.Invoke(this, thing);
             } else {
-                var old = _stuff.Things[uri] as Thing.Item;
+                _stuff.Things.TryGetValue(uri, out var thing);
+                var old = thing as TTracked;
 
                 if (old != value) {
                     value.Uri = uri;
-                    var item = _stuff.Add(value) as Thing.Item;
+
+                    if (old is not null) {
+                        Removed?.Invoke(this, old);
+                    }
+                    var tracked = _stuff.Add(value) as TTracked;
+                    Added?.Invoke(this, tracked);
                 }
             }
         }
     }
-    
+
     public delegate void DoAdded(Ledger<TTracked> ledger, TTracked item);
-    
+
     public event DoAdded Added;
-    
+
     public delegate void DoRemoved(Ledger<TTracked> ledger, TTracked item);
-    
+
     public event DoRemoved Removed;
 
     public void Dispose(){
-        foreach (var item in _stuff.Things.Where( thing => thing is IItem )) {
+        foreach (var item in _stuff.Things.Where(thing => thing is IItem)) {
             item.Value.Dispose();
         }
     }
+
+    public void LoadFromXmlFile(string xmlFile){
+        LoadFromXml(XElement.Load(xmlFile));
+    }
+
+    public abstract void LoadFromXml(XElement skillquest_root);
 }
