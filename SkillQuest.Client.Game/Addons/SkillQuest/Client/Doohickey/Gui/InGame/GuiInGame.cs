@@ -1,5 +1,6 @@
 using System.Numerics;
 using ImGuiNET;
+using Silk.NET.Input;
 using Silk.NET.Maths;
 using SkillQuest.API.ECS;
 using SkillQuest.API.Geometry;
@@ -22,6 +23,7 @@ public class GuiInGame : Shared.Engine.ECS.Doohickey, IDrawable, IHasControls {
     public GuiInGame(WorldPlayer localhost){
         _localhost = localhost;
         World = new World(_localhost);
+        ConnectInput();
     }
 
     public void Draw(DateTime now, TimeSpan delta){
@@ -34,7 +36,8 @@ public class GuiInGame : Shared.Engine.ECS.Doohickey, IDrawable, IHasControls {
                 ImGuiWindowFlags.NoTitleBar |
                 ImGuiWindowFlags.NoResize |
                 ImGuiWindowFlags.NoCollapse |
-                ImGuiWindowFlags.NoSavedSettings
+                ImGuiWindowFlags.NoSavedSettings |
+                ImGuiWindowFlags.NoMove
             )
         ) {
 
@@ -50,10 +53,19 @@ public class GuiInGame : Shared.Engine.ECS.Doohickey, IDrawable, IHasControls {
     }
 
     public void ConnectInput(){
-        
+        Engine.State.CL.Keyboard.KeyDown += KeyboardOnKeyDown;
+    }
+
+    void KeyboardOnKeyDown(IKeyboard arg1, Key key, int arg3){
+        if (key == Key.Escape) {
+            DisconnectInput();
+            Stuff.Add(new GuiPause()).Unstuffed += (stuff, thing) => {
+                ConnectInput();
+            };
+        }
     }
 
     public void DisconnectInput(){
-        
+        Engine.State.CL.Keyboard.KeyDown -= KeyboardOnKeyDown;
     }
 }
