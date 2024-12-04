@@ -26,7 +26,7 @@ public class GuiPause : Shared.Engine.ECS.Doohickey, IDrawable, IHasControls {
                 ImGuiWindowFlags.NoMove
             )
         ) {
-            if (ImGui.Button($"Admin Editor")) {
+            if (ImGui.Button($"Editor")) {
                 foreach (var gui in Stuff.Things.Where(g => g.Key.Scheme == "ui")) {
                     if (gui.Value == this) continue;
                     

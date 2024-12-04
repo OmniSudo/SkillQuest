@@ -22,10 +22,7 @@ public class GuiEditor : Shared.Engine.ECS.Doohickey, IDrawable {
                 ImGuiWindowFlags.NoMove
             )
         ) {
-            if (ImGui.Button($"Test")) {
-                Console.WriteLine("Test");
-            }
-
+            
             ImGui.End();
         }
     }
