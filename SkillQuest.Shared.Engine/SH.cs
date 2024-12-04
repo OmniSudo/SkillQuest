@@ -3,7 +3,7 @@ using SkillQuest.API;
 using SkillQuest.API.ECS;
 using SkillQuest.API.Network;
 using SkillQuest.API.Procedural.World;
-using SkillQuest.Shared.Engine.Doohickey.Ledger.State;
+using SkillQuest.Shared.Engine.Doohickey.State.Ledger;
 using SkillQuest.Shared.Engine.Network;
 using SkillQuest.Shared.Engine.Procedural.World;
 

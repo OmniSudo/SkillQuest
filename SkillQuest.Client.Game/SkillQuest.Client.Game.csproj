@@ -13,9 +13,9 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Addons\Metallurgy\Resources\Doohickey\Material\Metallurgy\" />
+      <Folder Include="Addons\Metallurgy\Client\Component\Material\" />
+      <Folder Include="Addons\Metallurgy\Client\Thing\" />
       <Folder Include="Addons\Mining\Client\Thing\Item\" />
-      <Folder Include="Addons\Mining\Resources\Thing\" />
       <Folder Include="res\" />
     </ItemGroup>
 

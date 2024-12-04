@@ -1,11 +1,9 @@
-using SkillQuest.Shared.Engine.Doohickey.Item;
-using SkillQuest.Shared.Engine.Doohickey.Material.Ledger;
-
-namespace SkillQuest.Shared.Engine.Doohickey.Ledger.State;
+namespace SkillQuest.Shared.Engine.Doohickey.State.Ledger;
 
 public class GlobalLedger{
-    public ItemLedger Items { get; set; } = new ItemLedger();
+    public ItemLedger Items { get; } = new ItemLedger();
     
-    public MaterialLedger Materials { get; set; } = new MaterialLedger();
+    public MaterialLedger Materials { get; } = new MaterialLedger();
     
+    public ComponentLedger Components { get; } = new ComponentLedger();
 }

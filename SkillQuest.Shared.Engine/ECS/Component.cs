@@ -1,8 +1,12 @@
+using System.Xml;
+using System.Xml.Schema;
+using System.Xml.Serialization;
 using SkillQuest.API.ECS;
 
 namespace SkillQuest.Shared.Engine.ECS;
 
-public class Component<TAttached> : IComponent where TAttached : class, IComponent{
+public class Component<TAttached> : IComponent, IXmlSerializable where TAttached : class, IComponent{
+    [XmlIgnore]
     public IThing? Thing {
         get {
             return _thing;
@@ -29,8 +33,20 @@ public class Component<TAttached> : IComponent where TAttached : class, ICompone
     public event IComponent.DoConnectThing? ConnectThing;
 
     public event IComponent.DoDisconnectThing? DisconnectThing;
-
-    public string Name { get; set; }
+    
+    public string Name => GetType().Name;
     
     IThing? _thing;
+    
+    public virtual XmlSchema? GetSchema(){
+        return null;
+    }
+
+    public virtual void ReadXml(XmlReader reader){
+        throw new NotImplementedException();
+    }
+
+    public virtual void WriteXml(XmlWriter writer){
+        throw new NotImplementedException();
+    }
 }
