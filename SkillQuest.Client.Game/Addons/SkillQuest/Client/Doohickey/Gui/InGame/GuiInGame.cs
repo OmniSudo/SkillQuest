@@ -23,7 +23,8 @@ public class GuiInGame : Shared.Engine.ECS.Doohickey, IDrawable, IHasControls {
     public GuiInGame(WorldPlayer localhost){
         _localhost = localhost;
         World = new World(_localhost);
-        ConnectInput();
+        this.Stuffed += OnStuffed;
+        this.Unstuffed += OnUnstuffed;
     }
 
     public void Draw(DateTime now, TimeSpan delta){
@@ -52,20 +53,29 @@ public class GuiInGame : Shared.Engine.ECS.Doohickey, IDrawable, IHasControls {
         }
     }
 
-    public void ConnectInput(){
-        Engine.State.CL.Keyboard.KeyDown += KeyboardOnKeyDown;
+    void OnStuffed(IStuff stuff, IThing thing){
+        ConnectInput();
+    }
+
+    void OnUnstuffed(IStuff stuff, IThing thing){
+        DisconnectInput();
     }
 
     void KeyboardOnKeyDown(IKeyboard arg1, Key key, int arg3){
         if (key == Key.Escape) {
             DisconnectInput();
             Stuff.Add(new GuiPause()).Unstuffed += (stuff, thing) => {
-                ConnectInput();
+                if ( Stuff is not null ) ConnectInput();
             };
         }
+    }
+
+    public void ConnectInput(){
+        Engine.State.CL.Keyboard.KeyDown += KeyboardOnKeyDown;
     }
 
     public void DisconnectInput(){
         Engine.State.CL.Keyboard.KeyDown -= KeyboardOnKeyDown;
     }
+
 }
