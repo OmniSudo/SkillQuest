@@ -33,8 +33,24 @@ public class Thing : IThing{
         }
     }
 
+    Uri? _relative = null;
 
-    public virtual Uri? Uri { get; set; }
+    Uri? _uri;
+    
+    public virtual Uri? Uri {
+        get {
+            return _uri;
+        }
+        set {
+            if (!value?.IsAbsoluteUri ?? false) {
+                _relative = value;
+                _uri = new Uri(Parent?.Uri ?? new Uri("thing://skill.quest/"), _relative);
+                return;
+            }
+            _relative = null;
+            _uri = value;
+        }
+    }
 
     public event IThing.DoStuffed Stuffed;
 
@@ -106,6 +122,10 @@ public class Thing : IThing{
             var old = _parent;
 
             _parent = value;
+
+            if (_relative is not null) {
+                Uri = _relative;
+            }
 
             if (old is not null) {
                 old[this.Uri] = null;
