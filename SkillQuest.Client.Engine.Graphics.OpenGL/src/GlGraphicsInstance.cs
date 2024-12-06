@@ -96,19 +96,19 @@ public class GlGraphicsInstance : IGraphicsInstance {
         return _surfaceFactory.Build( Gl, gltfPath );
     }
     
-    private ConcurrentDictionary< Uri, IDrawable > _renderables = new();
+    private ConcurrentDictionary< Uri, IThing > _renderables = new();
 
     void OnStuffThingAdded(IThing thing){
         // ReSharper disable once SuspiciousTypeConversion.Global
-        if (thing is IDrawable renderable) {
-            _renderables.TryAdd(thing.Uri, renderable);
+        if (thing is IDrawable) {
+            _renderables.TryAdd(thing.Uri, thing);
         }
     }
 
     void OnStuffThingRemoved(IThing thing){
         // ReSharper disable once SuspiciousTypeConversion.Global
-        if (thing is IDrawable renderable) {
-            if (_renderables.TryGetValue(thing.Uri, out var old) && old == renderable) {
+        if (thing is IDrawable) {
+            if (_renderables.TryGetValue(thing.Uri, out var old) && old == thing) {
                 _renderables.TryRemove(thing.Uri, out _);
             }
         }
@@ -138,7 +138,9 @@ public class GlGraphicsInstance : IGraphicsInstance {
             
             var clone = _renderables.ToImmutableDictionary();
             foreach (var pair in clone) {
-                pair.Value.Draw(now, delta);
+                if ( pair.Value.Parent is null ) {
+                    (pair.Value as IDrawable )?.Draw(now, delta);
+                }
             }
             
             Gui.Render();

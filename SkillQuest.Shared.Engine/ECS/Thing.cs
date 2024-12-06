@@ -42,7 +42,7 @@ public class Thing : IThing{
             return _uri;
         }
         set {
-            if (!value?.IsAbsoluteUri ?? false) {
+            if (!value?.IsAbsoluteUri ?? false ) {
                 _relative = value;
                 _uri = new Uri(Parent?.Uri ?? new Uri("thing://skill.quest/"), _relative);
                 return;
