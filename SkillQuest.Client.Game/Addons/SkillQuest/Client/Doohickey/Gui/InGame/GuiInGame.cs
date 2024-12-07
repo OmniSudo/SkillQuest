@@ -64,7 +64,7 @@ public class GuiInGame : Shared.Engine.ECS.Doohickey, IDrawable, IHasControls {
     void KeyboardOnKeyDown(IKeyboard arg1, Key key, int arg3){
         if (key == Key.Escape) {
             DisconnectInput();
-            Stuff.Add(new GuiPause()).Unstuffed += (stuff, thing) => {
+            Stuff.Add(new GuiPause(_localhost)).Unstuffed += (stuff, thing) => {
                 if ( Stuff is not null ) ConnectInput();
             };
         }

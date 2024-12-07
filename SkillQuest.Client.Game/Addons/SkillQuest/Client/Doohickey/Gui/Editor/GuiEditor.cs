@@ -4,19 +4,23 @@ using System.Numerics;
 using ImGuiNET;
 using Silk.NET.OpenGL;
 using SkillQuest.API.ECS;
+using SkillQuest.API.Thing.Character;
 using SkillQuest.Client.Engine.Graphics.API;
 using SkillQuest.Client.Engine.Input;
 
 namespace SkillQuest.Client.Game.Addons.SkillQuest.Client.Doohickey.Gui.InGame;
 
 public class GuiEditor : Shared.Engine.ECS.Doohickey, IDrawable {
-    public GuiEditor() : base( new Uri("ui://skill.quest/editor") ) {
+    public GuiEditor(IPlayerCharacter player) : base( new Uri("ui://skill.quest/editor") ) {
         Stuffed += (stuff, thing) => {
             var explorer = new GuiElementThingExplorer();
             explorer.Parent = this;
             stuff.Add( explorer );
         };
+        Player = player;
     }
+    
+    IPlayerCharacter Player { get; set; }
     
     public void Draw(DateTime now, TimeSpan delta){
         ImGui.SetNextWindowSize(ImGui.GetIO().DisplaySize);
