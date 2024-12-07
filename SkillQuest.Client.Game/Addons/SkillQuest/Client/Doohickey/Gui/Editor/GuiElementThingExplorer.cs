@@ -84,7 +84,7 @@ public class GuiElementThingExplorer : Shared.Engine.ECS.Doohickey, IDrawable {
     }
 
     private void DrawNode(DirNode node){
-        ImGui.TreePush("#test");
+        ImGui.TreePush(node.Name);
         ImGui.PushID(node.Name);
         
         if (ImGui.Button( " " ) ) {
