@@ -4,6 +4,6 @@
             asm="SkillQuest.Client.Game"
             type="SkillQuest.Client.Game.Addons.Mining.Client.Component.Item.Mining.Ore"
     >
-        <Alias>component://skill.quest/item/mining/ore</Alias>
+        <Alias>component://skill.quest/mining/ore</Alias>
     </Component>
 </SkillQuest>
