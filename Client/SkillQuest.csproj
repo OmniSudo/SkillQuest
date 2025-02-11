@@ -1,0 +1,23 @@
+<Project Sdk="Godot.NET.Sdk/4.3.0">
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <TargetFramework Condition=" '$(GodotTargetPlatform)' == 'android' ">net7.0</TargetFramework>
+    <TargetFramework Condition=" '$(GodotTargetPlatform)' == 'ios' ">net8.0</TargetFramework>
+    <EnableDynamicLoading>true</EnableDynamicLoading>
+    <Nullable>enable</Nullable>
+    <RootNamespace>SkillQuest</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Content Include=".gitattributes" />
+    <Content Include=".gitignore" />
+    <Content Include="Client\scenes\skillquest.client.tscn" />
+    <Content Include="icon.svg" />
+    <Content Include="icon.svg.import" />
+    <Content Include="project.godot" />
+    <Content Include="SkillQuest.csproj.DotSettings" />
+    <Content Include="SkillQuest.sln" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Client\code\" />
+  </ItemGroup>
+</Project>

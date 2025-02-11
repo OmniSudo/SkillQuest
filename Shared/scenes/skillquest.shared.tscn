@@ -1,0 +1,11 @@
+[gd_scene format=3 uid="uid://cy730oecagcjh"]
+
+[node name="Shared" type="Node"]
+
+[node name="Ledger" type="Node" parent="."]
+
+[node name="ItemStacks" type="Node" parent="Ledger"]
+
+[node name="Universe" type="Node" parent="."]
+
+[node name="System" type="Node" parent="."]
