@@ -1,11 +1,13 @@
-[gd_scene format=3 uid="uid://c4xng2gciik4k"]
+[gd_scene load_steps=2 format=3 uid="uid://c4xng2gciik4k"]
 
-[node name="Node" type="Node"]
+[ext_resource type="PackedScene" uid="uid://cy730oecagcjh" path="res://Shared/scenes/skillquest.shared.tscn" id="1_b3tnv"]
 
-[node name="Ledger" type="Node" parent="."]
+[node name="SkillQuest" type="Node"]
 
-[node name="ItemStacks" type="Node" parent="Ledger"]
+[node name="Shared" parent="." instance=ExtResource("1_b3tnv")]
 
-[node name="Universe" type="Node" parent="."]
+[node name="Server" type="Node" parent="."]
 
-[node name="System" type="Node" parent="."]
+[node name="Client" type="Node" parent="."]
+
+[node name="OmniSudo" type="Node" parent="Client"]
