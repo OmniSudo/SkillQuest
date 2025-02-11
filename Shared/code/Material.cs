@@ -2,6 +2,8 @@ using Godot;
 using System;
 using Godot.Collections;
 
+namespace SkillQuest;
+
 public partial class Material : Node
 {
 	[Export] public string Name { get; set; }

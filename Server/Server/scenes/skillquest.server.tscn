@@ -1,13 +1,15 @@
 [gd_scene load_steps=2 format=3 uid="uid://c4xng2gciik4k"]
 
-[ext_resource type="PackedScene" uid="uid://cy730oecagcjh" path="res://Shared/scenes/skillquest.shared.tscn" id="1_b3tnv"]
+[ext_resource type="Script" path="res://Server/code/Server.cs" id="1_4s0ga"]
+[ext_resource type="PackedScene" uid="uid://cy730oecagcjh" path="res://Shared/scenes/skillquest.shared.tscn" id="1_yllkk"]
 
 [node name="SkillQuest" type="Node"]
 
-[node name="Shared" parent="." instance=ExtResource("1_b3tnv")]
-
-[node name="Server" type="Node" parent="."]
+[node name="Shared" parent="." instance=ExtResource("1_yllkk")]
 
 [node name="Client" type="Node" parent="."]
 
 [node name="OmniSudo" type="Node" parent="Client"]
+
+[node name="Server" type="Node" parent="."]
+script = ExtResource("1_4s0ga")

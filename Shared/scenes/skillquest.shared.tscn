@@ -1,6 +1,9 @@
-[gd_scene format=3 uid="uid://cy730oecagcjh"]
+[gd_scene load_steps=2 format=3 uid="uid://cy730oecagcjh"]
+
+[ext_resource type="Script" path="res://Shared/code/Shared.cs" id="1_k2l27"]
 
 [node name="Shared" type="Node"]
+script = ExtResource("1_k2l27")
 
 [node name="Ledger" type="Node" parent="."]
 

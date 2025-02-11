@@ -1,6 +1,6 @@
 ﻿using Godot;
 
-namespace SkillQuest.Core;
+namespace SkillQuest;
 
 public partial class ItemStack : Node {
     [Export] public Item Item { get; set; }

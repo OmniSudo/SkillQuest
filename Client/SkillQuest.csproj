@@ -14,4 +14,13 @@
   <ItemGroup>
     <Folder Include="Client\code\" />
   </ItemGroup>
+  <ItemGroup>
+    <Content Include="Shared\lib\**">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Facepunch.Steamworks" Version="2.3.3" />
+    <PackageReference Include="Facepunch.Steamworks" Version="2.3.3" />
+  </ItemGroup>
 </Project>

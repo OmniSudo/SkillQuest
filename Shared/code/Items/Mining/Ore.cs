@@ -1,6 +1,6 @@
 using System;
 using Godot;
-using SkillQuest.Core;
+using SkillQuest;
 
 namespace SkillQuest.Items.Mining;
 

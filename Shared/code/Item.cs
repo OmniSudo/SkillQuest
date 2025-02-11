@@ -1,7 +1,7 @@
 using Godot;
 using System;
 
-namespace SkillQuest.Core;
+namespace SkillQuest;
 
 public partial class Item : Node {
 	[Export] public string Singular { get; set; } = "";

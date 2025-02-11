@@ -11,7 +11,70 @@
     <Folder Include="Server\code\" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="..\Shared\lib\steamworks\linux32.meta">
+      <Link>Shared\lib\steamworks\linux32.meta</Link>
+    </Content>
+    <Content Include="..\Shared\lib\steamworks\linux32\libsteam_api.so">
+      <Link>Shared\lib\steamworks\linux32\libsteam_api.so</Link>
+    </Content>
+    <Content Include="..\Shared\lib\steamworks\linux32\libsteam_api.so.meta">
+      <Link>Shared\lib\steamworks\linux32\libsteam_api.so.meta</Link>
+    </Content>
+    <Content Include="..\Shared\lib\steamworks\linux64.meta">
+      <Link>Shared\lib\steamworks\linux64.meta</Link>
+    </Content>
+    <Content Include="..\Shared\lib\steamworks\linux64\libsteam_api.so">
+      <Link>Shared\lib\steamworks\linux64\libsteam_api.so</Link>
+    </Content>
+    <Content Include="..\Shared\lib\steamworks\linux64\libsteam_api.so.meta">
+      <Link>Shared\lib\steamworks\linux64\libsteam_api.so.meta</Link>
+    </Content>
+    <Content Include="..\Shared\lib\steamworks\osx.meta">
+      <Link>Shared\lib\steamworks\osx.meta</Link>
+    </Content>
+    <Content Include="..\Shared\lib\steamworks\osx\libsteam_api.dylib">
+      <Link>Shared\lib\steamworks\osx\libsteam_api.dylib</Link>
+    </Content>
+    <Content Include="..\Shared\lib\steamworks\osx\libsteam_api.dylib.meta">
+      <Link>Shared\lib\steamworks\osx\libsteam_api.dylib.meta</Link>
+    </Content>
+    <Content Include="..\Shared\lib\steamworks\steam_api.dll">
+      <Link>Shared\lib\steamworks\steam_api.dll</Link>
+    </Content>
+    <Content Include="..\Shared\lib\steamworks\steam_api.dll.meta">
+      <Link>Shared\lib\steamworks\steam_api.dll.meta</Link>
+    </Content>
+    <Content Include="..\Shared\lib\steamworks\steam_api.lib">
+      <Link>Shared\lib\steamworks\steam_api.lib</Link>
+    </Content>
+    <Content Include="..\Shared\lib\steamworks\steam_api.lib.meta">
+      <Link>Shared\lib\steamworks\steam_api.lib.meta</Link>
+    </Content>
+    <Content Include="..\Shared\lib\steamworks\win64.meta">
+      <Link>Shared\lib\steamworks\win64.meta</Link>
+    </Content>
+    <Content Include="..\Shared\lib\steamworks\win64\steam_api64.dll">
+      <Link>Shared\lib\steamworks\win64\steam_api64.dll</Link>
+    </Content>
+    <Content Include="..\Shared\lib\steamworks\win64\steam_api64.dll.meta">
+      <Link>Shared\lib\steamworks\win64\steam_api64.dll.meta</Link>
+    </Content>
+    <Content Include="..\Shared\lib\steamworks\win64\steam_api64.lib">
+      <Link>Shared\lib\steamworks\win64\steam_api64.lib</Link>
+    </Content>
+    <Content Include="..\Shared\lib\steamworks\win64\steam_api64.lib.meta">
+      <Link>Shared\lib\steamworks\win64\steam_api64.lib.meta</Link>
+    </Content>
     <Content Include="icon.svg" />
     <Content Include="Server\scenes\skillquest.server.tscn" />
+    <Content Remove="Shared\lib\**" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Shared\lib\**">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Facepunch.Steamworks" Version="2.3.3" />
   </ItemGroup>
 </Project>
