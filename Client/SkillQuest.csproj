@@ -8,14 +8,8 @@
     <RootNamespace>SkillQuest</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <Content Include=".gitattributes" />
-    <Content Include=".gitignore" />
     <Content Include="Client\scenes\skillquest.client.tscn" />
     <Content Include="icon.svg" />
-    <Content Include="icon.svg.import" />
-    <Content Include="project.godot" />
-    <Content Include="SkillQuest.csproj.DotSettings" />
-    <Content Include="SkillQuest.sln" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Client\code\" />
