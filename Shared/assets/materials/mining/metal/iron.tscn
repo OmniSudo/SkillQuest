@@ -1,0 +1,7 @@
+[gd_scene load_steps=2 format=3 uid="uid://bpponi4jq1ctr"]
+
+[ext_resource type="Script" path="res://Shared/code/Material.cs" id="1_y8wn7"]
+
+[node name="iron" type="Node"]
+script = ExtResource("1_y8wn7")
+Name = "Iron"

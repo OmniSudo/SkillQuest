@@ -7,6 +7,10 @@ script = ExtResource("1_k2l27")
 
 [node name="Ledger" type="Node" parent="."]
 
+[node name="Items" type="Node" parent="Ledger"]
+
+[node name="Materials" type="Node" parent="Ledger"]
+
 [node name="ItemStacks" type="Node" parent="Ledger"]
 
 [node name="Universe" type="Node" parent="."]

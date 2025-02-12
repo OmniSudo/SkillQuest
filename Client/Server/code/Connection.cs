@@ -1,4 +1,4 @@
-﻿namespace SkillQuest.Server;
+﻿namespace SkillQuest;
 
 public class Connection {
     

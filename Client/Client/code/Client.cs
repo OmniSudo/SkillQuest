@@ -1,8 +1,8 @@
 using Godot;
-using SkillQuest;
 using Steamworks;
 using System;
-using System.Diagnostics;
+
+namespace SkillQuest;
 
 public partial class Client : Node {
     public override void _Ready() {

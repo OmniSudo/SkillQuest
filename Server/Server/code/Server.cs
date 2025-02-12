@@ -1,13 +1,13 @@
 using Godot;
-using SkillQuest;
-using System;
 using Steamworks;
+using System;
 using System.Net;
+
+namespace SkillQuest;
 
 public partial class Server : Node {
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready() {
-		
 		try {
 			SteamServer.Init( SteamAPI.AppID, new SteamServerInit() {
 				DedicatedServer = true,
