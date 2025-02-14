@@ -5,7 +5,8 @@
       "__guid": "3c52b3a0-9567-420b-bc53-ad143da8ddfa",
       "Flags": 0,
       "Name": "Main Camera",
-      "Position": "-300,0,100",
+      "Position": "-137.9456,0,28.70712",
+      "Rotation": "-0.0002109528,0.1017619,0.002062238,0.9948066",
       "Enabled": true,
       "Components": [
         {
@@ -87,6 +88,37 @@
             "_type": "gameobject",
             "prefab": "shared/shared.prefab"
           }
+        }
+      ]
+    },
+    {
+      "__guid": "87c8dc65-385c-4cae-a92e-5cff61c10af5",
+      "Flags": 0,
+      "Name": "Plane",
+      "Enabled": true,
+      "Components": [
+        {
+          "__type": "Sandbox.ModelRenderer",
+          "__guid": "a8148c0f-87fa-40b9-b01d-da591128f64a",
+          "BodyGroups": 18446744073709551615,
+          "CreateAttachments": false,
+          "MaterialGroup": null,
+          "MaterialOverride": null,
+          "Model": "models/dev/plane.vmdl",
+          "OnComponentDestroy": null,
+          "OnComponentDisabled": null,
+          "OnComponentEnabled": null,
+          "OnComponentFixedUpdate": null,
+          "OnComponentStart": null,
+          "OnComponentUpdate": null,
+          "RenderOptions": {
+            "GameLayer": true,
+            "OverlayLayer": false,
+            "BloomLayer": false,
+            "AfterUILayer": false
+          },
+          "RenderType": "On",
+          "Tint": "1,1,1,1"
         }
       ]
     }

@@ -1,7 +1,7 @@
 {
   "Title": "SkillQuest",
   "Type": "game",
-  "Org": "local",
+  "Org": "skillquest",
   "Ident": "skillquest",
   "Schema": 1,
   "IncludeSourceFiles": false,
