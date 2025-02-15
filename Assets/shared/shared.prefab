@@ -5,7 +5,18 @@
     "Name": "shared",
     "Enabled": true,
     "NetworkMode": 0,
-    "Components": [],
+    "Components": [
+      {
+        "__type": "Sandbox.SQ.SharedController",
+        "__guid": "4fa43772-a4a0-42f3-8523-e5723b960858",
+        "OnComponentDestroy": null,
+        "OnComponentDisabled": null,
+        "OnComponentEnabled": null,
+        "OnComponentFixedUpdate": null,
+        "OnComponentStart": null,
+        "OnComponentUpdate": null
+      }
+    ],
     "Children": [
       {
         "__guid": "6b273088-9571-4722-b437-206b847db265",

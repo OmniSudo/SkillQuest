@@ -1,5 +1,6 @@
 using Sandbox.Diagnostics;
 using System.IO;
+using System.Net.Sockets;
 
 namespace Sandbox.SQ;
 
@@ -11,18 +12,18 @@ public sealed class SharedController : Component {
 			Log.Info( "Starting Server" );
 
 			var prefab = GameObject.GetComponentInParent< SkillQuest >( ).ServerPrefab;
-			var server = prefab.Clone( Vector3.Zero );
+			SkillQuest.Server = prefab.Clone( Vector3.Zero );
 
-			server.Name = "Server";
-			server.SetParent( this.GameObject.Parent );
+			SkillQuest.Server.Name = "Server";
+			SkillQuest.Server.SetParent( this.GameObject.Parent );
 		} else if ( Networking.IsClient ) {
 			Log.Info( "Starting Client" );
 
 			var prefab = GameObject.GetComponentInParent< SkillQuest >( ).ClientPrefab;
-			var client = prefab.Clone( Vector3.Zero );
+			SkillQuest.Client = prefab.Clone( Vector3.Zero );
 
-			client.Name = "Client";
-			client.SetParent( this.GameObject.Parent );
+			SkillQuest.Client.Name = "Client";
+			SkillQuest.Client.SetParent( this.GameObject.Parent );
 		}
 	}
 }

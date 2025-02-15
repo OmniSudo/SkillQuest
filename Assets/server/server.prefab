@@ -7,8 +7,8 @@
     "NetworkMode": 0,
     "Components": [
       {
-        "__type": "Sandbox.SQ.Server.ServerController",
-        "__guid": "c8871d34-ae9a-42ba-bc28-e79fea5bb6f5",
+        "__type": "Sandbox.SQ.ServerController",
+        "__guid": "9b59aa7f-df88-4007-98ac-f740a042b513",
         "OnComponentDestroy": null,
         "OnComponentDisabled": null,
         "OnComponentEnabled": null,
