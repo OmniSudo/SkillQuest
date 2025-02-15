@@ -64,30 +64,17 @@
       "__guid": "bc111a41-a701-4f06-8ce1-8df6306a95e6",
       "Flags": 0,
       "Name": "SkillQuest",
-      "Position": "149.3263,149.3264,-211.1794",
       "Enabled": true,
       "Components": [
         {
           "__type": "Sandbox.SkillQuest",
           "__guid": "5de55024-1b07-4840-b3cf-967cd1716518",
-          "ClientPrefab": {
-            "_type": "gameobject",
-            "prefab": "client/client.prefab"
-          },
           "OnComponentDestroy": null,
           "OnComponentDisabled": null,
           "OnComponentEnabled": null,
           "OnComponentFixedUpdate": null,
           "OnComponentStart": null,
-          "OnComponentUpdate": null,
-          "ServerPrefab": {
-            "_type": "gameobject",
-            "prefab": "server/server.prefab"
-          },
-          "SharedPrefab": {
-            "_type": "gameobject",
-            "prefab": "shared/shared.prefab"
-          }
+          "OnComponentUpdate": null
         }
       ]
     },

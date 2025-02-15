@@ -2,6 +2,37 @@
   "__guid": "18babc6e-9c8e-41f0-860e-6fc24623602f",
   "GameObjects": [
     {
+      "__guid": "b11394fc-e5e8-4a25-9862-c0a32afa5021",
+      "Flags": 0,
+      "Name": "Plane",
+      "Enabled": true,
+      "Components": [
+        {
+          "__type": "Sandbox.ModelRenderer",
+          "__guid": "aa82c8e1-fc75-46a3-966b-ff1da31c3996",
+          "BodyGroups": 18446744073709551615,
+          "CreateAttachments": false,
+          "MaterialGroup": null,
+          "MaterialOverride": null,
+          "Model": "models/dev/plane.vmdl",
+          "OnComponentDestroy": null,
+          "OnComponentDisabled": null,
+          "OnComponentEnabled": null,
+          "OnComponentFixedUpdate": null,
+          "OnComponentStart": null,
+          "OnComponentUpdate": null,
+          "RenderOptions": {
+            "GameLayer": true,
+            "OverlayLayer": false,
+            "BloomLayer": false,
+            "AfterUILayer": false
+          },
+          "RenderType": "On",
+          "Tint": "1,1,1,1"
+        }
+      ]
+    },
+    {
       "__guid": "3c52b3a0-9567-420b-bc53-ad143da8ddfa",
       "Flags": 0,
       "Name": "Main Camera",
@@ -69,24 +100,12 @@
         {
           "__type": "Sandbox.SkillQuest",
           "__guid": "5de55024-1b07-4840-b3cf-967cd1716518",
-          "ClientPrefab": {
-            "_type": "gameobject",
-            "prefab": "client/client.prefab"
-          },
           "OnComponentDestroy": null,
           "OnComponentDisabled": null,
           "OnComponentEnabled": null,
           "OnComponentFixedUpdate": null,
           "OnComponentStart": null,
-          "OnComponentUpdate": null,
-          "ServerPrefab": {
-            "_type": "gameobject",
-            "prefab": "server/server.prefab"
-          },
-          "SharedPrefab": {
-            "_type": "gameobject",
-            "prefab": "shared/shared.prefab"
-          }
+          "OnComponentUpdate": null
         }
       ]
     }
