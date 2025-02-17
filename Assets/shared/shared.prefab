@@ -19,10 +19,11 @@
     ],
     "Children": [
       {
-        "__guid": "6b273088-9571-4722-b437-206b847db265",
+        "__guid": "d5243d85-8e25-4486-98e1-aa814aeb7ad9",
         "Flags": 0,
-        "Name": "Ledger",
-        "Enabled": true
+        "Name": "Characters",
+        "Enabled": true,
+        "NetworkMode": 0
       }
     ],
     "__variables": [],
