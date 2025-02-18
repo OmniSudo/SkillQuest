@@ -1,0 +1,28 @@
+@using Sandbox;
+@using Sandbox.SQ.System.Login
+@using Sandbox.UI;
+@inherits PanelComponent
+
+@namespace Sandbox.SQ.UI.Character
+
+<root class="background">
+	<div class="character-select">
+		@foreach ( var character in Characters ) {
+			<div class="character-selection">
+				<p>@character.Name</p>
+			</div>
+		}
+	</div>
+	<div class="selected-character">
+
+	</div>
+</root>
+
+@code {
+	public List< CharacterInfo > Characters { get; set; }
+
+	protected override int BuildHash ( ) {
+		return Characters.GetHashCode();
+	}
+
+}

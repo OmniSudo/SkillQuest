@@ -24,14 +24,12 @@
       "__guid": "18d8072f-a577-4c4d-b834-ae42589ac2eb",
       "Flags": 0,
       "Name": "DELETE",
-      "Position": "-165.1776,8.864786,20.30998",
       "Enabled": true,
       "Children": [
         {
           "__guid": "0f2020bf-8dcd-47dd-960b-f1cba0b52837",
           "Flags": 0,
           "Name": "Player Controller",
-          "Position": "165.1776,-8.864786,-20.30998",
           "Enabled": true,
           "Components": [
             {
@@ -1153,7 +1151,6 @@
           "__guid": "b11394fc-e5e8-4a25-9862-c0a32afa5021",
           "Flags": 0,
           "Name": "Plane",
-          "Position": "165.1776,-8.864786,-20.30998",
           "Scale": "3,3,3",
           "Enabled": true,
           "Components": [

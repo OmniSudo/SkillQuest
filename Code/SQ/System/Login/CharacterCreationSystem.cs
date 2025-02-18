@@ -37,7 +37,6 @@ public static class CharacterCreationSystem {
 		var ret = Client.Create().Result;
 
 		ret.SteamId = Rpc.Caller.SteamId;
-		ret.Username = Rpc.Caller.Name;
 
 		__didCreateCharacter( call, ret );
 	}

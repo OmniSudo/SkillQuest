@@ -47,26 +47,31 @@ public partial class SkillQuest : Component {
 		public ScreenPanel UI { get; set; }
 
 		protected override void OnStart ( ) {
-			UI = new GameObject( this.GameObject, true, "UI" ).AddComponent< ScreenPanel >();
+			UI = new GameObject( this.GameObject, true, "UI" ) {
+					NetworkMode = NetworkMode.Never
+			}.AddComponent< ScreenPanel >();
 
 			// TODO: Select character to load
 			Log.Info( "Requesting Characters" );
 
 			Task.RunInThreadAsync(
-							async () => {
-								var chars = await CharacterSelectSystem.Client.GetCharacters();
-								Log.Info( $"Found {chars.Count} characters" );
-							}
-					);
+					() => {
+						var chars = CharacterSelectSystem.Client.GetCharacters();
+						Log.Info( $"Found {chars.Count} characters" );
+						var selected = CharacterSelectSystem.Client.SelectCharacter( chars );
+					}
+			);
 			Log.Info( "Started Client" );
 		}
 	}
 
 	public class Server : Component, Component.INetworkListener {
 		public delegate void DoConnected ( Connection connection );
+
 		public static event DoConnected Connected;
-		
+
 		public delegate void DoDisconnected ( Connection connection );
+
 		public static event DoDisconnected Disconnected;
 
 		public ScreenPanel UI { get; set; }
@@ -83,11 +88,11 @@ public partial class SkillQuest : Component {
 			Log.Info( $"Client {channel.DisplayName} connected" );
 
 			// TODO: CREATE CHARACTER GAMEOBJECT
-			
+
 			try {
 				Connected?.Invoke( channel );
 			} catch ( Exception e ) {
-				Log.Info( $"{channel.DisplayName}\n{e}\n{e.StackTrace}"  );
+				Log.Info( $"{channel.DisplayName}\n{e}\n{e.StackTrace}" );
 			}
 		}
 
@@ -97,7 +102,7 @@ public partial class SkillQuest : Component {
 			try {
 				Disconnected?.Invoke( channel );
 			} catch ( Exception e ) {
-				Log.Info( $"{channel.DisplayName}\n{e}\n{e.StackTrace}"  );
+				Log.Info( $"{channel.DisplayName}\n{e}\n{e.StackTrace}" );
 			}
 			// TODO: DELETE CHARACTER GAMEOBJECT
 		}

@@ -1,4 +1,6 @@
-﻿using Sandbox.SQ.Actor;
+﻿using Microsoft.VisualBasic;
+using Sandbox.SQ.Actor;
+using Sandbox.SQ.UI.Character;
 using System;
 using System.IO;
 using System.Text.Json.Nodes;
@@ -9,26 +11,38 @@ namespace Sandbox.SQ.System.Login;
 
 public static class CharacterSelectSystem {
 	public static class Client {
-		public static async Task< List< CharacterInfo > > GetCharacters ( ) {
+		public static List< CharacterInfo > GetCharacters ( ) {
 			var guid = Guid.NewGuid();
 			var tcs  = _tasks [ guid ] = new();
-			
+
 			_sv_getCharactersFromFilesystem( guid );
-			
-			return await tcs.Task;
+
+			return tcs.Task.Result;
+		}
+
+		public static CharacterInfo SelectCharacter ( List< CharacterInfo > characters ) {
+			Log.Info( "Selecting character" );
+			var selector = SkillQuest.CL.UI.AddComponent< CharacterSelect >();
+
+			selector.Characters = characters;
+
+			return characters.FirstOrDefault();
 		}
 	}
 
 	public static class Server {
 		public static async Task< List< CharacterInfo > > GetCharacters ( Connection connection ) {
 			var characterListFile = $"server/characters/{connection.SteamId.ToString()}.json";
-			var characters =
-					FileSystem.OrganizationData.ReadJsonOrDefault< List< CharacterInfo > >( characterListFile, [ ] );
+			var characters = FileSystem.OrganizationData.ReadJsonOrDefault< CharacterInfo [ ] >( characterListFile, [ ] );
 
-			if ( !FileSystem.Data.FileExists( characterListFile ) || characters.Count == 0 ) {
+			Log.Info(
+					$"Loaded {characters.Length} characters from {FileSystem.OrganizationData.GetFullPath( characterListFile )}"
+			);
+
+			if ( !FileSystem.OrganizationData.FileExists( characterListFile ) || characters.Length == 0 ) {
 				FileSystem.OrganizationData.CreateDirectory( Path.GetDirectoryName( characterListFile ) );
 
-				var tcs = new TaskCompletionSource< CharacterInfo  >();
+				var tcs = new TaskCompletionSource< CharacterInfo >();
 
 				void ServerOnDisconnected ( Connection c ) {
 					Log.Info( $"Aborting character creation wait" );
@@ -46,16 +60,14 @@ public static class CharacterSelectSystem {
 							tcs.SetResult( task.Result );
 						}
 				);
-				
+
 				var res = await tcs.Task;
-				
-				FileSystem.OrganizationData.WriteJson< List< CharacterInfo > >(
-						characterListFile, characters = ( res is null ? [ ] : [ res ] )
-				);
+				characters = res is null ? [ ] : [ res ];
+
+				FileSystem.OrganizationData.WriteJson( characterListFile, characters );
 			}
-			
-			Log.Info( $"Loaded character list for user {connection.Name}"  );
-			return characters;
+
+			return characters.ToList();
 		}
 	}
 
