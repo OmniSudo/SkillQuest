@@ -11,11 +11,13 @@
 <root>
 	<div class="background">
 		<div class="character-select">
-			@foreach ( var character in Characters ) {
-				<button class="character-selection" onclick=@( ( ) => { CharacterButtonOnClick( character ); } )>
-					@character.Name
-				</button>
+			<button class="character-selection" onclick=@(
+			( ) => {
+				CharacterButtonOnClick();
 			}
+			)>
+				Exoa Ilter
+			</button>
 		</div>
 		<div class="selected-character">
 
@@ -28,27 +30,30 @@
 
 	private TaskCompletionSource< CharacterInfo > _tcs = new();
 
-	private void CharacterButtonOnClick ( CharacterInfo character ) {
-		if ( !_tcs.Task.IsCompleted ) _tcs.SetResult( character );
-		DestroyGameObject();
+	private void CharacterButtonOnClick ( ) {
+		if ( !_tcs.Task.IsCompleted )
+			_tcs.SetResult(
+				new CharacterInfo() {
+					Name = "Exoa Ilter"
+				}
+			);
 	}
 
 	protected override int BuildHash ( ) {
 		return HashCode.Combine( Characters );
 	}
 
-	public static Task< CharacterInfo > SelectCharacter ( CharacterInfo [ ] characters ) {
+	public static Task< CharacterInfo > CreateCharacter () {
 		Log.Info( "Spawning Character Select UI" );
 		var tcs = new TaskCompletionSource< CharacterInfo >();
-		
-		Sandbox.SkillQuest.SH.CreateOnMainThread( SkillQuest.CL.UI.GameObject, name: "Character Selector" ).ContinueWith(
-				t => {
-					var cs = t.Result.AddComponent< CharacterSelect >();
-					cs.Characters = characters;
-					cs._tcs.Task.ContinueWith( tt => { tcs.SetResult( tt.Result ); } );
-				}
+
+		Sandbox.SkillQuest.SH.CreateOnMainThread( SkillQuest.CL.UI.GameObject, name: "Character Creator" ).ContinueWith(
+			t => {
+				var cs = t.Result.AddComponent< CharacterCreate >();
+				cs._tcs.Task.ContinueWith( tt => { tcs.SetResult( tt.Result ); } );
+			}
 		);
-		
+
 		return tcs.Task;
 	}
 

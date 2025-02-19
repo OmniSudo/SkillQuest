@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Sandbox.SQ.UI.Character;
+using System;
 using System.Dynamic;
 using System.IO;
 using System.Threading.Tasks;
@@ -8,18 +9,16 @@ namespace Sandbox.SQ.System.Login;
 
 public static class CharacterCreationSystem {
 	public static class Client {
-		public static async Task< CharacterInfo > Create ( ) {
-			// TODO: Wait for UI
-			await Task.Delay ( 0 );
+		public static Task< CharacterInfo > Create ( ) {
+			Log.Info( "Starting create character UI" );
 			
-			return new CharacterInfo() {
-					Name = "Exoa Ilter"
-			};
+			return CharacterCreate.CreateCharacter();
 		}
 	}
 
 	public static class Server {
 		public static Task< CharacterInfo > RequestCreate ( Connection connection ) {
+			Log.Info( $"Creating new character on {connection.DisplayName}"  );
 			var guid = Guid.NewGuid();
 			var tcs  = _tasks [ guid ] = new();
 
@@ -29,16 +28,26 @@ public static class CharacterCreationSystem {
 
 			return tcs.Task;
 		}
+
+		public static bool CharacterExists ( string name ) {
+			return false;
+		}
 	}
 
 
 	[ Rpc.Broadcast ]
 	private static void __createCharacter ( Guid call ) {
-		var ret = Client.Create().Result;
+		var ret = Client.Create().ContinueWith(
+				t => {
+					var ret = t.Result;
+					
+					ret.SteamId = Connection.Local.SteamId;
 
-		ret.SteamId = Rpc.Caller.SteamId;
+					Log.Info( HashCode.Combine( ret.Name ) ) ;
 
-		__didCreateCharacter( call, ret );
+					__didCreateCharacter( call, ret );
+				}
+		);
 	}
 
 	[ Rpc.Host ]

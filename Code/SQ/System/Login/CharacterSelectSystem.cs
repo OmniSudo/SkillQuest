@@ -11,88 +11,95 @@ namespace Sandbox.SQ.System.Login;
 
 public static class CharacterSelectSystem {
 	public static class Client {
-		public static List< CharacterInfo > GetCharacters ( ) {
-			var guid = Guid.NewGuid();
-			var tcs  = _tasks [ guid ] = new();
-
-			_sv_getCharactersFromFilesystem( guid );
-
-			return tcs.Task.Result;
-		}
-
-		public static CharacterInfo SelectCharacter ( List< CharacterInfo > characters ) {
-			Log.Info( "Selecting character" );
-			var selector = SkillQuest.CL.UI.AddComponent< CharacterSelect >();
-
-			selector.Characters = characters;
-
-			return characters.FirstOrDefault();
+		public static Task< CharacterInfo > GetSelection ( CharacterInfo [ ] characters ) {
+			return CharacterSelect.SelectCharacter( characters );
 		}
 	}
 
 	public static class Server {
-		public static async Task< List< CharacterInfo > > GetCharacters ( Connection connection ) {
-			var characterListFile = $"server/characters/{connection.SteamId.ToString()}.json";
-			var characters = FileSystem.OrganizationData.ReadJsonOrDefault< CharacterInfo [ ] >( characterListFile, [ ] );
+		public static Task< CharacterInfo [ ] > GetCharacters ( Connection connection ) {
+			Log.Info( "Loading characters from JSON file"  );
+			var path = $"server/users/{connection.SteamId}.json";
 
-			Log.Info(
-					$"Loaded {characters.Length} characters from {FileSystem.OrganizationData.GetFullPath( characterListFile )}"
-			);
+			CharacterInfo[] characters = FileSystem.OrganizationData.ReadJsonOrDefault< CharacterInfo[] >( path, [] );
+			var tcs  = new TaskCompletionSource< CharacterInfo [ ] >();
 
-			if ( !FileSystem.OrganizationData.FileExists( characterListFile ) || characters.Length == 0 ) {
-				FileSystem.OrganizationData.CreateDirectory( Path.GetDirectoryName( characterListFile ) );
+			if ( !FileSystem.OrganizationData.FileExists( path ) || characters.Length == 0 ) {
+				FileSystem.OrganizationData.CreateDirectory( Path.GetDirectoryName( path ) );
 
-				var tcs = new TaskCompletionSource< CharacterInfo >();
-
-				void ServerOnDisconnected ( Connection c ) {
-					Log.Info( $"Aborting character creation wait" );
-					tcs.SetResult( null );
-
-					SkillQuest.Server.Disconnected -= ServerOnDisconnected;
-				}
-
-				SkillQuest.Server.Disconnected += ServerOnDisconnected;
-
-				var request = CharacterCreationSystem.Server.RequestCreate( connection ).ContinueWith(
-						task => {
-							Log.Info( $"Received new character creation: {task.Result?.Name}" );
-							SkillQuest.Server.Disconnected -= ServerOnDisconnected;
-							tcs.SetResult( task.Result );
+				var task = CharacterCreationSystem.Server.RequestCreate( connection );
+				task.ContinueWith(
+						( t ) => {
+							Log.Info( $"Created new character {t.Result.Name}" );
+							FileSystem.OrganizationData.WriteJson( path, characters );
+							tcs.SetResult( [ t.Result ] );
 						}
 				);
 
-				var res = await tcs.Task;
-				characters = res is null ? [ ] : [ res ];
-
-				FileSystem.OrganizationData.WriteJson( characterListFile, characters );
+				void disconnected ( Connection connection ) {
+						tcs.SetResult( [ ] );
+						SkillQuest.Server.Disconnected -= disconnected;
+				}
+				
+				SkillQuest.Server.Disconnected += disconnected;
 			}
 
-			return characters.ToList();
+			
+
+			if ( characters.Length > 0 ) {
+				tcs.SetResult( characters );
+			}
+			
+			return tcs.Task;
+		}
+
+		public static Task< CharacterInfo > RequestSelect ( Connection connection ) {
+			var guid = Guid.NewGuid();
+			var tcs = ( TaskCompletionSource< CharacterInfo > ) (
+					_tasks [ guid ] = new TaskCompletionSource< CharacterInfo >()
+			);
+			
+			void disconnected ( Connection connection ) {
+				tcs.SetResult( null );
+				SkillQuest.Server.Disconnected -= disconnected;
+			}
+			
+			SkillQuest.Server.Disconnected += disconnected;
+			
+			GetCharacters( connection ).ContinueWith(
+					task => {
+						Log.Info( $"Got characters from connection {connection.DisplayName}" );
+						using ( Rpc.FilterInclude( connection ) ) {
+							_cl_getSelection( guid, task.Result );
+						}
+					}
+			);
+
+			return tcs.Task;
 		}
 	}
 
-	[ Rpc.Host ]
-	private static void _sv_getCharactersFromFilesystem ( Guid call ) {
-		var caller = Rpc.Caller;
-		Server.GetCharacters( caller ).ContinueWith(
+	[ Rpc.Broadcast ]
+	private static void _cl_getSelection ( Guid guid, CharacterInfo [ ] characters ) {
+		Client.GetSelection( characters ).ContinueWith(
 				task => {
-					Log.Info( "Forwarding characters to client" );
-					using ( Rpc.FilterInclude( caller ) ) {
-						_cl_doCharacterInfoListCallback( call, task.Result );
+					Log.Info( "Got selection" );
+					using ( Rpc.FilterInclude( Connection.Host ) ) {
+						_sv_gotSelection( guid, task.Result );
 					}
 				}
 		);
 	}
 
-	[ Rpc.Broadcast ]
-	private static void _cl_doCharacterInfoListCallback ( Guid call, List< CharacterInfo > characters ) {
-		Log.Info( "Received characters from server" );
-
-		if ( _tasks.Remove( call, out var tcs ) ) {
-			Log.Info( "Finishing up character request task" );
-			tcs.SetResult( characters );
+	[ Rpc.Host ]
+	private static void _sv_gotSelection ( Guid guid, CharacterInfo info ) {
+		if ( _tasks.Remove( guid, out var result ) ) {
+			var task = ( TaskCompletionSource< CharacterInfo > ) result;
+			if ( !task.Task.IsCompleted ) {
+				task.SetResult( info );
+			}
 		}
 	}
 
-	private static Dictionary< Guid, TaskCompletionSource< List< CharacterInfo > > > _tasks = new();
+	private static Dictionary< Guid, object > _tasks = new();
 }

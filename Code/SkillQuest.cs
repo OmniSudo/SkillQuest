@@ -32,15 +32,44 @@ public partial class SkillQuest : Component {
 						NetworkMode = NetworkMode.Never
 				}.AddComponent< Server >();
 
-			} else if ( Networking.IsClient ) {
+			}
 
+			if ( !Application.IsHeadless ) {
 				Log.Info( "Creating Client" );
 				SkillQuest.CL = new GameObject( this.GameObject.Parent, true, "Client" ) {
 						NetworkMode = NetworkMode.Never
 				}.AddComponent< Client >();
-
 			}
 		}
+
+		public Task< GameObject > CreateOnMainThread ( GameObject parent, bool enable = true, string name = null ) {
+			var tcs = new TaskCompletionSource< GameObject >();
+
+			var request = new CreationRequest( tcs, parent, enable, name );
+			creationRequests.Add( request );
+			
+			return tcs.Task;
+		}
+
+		private struct CreationRequest
+				( TaskCompletionSource< GameObject > tcs, GameObject parent, bool enable, string name ) {
+			public TaskCompletionSource< GameObject > tcs    = tcs;
+			public GameObject                         parent = parent;
+			public bool                               enable = enable;
+			public string                             name   = name;
+		}
+
+		protected override void OnUpdate ( ) {
+			if ( creationRequests.Count > 0 ) {
+				var requests = creationRequests.ToArray ();
+				foreach ( var request in requests ) {
+					creationRequests.Remove( request );
+					request.tcs.SetResult( new GameObject( request.parent, request.enable, request.name ) );
+				}
+			}
+		}
+
+		private List< CreationRequest > creationRequests = new();
 	}
 
 	public class Client : Component {
@@ -51,16 +80,6 @@ public partial class SkillQuest : Component {
 					NetworkMode = NetworkMode.Never
 			}.AddComponent< ScreenPanel >();
 
-			// TODO: Select character to load
-			Log.Info( "Requesting Characters" );
-
-			Task.RunInThreadAsync(
-					() => {
-						var chars = CharacterSelectSystem.Client.GetCharacters();
-						Log.Info( $"Found {chars.Count} characters" );
-						var selected = CharacterSelectSystem.Client.SelectCharacter( chars );
-					}
-			);
 			Log.Info( "Started Client" );
 		}
 	}
@@ -74,20 +93,28 @@ public partial class SkillQuest : Component {
 
 		public static event DoDisconnected Disconnected;
 
-		public ScreenPanel UI { get; set; }
+		public GameObject Clients { get; set; }
 
 		protected override void OnStart ( ) {
-			UI = new GameObject( this.GameObject, true, "UI" ) {
+			Clients = new GameObject( this.GameObject, true, "Clients" ) {
 					NetworkMode = NetworkMode.Never
-			}.AddComponent< ScreenPanel >();
+			};
 
 			Log.Info( "Started Server" );
+
+			OnConnected( Connection.Host );
 		}
 
 		public void OnConnected ( Connection channel ) {
 			Log.Info( $"Client {channel.DisplayName} connected" );
 
 			// TODO: CREATE CHARACTER GAMEOBJECT
+
+			CharacterSelectSystem.Server.RequestSelect( channel ).ContinueWith(
+					t => {
+						Log.Info( $"{channel.SteamId} selected {t.Result.Name}" );
+					}
+			);
 
 			try {
 				Connected?.Invoke( channel );
