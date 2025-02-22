@@ -9,57 +9,41 @@
 @namespace Sandbox.SQ.UI.Character
 
 <root>
-	<div class="background">
-		<div class="character-select">
-			<button class="character-selection" onclick=@(
-			( ) => {
-				CharacterButtonOnClick();
-			}
-			)>
-				Exoa Ilter
-			</button>
+	<div class="character-creator">
+		<div class="character-info">
+			<TextEntry class="character-name" Value:bind="@Name">Name:</TextEntry>
 		</div>
-		<div class="selected-character">
-
+		<div class="character-preview">
+			<Button onclick=@CharacterButtonOnClick>Confirm</Button>
 		</div>
 	</div>
 </root>
 
 @code {
-	public CharacterInfo [ ] Characters { get; set; }
+	public CharacterInfo Character { get; set; } = new();
 
-	private TaskCompletionSource< CharacterInfo > _tcs = new();
+	public delegate void DoSubmit ( CharacterInfo info );
+
+	public event DoSubmit? Submit;
+
+	private Panel CharacterInfoPanel;
+
+	public string Name {
+		get => Character.Name;
+		set {
+			Character.Name = value;
+		}
+	}
 
 	private void CharacterButtonOnClick ( ) {
-		if ( !_tcs.Task.IsCompleted )
-			_tcs.SetResult(
-				new CharacterInfo() {
-					Name = "Exoa Ilter"
+		CharacterInfo.Client.Exists( Character.Name ).ContinueWith(
+				exists => {
+					if ( !exists.Result ) Submit?.Invoke( Character );
 				}
-			);
+		);
 	}
 
 	protected override int BuildHash ( ) {
-		return HashCode.Combine( Characters );
+		return HashCode.Combine( Character );
 	}
-
-	public static Task< CharacterInfo > CreateCharacter () {
-		Log.Info( "Spawning Character Select UI" );
-		var tcs = new TaskCompletionSource< CharacterInfo >();
-
-		Sandbox.SkillQuest.SH.CreateOnMainThread( SkillQuest.CL.UI.GameObject, name: "Character Creator" ).ContinueWith(
-			t => {
-				var cs = t.Result.AddComponent< CharacterCreate >();
-				cs._tcs.Task.ContinueWith( tt => { tcs.SetResult( tt.Result ); } );
-			}
-		);
-
-		return tcs.Task;
-	}
-
-	protected override void OnDestroy ( ) {
-		if ( !_tcs.Task.IsCompleted ) _tcs.SetResult( null );
-		base.OnDestroy();
-	}
-
 }

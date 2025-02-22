@@ -9,8 +9,8 @@
 @namespace Sandbox.SQ.UI.Character
 
 <root>
-	<div class="background">
-		<div class="character-select">
+	<div class="character-select">
+		<div class="character-list">
 			@foreach ( var character in Characters ) {
 				<button class="character-selection" onclick=@( ( ) => { CharacterButtonOnClick( character ); } )>
 					@character.Name
@@ -21,6 +21,7 @@
 
 		</div>
 	</div>
+
 </root>
 
 @code {
@@ -38,17 +39,17 @@
 	}
 
 	public static Task< CharacterInfo > SelectCharacter ( CharacterInfo [ ] characters ) {
-		Log.Info( "Spawning Character Select UI" );
+		Log.Info( "Spawning character select UI" );
 		var tcs = new TaskCompletionSource< CharacterInfo >();
-		
+
 		Sandbox.SkillQuest.SH.CreateOnMainThread( SkillQuest.CL.UI.GameObject, name: "Character Selector" ).ContinueWith(
-				t => {
-					var cs = t.Result.AddComponent< CharacterSelect >();
-					cs.Characters = characters;
-					cs._tcs.Task.ContinueWith( tt => { tcs.SetResult( tt.Result ); } );
-				}
+			t => {
+				var cs = t.Result.AddComponent< CharacterSelect >();
+				cs.Characters = characters;
+				cs._tcs.Task.ContinueWith( tt => { tcs.SetResult( tt.Result ); } );
+			}
 		);
-		
+
 		return tcs.Task;
 	}
 

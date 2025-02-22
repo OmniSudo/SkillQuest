@@ -5,21 +5,18 @@
   height: 100%;
   align-items: center;
   justify-content: center;
-  
-  .background {
+    
+  .character-select {
     gap: 1px;
     width: 25%;
     height: 50%;
-  }
-  
-  .character-select {
     width: 400px;
     padding-left: 10px;
     flex-direction: column;
     gap: 1px;
   }
   
-  .character-selection {
+  .character-list {
     background: #2a2a2aF0;
     color: #fff;
     padding: 10px;

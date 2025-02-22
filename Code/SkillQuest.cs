@@ -51,6 +51,10 @@ public partial class SkillQuest : Component {
 			return tcs.Task;
 		}
 
+		public void DestroyOnMainThread ( GameObject obj ) {
+			destroyRequests.Add( obj );
+		}
+
 		private struct CreationRequest
 				( TaskCompletionSource< GameObject > tcs, GameObject parent, bool enable, string name ) {
 			public TaskCompletionSource< GameObject > tcs    = tcs;
@@ -67,9 +71,18 @@ public partial class SkillQuest : Component {
 					request.tcs.SetResult( new GameObject( request.parent, request.enable, request.name ) );
 				}
 			}
+			
+			if ( destroyRequests.Count > 0 ) {
+				var requests = destroyRequests.ToArray ();
+				foreach ( var request in requests ) {
+					request.Destroy();
+				}
+			}
 		}
 
 		private List< CreationRequest > creationRequests = new();
+
+		private List< GameObject > destroyRequests = new();
 	}
 
 	public class Client : Component {
@@ -109,13 +122,7 @@ public partial class SkillQuest : Component {
 			Log.Info( $"Client {channel.DisplayName} connected" );
 
 			// TODO: CREATE CHARACTER GAMEOBJECT
-
-			CharacterSelectSystem.Server.RequestSelect( channel ).ContinueWith(
-					t => {
-						Log.Info( $"{channel.SteamId} selected {t.Result.Name}" );
-					}
-			);
-
+			
 			try {
 				Connected?.Invoke( channel );
 			} catch ( Exception e ) {
