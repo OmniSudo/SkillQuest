@@ -115,13 +115,21 @@ public partial class SkillQuest : Component {
 
 			Log.Info( "Started Server" );
 
+			CharacterCreationSystem.Server.CharacterSubmitted += ServerOnCharacterSubmitted;
+			
 			OnConnected( Connection.Host );
+		}
+
+		private void ServerOnCharacterSubmitted ( Connection connection, CharacterInfo character ) {
+			
 		}
 
 		public void OnConnected ( Connection channel ) {
 			Log.Info( $"Client {channel.DisplayName} connected" );
 
 			// TODO: CREATE CHARACTER GAMEOBJECT
+			CharacterSelectSystem.Server.OpenUI( channel );
+			
 			
 			try {
 				Connected?.Invoke( channel );

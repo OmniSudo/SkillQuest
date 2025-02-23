@@ -11,10 +11,10 @@
 <root>
 	<div class="character-creator">
 		<div class="character-info">
-			<TextEntry class="character-name" Value:bind="@Name">Name:</TextEntry>
+			<TextEntry class="character-name" Value:bind=@Name>Name:</TextEntry>
 		</div>
 		<div class="character-preview">
-			<Button onclick=@CharacterButtonOnClick>Confirm</Button>
+			<Button onclick=@SubmitButtonOnClick>Submit</Button>
 		</div>
 	</div>
 </root>
@@ -35,12 +35,8 @@
 		}
 	}
 
-	private void CharacterButtonOnClick ( ) {
-		CharacterInfo.Client.Exists( Character.Name ).ContinueWith(
-				exists => {
-					if ( !exists.Result ) Submit?.Invoke( Character );
-				}
-		);
+	private void SubmitButtonOnClick ( ) {
+		Submit?.Invoke( Character );
 	}
 
 	protected override int BuildHash ( ) {
