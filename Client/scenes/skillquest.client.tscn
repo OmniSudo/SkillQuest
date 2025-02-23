@@ -1,0 +1,15 @@
+[gd_scene load_steps=4 format=3 uid="uid://c4xng2gciik4k"]
+
+[ext_resource type="PackedScene" uid="uid://cy730oecagcjh" path="res://Shared/scenes/skillquest.shared.tscn" id="1_fvhv2"]
+[ext_resource type="Script" path="res://Client/code/Client.cs" id="1_qphol"]
+[ext_resource type="Script" path="res://Server/code/Server.cs" id="2_tef6s"]
+
+[node name="SkillQuest" type="Node"]
+
+[node name="Shared" parent="." instance=ExtResource("1_fvhv2")]
+
+[node name="Server" type="Node" parent="."]
+script = ExtResource("2_tef6s")
+
+[node name="Client" type="Node" parent="."]
+script = ExtResource("1_qphol")
