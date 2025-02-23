@@ -1,12 +1,6 @@
 ﻿Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2012
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Client", "Client", "{69BBB0A9-BE69-4C13-9377-3C7187D5777D}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Server", "Server", "{46859831-793C-4842-95EE-6584F35ECF74}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SkillQuest", "Client\SkillQuest.csproj", "{337ADCE1-7649-41FB-9FD9-8A589484FCB2}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SkillQuest", "Server\SkillQuest.csproj", "{122E974A-62D1-4C3B-ADAA-B23E0C466FD7}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SkillQuest", "SkillQuest.csproj", "{A7182539-F32D-4F74-B7B4-2B6BF4241010}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,21 +9,11 @@ Global
 	ExportRelease|Any CPU = ExportRelease|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{337ADCE1-7649-41FB-9FD9-8A589484FCB2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{337ADCE1-7649-41FB-9FD9-8A589484FCB2}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{337ADCE1-7649-41FB-9FD9-8A589484FCB2}.ExportDebug|Any CPU.ActiveCfg = ExportDebug|Any CPU
-		{337ADCE1-7649-41FB-9FD9-8A589484FCB2}.ExportDebug|Any CPU.Build.0 = ExportDebug|Any CPU
-		{337ADCE1-7649-41FB-9FD9-8A589484FCB2}.ExportRelease|Any CPU.ActiveCfg = ExportRelease|Any CPU
-		{337ADCE1-7649-41FB-9FD9-8A589484FCB2}.ExportRelease|Any CPU.Build.0 = ExportRelease|Any CPU
-		{122E974A-62D1-4C3B-ADAA-B23E0C466FD7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{122E974A-62D1-4C3B-ADAA-B23E0C466FD7}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{122E974A-62D1-4C3B-ADAA-B23E0C466FD7}.ExportDebug|Any CPU.ActiveCfg = ExportDebug|Any CPU
-		{122E974A-62D1-4C3B-ADAA-B23E0C466FD7}.ExportDebug|Any CPU.Build.0 = ExportDebug|Any CPU
-		{122E974A-62D1-4C3B-ADAA-B23E0C466FD7}.ExportRelease|Any CPU.ActiveCfg = ExportRelease|Any CPU
-		{122E974A-62D1-4C3B-ADAA-B23E0C466FD7}.ExportRelease|Any CPU.Build.0 = ExportRelease|Any CPU
-	EndGlobalSection
-	GlobalSection(NestedProjects) = preSolution
-		{337ADCE1-7649-41FB-9FD9-8A589484FCB2} = {69BBB0A9-BE69-4C13-9377-3C7187D5777D}
-		{122E974A-62D1-4C3B-ADAA-B23E0C466FD7} = {46859831-793C-4842-95EE-6584F35ECF74}
-	EndGlobalSection
+		{A7182539-F32D-4F74-B7B4-2B6BF4241010}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A7182539-F32D-4F74-B7B4-2B6BF4241010}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A7182539-F32D-4F74-B7B4-2B6BF4241010}.ExportDebug|Any CPU.ActiveCfg = ExportDebug|Any CPU
+		{A7182539-F32D-4F74-B7B4-2B6BF4241010}.ExportDebug|Any CPU.Build.0 = ExportDebug|Any CPU
+		{A7182539-F32D-4F74-B7B4-2B6BF4241010}.ExportRelease|Any CPU.ActiveCfg = ExportRelease|Any CPU
+		{A7182539-F32D-4F74-B7B4-2B6BF4241010}.ExportRelease|Any CPU.Build.0 = ExportRelease|Any CPU
+EndGlobalSection
 EndGlobal
