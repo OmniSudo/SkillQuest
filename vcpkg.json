@@ -1,0 +1,31 @@
+{
+  "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg-tool/main/docs/vcpkg.schema.json",
+  "dependencies": [
+    "glm",
+    "openssl",
+    "opengl",
+    "openal-soft",
+    "nlohmann-json",
+    "libpng",
+    "lua",
+    {
+      "name": "libpq",
+      "platform": "!emscripten"
+    },
+    {
+      "name": "sqlite3",
+      "platform": "!emscripten"
+    },
+    {
+      "name": "glfw3",
+      "platform": "!emscripten"
+    },
+    {
+      "name": "imgui",
+      "features": [
+        "glfw-binding",
+        "opengl3-binding"
+      ]
+    }
+  ]
+}
