@@ -12,9 +12,6 @@
     <Content Include="icon.svg" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Client\code\" />
-  </ItemGroup>
-  <ItemGroup>
     <Content Include="Shared\lib\**">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>

@@ -14,17 +14,15 @@ using System.Threading.Tasks;
 namespace SkillQuest.Network;
 
 public partial class Multiplayer {
-    public Multiplayer()
-    {
-        SystemChannel = CreateChannel(new Uri("packet://system.skill.quest/"));
-        SystemChannel.Subscribe<RSAPacket>(OnRSAPacket);
-        SystemChannel.Subscribe<AESPacket>(OnAESPacket);
-        SystemChannel.Subscribe<SteamAuthPacket>(OnSteamAuthPacket);
+    public Multiplayer() {
+        SystemChannel = CreateChannel( new Uri( "packet://system.skill.quest/" ) );
+        SystemChannel.Subscribe<RSAPacket>( OnRSAPacket );
+        SystemChannel.Subscribe<AESPacket>( OnAESPacket );
+        SystemChannel.Subscribe<SteamAuthPacket>( OnSteamAuthPacket );
 
         SteamAPI.LoadLibrary();
-        if (!Steamworks.SteamAPI.Init())
-        {
-            GD.PrintErr("Failed to initialize Steam API!");
+        if (!Steamworks.SteamAPI.Init()) {
+            GD.PrintErr( "Failed to initialize Steam API!" );
             return;
         }
     }
@@ -75,7 +73,7 @@ public partial class Multiplayer {
                 if (client.IsOpen) client.Disconnect();
             }
         }
-        
+
         foreach (var (endpoint, server) in _servers) {
             server.Update( delta );
         }
@@ -87,7 +85,7 @@ public partial class Multiplayer {
         TaskCompletionSource<Connection.Client> tcs = new();
 
         client.Connected += (connection) => {
-            if ( !tcs.Task.IsCompleted ) tcs.SetResult( connection );
+            if (!tcs.Task.IsCompleted) tcs.SetResult( connection );
         };
 
         client.Disconnected += (connection) => {
@@ -97,13 +95,13 @@ public partial class Multiplayer {
         _clients[endpoint] = client;
 
         client.Connect();
-        
+
         return tcs.Task;
     }
-    
+
     public Connection.Server? Host(short port) {
         Steamworks.GameServer.Init( 0, 3698, 8963, EServerMode.eServerModeAuthenticationAndSecure, "v0.0.0" );
-        
+
         var server = new Connection.Server( this, port );
 
         _servers[server.EndPoint] = server;
@@ -135,7 +133,7 @@ public partial class Multiplayer {
             var identity = new SteamNetworkingIdentity() { };
 
             SteamUser.GetAuthSessionTicket( bytes, 1024, out size, ref identity );
-            
+
             SystemChannel.Send( sender, new SteamAuthPacket() {
                 SteamId = SteamUser.GetSteamID().m_SteamID,
                 Token = bytes,
@@ -163,7 +161,10 @@ public partial class Multiplayer {
 
     protected internal void OnSteamAuthPacket(Connection.Client sender, SteamAuthPacket packet) {
         try {
-            var result = SteamGameServer.BeginAuthSession( packet.Token, packet.Token.Length, new CSteamID( packet.SteamId ) );
+            var result = SteamGameServer.BeginAuthSession(
+                packet.Token, packet.Token.Length,
+                new CSteamID( packet.SteamId )
+            );
 
             if (result == EBeginAuthSessionResult.k_EBeginAuthSessionResultOK) {
                 sender.SteamId = packet.SteamId;
@@ -176,15 +177,13 @@ public partial class Multiplayer {
             GD.PrintErr( e.Message );
             GD.PrintErr( e.StackTrace );
         }
-        
-        
     }
 
     private Callback<ValidateAuthTicketResponse_t> _authCallback;
 
     private ConcurrentDictionary<CSteamID, Connection.Client> _steamids = new();
-    private ConcurrentDictionary< CSteamID, TaskCompletionSource<Connection.Client>> _sendTasks = new();
-    
+    private ConcurrentDictionary<CSteamID, TaskCompletionSource<Connection.Client>> _sendTasks = new();
+
     public void AddPacket<TPacket>() where TPacket : Network.Packet {
         var type = typeof(TPacket);
         _packets[type.FullName!] = type;

@@ -1,8 +1,9 @@
-[gd_scene load_steps=4 format=3 uid="uid://c4xng2gciik4k"]
+[gd_scene load_steps=5 format=3 uid="uid://c4xng2gciik4k"]
 
 [ext_resource type="PackedScene" uid="uid://cy730oecagcjh" path="res://Shared/scenes/skillquest.shared.tscn" id="1_fvhv2"]
 [ext_resource type="Script" path="res://Client/code/Client.cs" id="1_qphol"]
 [ext_resource type="Script" path="res://Server/code/Server.cs" id="2_tef6s"]
+[ext_resource type="PackedScene" uid="uid://cnnnlp6i42ygq" path="res://Client/scenes/UI/Login/Select/character_select.tscn" id="4_rd3ot"]
 
 [node name="SkillQuest" type="Node"]
 
@@ -13,3 +14,13 @@ script = ExtResource("2_tef6s")
 
 [node name="Client" type="Node" parent="."]
 script = ExtResource("1_qphol")
+
+[node name="UI" type="Control" parent="Client"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Character Select" parent="Client/UI" instance=ExtResource("4_rd3ot")]
