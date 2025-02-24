@@ -13,7 +13,7 @@ public class Channel {
     // TODO: public bool Encrypt { get; set; }
 
     
-    const bool DEBUG = true;
+    const bool DEBUG = false;
     
     public Channel(Multiplayer networker, string name){
         Multiplayer = networker;
@@ -27,7 +27,7 @@ public class Channel {
         try {
             await connection?.Send(packet, encrypt);
         } catch (Exception e) {
-            GD.Print( $"Unable to send packet {packet.GetType().Name} {e}");
+            GD.PrintErr( $"Unable to send packet {packet.GetType().Name} {e}");
 
             if (connection.Status == Connection.State.Disconnecting) {
                 connection.Disconnect();
@@ -40,7 +40,7 @@ public class Channel {
         if (_handlers.TryGetValue(packet.GetType(), out var handler)) {
             handler.Invoke(connection, packet);
         } else {
-            GD.Print( $"No handler for {packet.GetType().Name}");
+            GD.PrintErr( $"No handler for {packet.GetType().Name}");
         }
     }
 

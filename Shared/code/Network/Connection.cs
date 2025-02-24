@@ -71,7 +71,7 @@ public abstract class Connection {
 
                     OnConnected( connection );
                 } catch (Exception e) {
-                    GD.Print( $"Unable to accept connection {e}" );
+                    GD.PrintErr( $"Unable to accept connection {e}" );
                 }
             }
 
@@ -126,8 +126,21 @@ public abstract class Connection {
         protected TcpClient? _client { get; set; } = null;
 
         protected NetworkStream? _stream;
+        
+        public string Username {
+            get {
+                var steamid = new CSteamID(this.SteamId);
+                bool needsToRetreiveInformationFromInternet = SteamFriends.RequestUserInformation(steamid, true);
+                if (!needsToRetreiveInformationFromInternet)
+                {
+                    return SteamFriends.GetFriendPersonaName(steamid);
+                }
 
-        public uint SteamId { get; set; }
+                return "nil";
+            }
+        }
+
+        public ulong SteamId { get; set; }
 
         public string AuthToken { get; set; }
 
@@ -139,8 +152,6 @@ public abstract class Connection {
 
         public async Task Send(Packet packet, bool encrypt = true) {
             var serialized = JsonSerializer.Serialize( packet, packet.GetType() );
-
-            GD.Print( serialized );
 
             var typename = packet.GetType().FullName;
 
@@ -341,17 +352,17 @@ public abstract class Connection {
                                         if (Multiplayer.Channels.TryGetValue( packet.Channel, out var channel )) {
                                             channel.Receive( this, packet );
                                         } else {
-                                            GD.Print( $"No '{packet.Channel}' channel to receive '{packet}'" );
+                                            GD.PrintErr( $"No '{packet.Channel}' channel to receive '{packet}'" );
                                         }
                                     } else {
-                                        GD.Print( $"Malformed packet: '{typename}'" );
+                                        GD.PrintErr( $"Malformed packet: '{typename}'" );
                                     }
                                 } else {
-                                    GD.Print( $"Unknown Packet: '{typename}'" );
+                                    GD.PrintErr( $"Unknown Packet: '{typename}'" );
                                 }
 
                             } catch (Exception e) {
-                                GD.Print( $"{e}" );
+                                GD.PrintErr( $"{e}" );
                             }
                         }
 
@@ -369,7 +380,7 @@ public abstract class Connection {
 
         public async Task Receive(Network.Packet packet) {
             if (packet?.Channel is null || !Multiplayer.Channels.TryGetValue( packet.Channel, out var channel )) {
-                GD.Print( "Null Channel: " + packet.GetType().Name );
+                GD.PrintErr( "Null Channel: " + packet.GetType().Name );
                 return;
             }
 

@@ -14,23 +14,19 @@ using System.Threading.Tasks;
 namespace SkillQuest.Network;
 
 public partial class Multiplayer {
-    public Multiplayer() {
-        SystemChannel = CreateChannel( new Uri( "packet://system.skill.quest/" ) );
-        SystemChannel.Subscribe<RSAPacket>( OnRSAPacket );
-        SystemChannel.Subscribe<AESPacket>( OnAESPacket );
-        SystemChannel.Subscribe<SteamAuthPacket>( OnSteamAuthPacket );
+    public Multiplayer()
+    {
+        SystemChannel = CreateChannel(new Uri("packet://system.skill.quest/"));
+        SystemChannel.Subscribe<RSAPacket>(OnRSAPacket);
+        SystemChannel.Subscribe<AESPacket>(OnAESPacket);
+        SystemChannel.Subscribe<SteamAuthPacket>(OnSteamAuthPacket);
 
         SteamAPI.LoadLibrary();
-        if (!Steamworks.SteamAPI.Init()) {
-            GD.PrintErr( "Failed to initialize Steam API!" );
+        if (!Steamworks.SteamAPI.Init())
+        {
+            GD.PrintErr("Failed to initialize Steam API!");
             return;
         }
-        
-        _authCallback = Callback<ValidateAuthTicketResponse_t>.Create( OnAuthTicketResponse);
-    }
-
-    private void OnAuthTicketResponse(ValidateAuthTicketResponse_t param) {
-        GD.Print( $"got auth {param.m_SteamID}" );
     }
 
     public Side Side { get; set; }
@@ -75,7 +71,7 @@ public partial class Multiplayer {
             try {
                 client.Receive();
             } catch (Exception e) {
-                GD.Print( $"Unable to process connection {e}" );
+                GD.PrintErr( $"Unable to process connection {e}" );
                 if (client.IsOpen) client.Disconnect();
             }
         }
@@ -167,8 +163,14 @@ public partial class Multiplayer {
 
     protected internal void OnSteamAuthPacket(Connection.Client sender, SteamAuthPacket packet) {
         try {
-            var callback = SteamGameServer.BeginAuthSession( packet.Token, packet.Token.Length, new CSteamID( packet.SteamId ) );
-            
+            var result = SteamGameServer.BeginAuthSession( packet.Token, packet.Token.Length, new CSteamID( packet.SteamId ) );
+
+            if (result == EBeginAuthSessionResult.k_EBeginAuthSessionResultOK) {
+                sender.SteamId = packet.SteamId;
+                GD.Print( $"Steam user {sender.Username} logged in." );
+            } else {
+                sender.Disconnect(); // TODO: Error instead of just disconnecting
+            }
         } catch (Exception e) {
             GD.PrintErr( $"Failed to auth user with SteamId {packet.SteamId}" );
             GD.PrintErr( e.Message );

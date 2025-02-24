@@ -1,7 +1,6 @@
-[gd_scene load_steps=3 format=3 uid="uid://cy730oecagcjh"]
+[gd_scene load_steps=2 format=3 uid="uid://cy730oecagcjh"]
 
 [ext_resource type="Script" path="res://Shared/code/Shared.cs" id="1_k2l27"]
-[ext_resource type="Script" path="res://Shared/code/Network/Multiplayer.cs" id="2_plxts"]
 
 [node name="Shared" type="Node"]
 script = ExtResource("1_k2l27")
@@ -17,6 +16,3 @@ script = ExtResource("1_k2l27")
 [node name="Universe" type="Node" parent="."]
 
 [node name="System" type="Node" parent="."]
-
-[node name="Multiplayer" type="Node" parent="System"]
-script = ExtResource("2_plxts")
