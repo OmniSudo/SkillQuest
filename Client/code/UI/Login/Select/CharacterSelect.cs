@@ -52,37 +52,6 @@ public partial class CharacterSelect : CanvasLayer {
             0f
         );
     }
-
-    [Host]
-    public static void Test() {
-        GD.Print( "Test Called " + Network.Rpc.Caller?.EndPoint ?? "localhost" );
-
-        TestDupe();
-        
-        var id = Guid.NewGuid().ToString();
-        
-        TestClient( id );
-
-        foreach (var client in Shared.Multiplayer.Clients ) {
-            GD.Print( $"CLIENT: {client.Key}"  );
-        }
-        
-        using (Network.Rpc.FilterInclude( client =>
-                   client == (Shared.Multiplayer.Clients.Count > 0 ? Shared.Multiplayer.Clients.First().Value : null) )) {
-            TestClient( id );
-        }
-    }
-
-    [Host]
-    private static void TestDupe() {
-        GD.Print( $"????{Network.Multiplayer.Host}"  );
-    }
-
-    [Broadcast]
-    private static void TestClient( string id ) {
-        GD.Print( Network.Multiplayer.Host?.EndPoint +", "+ Network.Rpc.Caller?.EndPoint );
-        TestDupe();
-    }
     
     private void RotateRightOnButtonDown() {
         _rotation = RotateDirection.RIGHT;

@@ -146,10 +146,17 @@ public abstract class RpcAttribute : Attribute, IMethodDecorator {
         }
 
         Rpc.Caller = connection;
+        
         try {
             var args = new List<object>();
             foreach (var param in method.GetParameters()) {
-                args.Add( JsonSerializer.Deserialize( packet.Arguments[args.Count], param.ParameterType ) );
+                if (param.ParameterType.IsAssignableTo( typeof(Node) ) ) {
+                    var uri = packet.Arguments[args.Count];
+                    var node = (Engine.GetMainLoop() as SceneTree).GetRoot().GetNode( uri );
+                    args.Add( node );
+                } else {
+                    args.Add( JsonSerializer.Deserialize( packet.Arguments[args.Count], param.ParameterType ) );
+                }
             }
 
             method?.Invoke( null, args.ToArray() );
@@ -161,6 +168,16 @@ public abstract class RpcAttribute : Attribute, IMethodDecorator {
     }
 
     protected static Channel _channel;
+
+    protected static string[] FormatArgs(object[] args) {
+        return args.Select( o => {
+            if (o is Node node) {
+                return node.GetPath().ToString();
+            } else {
+                return JsonSerializer.Serialize( o );
+            }
+        } ).ToArray();
+    }
 }
 
 [AttributeUsage( AttributeTargets.Method, AllowMultiple = true )]
@@ -174,7 +191,7 @@ public class HostAttribute : RpcAttribute {
             var _packet = new RpcPacket() {
                 MethodName = method.Name,
                 TypeName = method.DeclaringType.AssemblyQualifiedName,
-                Arguments = JsonSerializer.SerializeToNode( args ).AsArray(),
+                Arguments = FormatArgs( args ),
             };
 
             _channel.Send( Multiplayer.Host, _packet, true );
@@ -192,7 +209,7 @@ public class HostAttribute : RpcAttribute {
 [AttributeUsage( AttributeTargets.Method, AllowMultiple = true )]
 public class BroadcastAttribute : RpcAttribute {
     public bool NeedBypass() {
-        return ( Server.IsHost && Server.IsDedicated ) || (!Rpc.Filter?.IsRecipient( Multiplayer.Host ) ?? false);
+        return (Server.IsHost && Server.IsDedicated) || (!Rpc.Filter?.IsRecipient( Multiplayer.Host ) ?? false);
     }
 
     public void Init(object instance, MethodBase method, object[] args) {
@@ -200,12 +217,12 @@ public class BroadcastAttribute : RpcAttribute {
             var _packet = new RpcPacket() {
                 MethodName = method.Name,
                 TypeName = method.DeclaringType.AssemblyQualifiedName,
-                Arguments = JsonSerializer.SerializeToNode( args ).AsArray(),
+                Arguments = FormatArgs( args ),
             };
 
             foreach (
                 var connection in
-                Shared.Multiplayer.Clients.Values.Where( (c) => (Rpc.Filter?.IsRecipient( c ) ?? true))) {
+                Shared.Multiplayer.Clients.Values.Where( (c) => (Rpc.Filter?.IsRecipient( c ) ?? true) )) {
                 _channel.Send( connection, _packet, true );
             }
         }
