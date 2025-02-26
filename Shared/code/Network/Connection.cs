@@ -76,8 +76,6 @@ public abstract class Connection {
                     GD.PrintErr( $"Unable to accept connection {e}" );
                 }
             }
-
-
         }
         
         protected internal void OnConnected(Connection.Client connection) {

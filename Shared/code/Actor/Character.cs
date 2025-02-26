@@ -1,7 +1,7 @@
 ﻿namespace SkillQuest.Actor;
 
 public class Character {
-    public struct Info {
+    public class Info {
         public string Name { get; set; }
     }
 }

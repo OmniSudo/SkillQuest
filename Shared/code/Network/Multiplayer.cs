@@ -84,6 +84,7 @@ public partial class Multiplayer {
     }
 
     public Task<Connection.Client?> Connect(IPEndPoint endpoint) {
+
         var client = new Connection.Remote( this, endpoint );
         Multiplayer.Host ??= client;
         
@@ -118,6 +119,7 @@ public partial class Multiplayer {
 
     protected internal void OnRSAPacket(Connection.Client sender, RSAPacket packet) {
         sender.InterruptTimeout();
+        sender.SteamId = SteamUser.GetSteamID().m_SteamID;
         sender.RSA.ImportFromPem( packet.PublicKey );
         sender.AES = Aes.Create();
         var key = Convert.ToBase64String( sender.AES.Key );

@@ -1,9 +1,11 @@
 using Godot;
 using SkillQuest.Actor;
 using SkillQuest.Network;
+using Steamworks;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace SkillQuest.UI.Login.Select;
@@ -29,7 +31,7 @@ public partial class CharacterSelect : CanvasLayer {
 
     private RotateDirection _rotation = RotateDirection.NONE;
 
-    private Character.Info _selected;
+    private Character.Info? _selected;
 
     public override void _Ready() {
         Create.Pressed += CreateOnPressed;
@@ -71,7 +73,7 @@ public partial class CharacterSelect : CanvasLayer {
     }
 
     private void ConfirmOnPressed() {
-        Select?.Invoke( _selected );
+        if ( _selected is not null ) Select?.Invoke( _selected );
     }
 
     private enum RotateDirection {
@@ -117,7 +119,7 @@ public partial class CharacterSelect : CanvasLayer {
         foreach (var character in characters) {
             var element = scene.Instantiate<CharacterSelectButton>();
             Selection.AddChild( element );
-            element.SetName( "OmniSudo" );
+            element.SetName( character.Name );
             element.CharacterInfo = character;
             var button = element.GetNode<Button>( "Button" );
             button.Pressed += () => {
@@ -156,11 +158,13 @@ public partial class CharacterSelect : CanvasLayer {
 
     [Broadcast]
     private static async void _CL_Open() {
-        var selection = await Client.Open( new Character.Info[] {
+        var sender = Network.Rpc.Caller;
+        Character.Info[] characters = [
             new Character.Info() {
-                Name = "OmniSudo"
+                Name = sender.Username,
             }
-        } );
+        ];
+        var selection = await Client.Open( characters );
         _SV_Get( selection );
     }
 

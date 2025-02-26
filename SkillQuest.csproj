@@ -29,4 +29,9 @@
     <PackageReference Include="MethodDecorator.Fody" Version="1.1.1" />
     <PackageReference Include="Steamworks.NET" Version="2024.8.0" />
   </ItemGroup>
+  <ItemGroup>
+    <Compile Update="Shared\code\Network\Connection.cs">
+      <DependentUpon>Channel.cs</DependentUpon>
+    </Compile>
+  </ItemGroup>
 </Project>
