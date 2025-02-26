@@ -1,4 +1,5 @@
 using Godot;
+using SkillQuest.Network;
 using SkillQuest.UI.Login.Select;
 using System;
 using System.Linq;
@@ -8,11 +9,13 @@ namespace SkillQuest;
 public partial class Server : Node {
     public static Server SV;
 
-    public static bool IsHost => !Shared.Multiplayer.Servers.IsEmpty;
+    public static bool IsHost => OS.GetCmdlineArgs().Contains( "--server" );
+
+    public static bool IsDedicated => OS.GetCmdlineArgs().Contains( "--dedicated" );
 
     // Called when the node enters the scene tree for the first time.
     public override void _Ready() {
-        if (!OS.GetCmdlineArgs().Contains( "--server" )) {
+        if (!IsHost) {
             QueueFree();
             return;
         }

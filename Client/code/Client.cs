@@ -1,4 +1,5 @@
 using Godot;
+using SkillQuest.Network;
 using SkillQuest.UI.Login.Select;
 using System;
 using System.Linq;
@@ -9,8 +10,10 @@ namespace SkillQuest;
 public partial class Client : Node {
     public static Client CL;
 
+    public static bool IsClient => !OS.GetCmdlineArgs().Contains( "--server" );
+    
     public override void _Ready() {
-        if (OS.GetCmdlineArgs().Contains( "--dedicated" )) {
+        if (!IsClient) {
             QueueFree();
             return;
         }

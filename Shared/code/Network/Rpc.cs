@@ -192,7 +192,7 @@ public class HostAttribute : RpcAttribute {
 [AttributeUsage( AttributeTargets.Method, AllowMultiple = true )]
 public class BroadcastAttribute : RpcAttribute {
     public bool NeedBypass() {
-        return Multiplayer.Host is not null && (!Rpc.Filter?.IsRecipient( Multiplayer.Host ) ?? false);
+        return ( Server.IsHost && Server.IsDedicated ) || (!Rpc.Filter?.IsRecipient( Multiplayer.Host ) ?? false);
     }
 
     public void Init(object instance, MethodBase method, object[] args) {
