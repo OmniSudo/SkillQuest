@@ -25,7 +25,11 @@ public class Channel {
         if ( DEBUG ) GD.Print( $"{Name} -> {packet.GetType().Name}");
 
         try {
-            await connection?.Send(packet, encrypt);
+            if (connection is not null ) {
+                await connection?.Send( packet, encrypt );
+            } else {
+                await Receive( null, packet );
+            }
         } catch (Exception e) {
             GD.PrintErr( $"Unable to send packet {packet.GetType().Name} {e}");
 

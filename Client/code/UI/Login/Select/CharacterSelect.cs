@@ -1,42 +1,89 @@
 using Godot;
+using SkillQuest.Network;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace SkillQuest.UI.Login.Select;
 
 public partial class CharacterSelect : CanvasLayer {
-    [Export] public VBoxContainer Characters { get; set; }
-    
+    [Export] public VBoxContainer Selection { get; set; }
+
     [Export] public Button Create { get; set; }
-    
+
     [Export] public Button Confirm { get; set; }
-    
+
     [Export] public Button RotateLeft { get; set; }
-    
+
     [Export] public Button RotateRight { get; set; }
-    
+
     [Export] public SubViewport Preview { get; set; }
-    
+
     [Export] public Node3D PreviewCamera { get; set; }
 
     [Export] public PanelContainer Stats { get; set; }
+
+    [Export] public Container[] Characters { get; set; }
 
     private RotateDirection _rotation = RotateDirection.NONE;
 
     public override void _Ready() {
         Create.Pressed += CreateOnPressed;
         Confirm.Pressed += ConfirmOnPressed;
-        
+
         RotateLeft.ButtonDown += RotateLeftOnButtonDown;
         RotateLeft.ButtonUp += RotateLeftOnButtonUp;
 
         RotateRight.ButtonDown += RotateRightOnButtonDown;
         RotateRight.ButtonUp += RotateRightOnButtonUp;
+
+        var character = GD.Load<PackedScene>(
+            "Client/scenes/UI/Login/Select/character_button.tscn"
+        ).Instantiate<CharacterSelectButton>();
+        Selection.AddChild( character );
+        character.SetName( "OmniSudo" );
+        Characters = [character];
     }
 
     public override void _Process(double delta) {
-        PreviewCamera.Rotation = new Vector3( 0f, PreviewCamera.Rotation.Y + ( float ) delta * (_rotation == RotateDirection.LEFT ? -1.0f : 0.0f ), 0f );
-        PreviewCamera.Rotation = new Vector3( 0f, PreviewCamera.Rotation.Y + ( float ) delta * (_rotation == RotateDirection.RIGHT ? 1.0f : 0.0f ), 0f );
+        PreviewCamera.Rotation = new Vector3(
+            0f,
+            PreviewCamera.Rotation.Y + (float)delta * (float)_rotation,
+            0f
+        );
     }
 
+    [Host]
+    public static void Test() {
+        GD.Print( "Test Called " + Network.Rpc.Caller?.EndPoint ?? "localhost" );
+
+        TestDupe();
+        
+        var id = Guid.NewGuid().ToString();
+        
+        TestClient( id );
+
+        foreach (var client in Shared.Multiplayer.Clients ) {
+            GD.Print( $"CLIENT: {client.Key}"  );
+        }
+        
+        using (Network.Rpc.FilterInclude( client =>
+                   client == (Shared.Multiplayer.Clients.Count > 0 ? Shared.Multiplayer.Clients.First().Value : null) )) {
+            TestClient( id );
+        }
+    }
+
+    [Host]
+    private static void TestDupe() {
+        GD.Print( $"????{Network.Multiplayer.Host}"  );
+    }
+
+    [Broadcast]
+    private static void TestClient( string id ) {
+        GD.Print( Network.Multiplayer.Host?.EndPoint +", "+ Network.Rpc.Caller?.EndPoint );
+        TestDupe();
+    }
+    
     private void RotateRightOnButtonDown() {
         _rotation = RotateDirection.RIGHT;
     }
@@ -62,7 +109,7 @@ public partial class CharacterSelect : CanvasLayer {
     }
 
     private enum RotateDirection {
-        LEFT = -1, 
+        LEFT = -1,
         NONE = 0,
         RIGHT = 1
     }

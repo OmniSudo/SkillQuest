@@ -26,6 +26,10 @@ public abstract class Connection {
 
         public IPEndPoint EndPoint { get; }
 
+        public static bool IsSelf(Connection.Client client) {
+            return client is Local;
+        }
+
         public ImmutableDictionary<IPEndPoint, Connection.Client> Clients => _clients.ToImmutableDictionary();
 
         ConcurrentDictionary<IPEndPoint, Connection.Client> _clients = new();
@@ -62,8 +66,6 @@ public abstract class Connection {
                             throw new ArgumentNullException( nameof(client.Client.RemoteEndPoint) )
                         ] = new Connection.Local( this, client );
 
-                    connection.Connected += SendRSAToClient;
-
                     connection.Disconnected += clientConnection => {
                         Disconnected?.Invoke( this, clientConnection );
                         _clients.TryRemove( clientConnection.EndPoint, out var _ );
@@ -77,18 +79,9 @@ public abstract class Connection {
 
 
         }
-
-        void SendRSAToClient(Connection.Client connection) {
-            connection.Connected -= SendRSAToClient;
-            Multiplayer.SystemChannel.Send(
-                connection,
-                new RSAPacket() { PublicKey = RSA.ExportRSAPublicKeyPem() },
-                false
-            );
-        }
-
+        
         protected internal void OnConnected(Connection.Client connection) {
-            (connection as Connection.Local)?.OnConnected();
+            (connection as Connection.Local)?.Ready();
             Connected?.Invoke( this, connection );
             GD.Print( $"Connected @ {connection.EndPoint}" );
         }
@@ -123,7 +116,7 @@ public abstract class Connection {
     }
 
     public class Client {
-        protected TcpClient? _client { get; set; } = null;
+        protected internal TcpClient? _client { get; set; } = null;
 
         protected NetworkStream? _stream;
         
@@ -146,7 +139,7 @@ public abstract class Connection {
 
         public virtual RSA RSA { get; } = new RSACryptoServiceProvider();
 
-        public virtual Aes AES { get; set; }
+        public Aes AES;
 
         public bool Running { get; set; }
 
@@ -217,8 +210,8 @@ public abstract class Connection {
             _client = null;
             GD.Print( $"Disposed @ {ep}" );
         }
-
-        protected internal void OnConnected() {
+        
+        protected internal virtual void Ready() {
             _stream = _client.GetStream();
 
             _keepalive = new Timer( TimeSpan.FromSeconds( 20 ) );
@@ -229,6 +222,9 @@ public abstract class Connection {
                 }
             };
             _keepalive.Start();
+        }
+
+        protected internal void OnConnected() {
             Connected?.Invoke( this );
         }
 
@@ -458,6 +454,19 @@ public abstract class Connection {
             _timeout.Enabled = false;
             _stream = _client.GetStream();
         }
+
+        protected internal override void Ready() {
+            base.Ready();
+            SendRSAToClient();
+        }
+        
+        void SendRSAToClient() {
+            Multiplayer.SystemChannel.Send(
+                this,
+                new RSAPacket() { PublicKey = RSA.ExportRSAPublicKeyPem() },
+                false
+            );
+        }
     }
 
     public class Remote : Client {
@@ -479,7 +488,8 @@ public abstract class Connection {
 
         public void Connect(){
             _client.Connect(EndPoint);
-            OnConnected();
+            if ( Multiplayer.Host is null ) Multiplayer.Host = this;
+            base.Ready();
         }
     }
 
@@ -490,5 +500,53 @@ public abstract class Connection {
         Connecting,
         Connected,
         Disconnecting
+    }
+    
+    public struct Filter
+    {
+        private IEnumerable<Connection.Client> Connections { get; set; }
+
+        private Predicate<Connection.Client> Predicate { get; set; }
+
+        private FilterType Type { get; set; }
+
+        public Filter(Connection.Filter.FilterType type, Predicate<Connection.Client> predicate)
+        {
+            // ISSUE: reference to a compiler-generated field
+            this.Predicate = predicate;
+            this.Type = type;
+        }
+
+        public Filter(Connection.Filter.FilterType type, IEnumerable<Connection.Client> connections)
+        {
+            this.Connections = connections;
+            this.Type = type;
+        }
+
+        /// <summary>
+        /// Is the specified <see cref="T:Sandbox.Connection" /> a valid recipient?
+        /// </summary>
+        public bool IsRecipient(Connection.Client connection)
+        {
+            if (this.Type == Connection.Filter.FilterType.Exclude)
+            {
+                Predicate<Connection.Client> predicate = this.Predicate;
+                return predicate == null ? !this.Connections.Contains<Connection.Client>(connection) : !predicate(connection);
+            }
+            Predicate<Connection.Client> predicate1 = this.Predicate;
+            return predicate1 == null ? this.Connections.Contains<Connection.Client>(connection) : predicate1(connection);
+        }
+
+        public enum FilterType
+        {
+            /// <summary>
+            /// Only include the connections in the filter when sending a message.
+            /// </summary>
+            Include,
+            /// <summary>
+            /// Exclude the connections in the filter when sending a message.
+            /// </summary>
+            Exclude,
+        }
     }
 }

@@ -1,4 +1,5 @@
 using Godot;
+using SkillQuest.UI.Login.Select;
 using System;
 using System.Linq;
 
@@ -7,18 +8,23 @@ namespace SkillQuest;
 public partial class Server : Node {
     public static Server SV;
 
+    public static bool IsHost => !Shared.Multiplayer.Servers.IsEmpty;
+
     // Called when the node enters the scene tree for the first time.
     public override void _Ready() {
-        SV = this;
-
         if (!OS.GetCmdlineArgs().Contains( "--server" )) {
+            QueueFree();
             return;
         }
+        
+        SV = this;
 
         GD.Print( "Initializing Server" );
 
         try {
-            Shared.Multiplayer.Host( 3698 );
+            var server = Shared.Multiplayer.Bind( 3698 );
+            CharacterSelect.Test();
+            
         } catch (Exception e) {
             GD.PrintErr( e );
         }

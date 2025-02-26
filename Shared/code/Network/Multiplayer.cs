@@ -5,8 +5,10 @@ using Steamworks;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Immutable;
+using System.Linq;
 using System.Net;
 using System.Net.Mime;
+using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
@@ -19,16 +21,16 @@ public partial class Multiplayer {
         SystemChannel.Subscribe<RSAPacket>( OnRSAPacket );
         SystemChannel.Subscribe<AESPacket>( OnAESPacket );
         SystemChannel.Subscribe<SteamAuthPacket>( OnSteamAuthPacket );
-
+        
         SteamAPI.LoadLibrary();
         if (!Steamworks.SteamAPI.Init()) {
             GD.PrintErr( "Failed to initialize Steam API!" );
             return;
         }
     }
-
-    public Side Side { get; set; }
-
+    
+    public static Connection.Client? Host { get; protected internal set; }
+    
     public Channel SystemChannel { get; set; }
 
     public ImmutableDictionary<IPEndPoint, Connection.Client> Clients => _clients.ToImmutableDictionary();
@@ -81,7 +83,8 @@ public partial class Multiplayer {
 
     public Task<Connection.Client?> Connect(IPEndPoint endpoint) {
         var client = new Connection.Remote( this, endpoint );
-
+        Multiplayer.Host ??= client;
+        
         TaskCompletionSource<Connection.Client> tcs = new();
 
         client.Connected += (connection) => {
@@ -89,6 +92,8 @@ public partial class Multiplayer {
         };
 
         client.Disconnected += (connection) => {
+            if ( Multiplayer.Host == connection ) Multiplayer.Host = _clients.FirstOrDefault().Value;
+
             _clients.TryRemove( connection.EndPoint, out _ );
         };
 
@@ -99,7 +104,7 @@ public partial class Multiplayer {
         return tcs.Task;
     }
 
-    public Connection.Server? Host(short port) {
+    public Connection.Server? Bind(short port) {
         Steamworks.GameServer.Init( 0, 3698, 8963, EServerMode.eServerModeAuthenticationAndSecure, "v0.0.0" );
 
         var server = new Connection.Server( this, port );
@@ -113,13 +118,14 @@ public partial class Multiplayer {
                 server.Disconnect( connection );
             };
         };
-
+        
         return server;
     }
 
     protected internal void OnRSAPacket(Connection.Client sender, RSAPacket packet) {
         sender.InterruptTimeout();
         sender.RSA.ImportFromPem( packet.PublicKey );
+        sender.AES = Aes.Create();
         var key = Convert.ToBase64String( sender.AES.Key );
         var iv = Convert.ToBase64String( sender.AES.IV );
         var plaintext = key + (char)0x00 + iv;
@@ -138,7 +144,7 @@ public partial class Multiplayer {
                 SteamId = SteamUser.GetSteamID().m_SteamID,
                 Token = bytes,
             }, true ).Wait();
-            (sender as Connection.Remote).OnConnected();
+            sender.OnConnected();
         } catch (Exception e) {
             sender.Disconnect();
             GD.PrintErr( $"Failed to initialize secure connection with server...{e}" );
@@ -151,9 +157,10 @@ public partial class Multiplayer {
                 Encoding.ASCII.GetString( sender.RSA.Decrypt( Convert.FromBase64String( packet.Data ),
                     RSAEncryptionPadding.Pkcs1 ) );
             var split = plaintext.Split( (char)0x00 );
-            sender.AES = Aes.Create();
-            sender.AES.Key = Convert.FromBase64String( split[0] );
-            sender.AES.IV = Convert.FromBase64String( split[1] );
+            var aes = Aes.Create();
+            aes.Key = Convert.FromBase64String( split[0] );
+            aes.IV = Convert.FromBase64String( split[1] );
+            sender.AES = aes;
         } catch (Exception e) {
             GD.PrintErr( $"Failed to initialize secure connection with client...{e}" );
         }
@@ -161,6 +168,13 @@ public partial class Multiplayer {
 
     protected internal void OnSteamAuthPacket(Connection.Client sender, SteamAuthPacket packet) {
         try {
+            var status = _clients.Where( pair => pair.Value.SteamId == packet.SteamId ).Select( pair => pair.Value )
+                .FirstOrDefault()?.Status ?? Connection.State.Disconnecting;
+
+            if ( status != Connection.State.Connected && status != Connection.State.Connecting) {
+                SteamGameServer.EndAuthSession( new CSteamID( packet.SteamId ) );
+            }
+            
             var result = SteamGameServer.BeginAuthSession(
                 packet.Token, packet.Token.Length,
                 new CSteamID( packet.SteamId )
@@ -169,6 +183,10 @@ public partial class Multiplayer {
             if (result == EBeginAuthSessionResult.k_EBeginAuthSessionResultOK) {
                 sender.SteamId = packet.SteamId;
                 GD.Print( $"Steam user {sender.Username} logged in." );
+                sender.OnConnected();
+                sender.Disconnected += connection => {
+                    SteamGameServer.EndAuthSession( new CSteamID( packet.SteamId ) );
+                };
             } else {
                 sender.Disconnect(); // TODO: Error instead of just disconnecting
             }

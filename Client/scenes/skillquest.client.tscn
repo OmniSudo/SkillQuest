@@ -3,7 +3,7 @@
 [ext_resource type="PackedScene" uid="uid://cy730oecagcjh" path="res://Shared/scenes/skillquest.shared.tscn" id="1_fvhv2"]
 [ext_resource type="Script" path="res://Client/code/Client.cs" id="1_qphol"]
 [ext_resource type="Script" path="res://Server/code/Server.cs" id="2_tef6s"]
-[ext_resource type="PackedScene" uid="uid://cnnnlp6i42ygq" path="res://Client/scenes/UI/Login/Select/character_select.tscn" id="4_rd3ot"]
+[ext_resource type="Script" path="res://Client/code/Ui.cs" id="4_roil7"]
 
 [node name="SkillQuest" type="Node"]
 
@@ -22,5 +22,4 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-
-[node name="Character Select" parent="Client/UI" instance=ExtResource("4_rd3ot")]
+script = ExtResource("4_roil7")

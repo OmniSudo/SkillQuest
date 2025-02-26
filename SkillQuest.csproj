@@ -6,6 +6,7 @@
     <EnableDynamicLoading>true</EnableDynamicLoading>
     <Nullable>enable</Nullable>
     <RootNamespace>SkillQuest</RootNamespace>
+    <InterceptorsPreviewNamespaces>$(InterceptorsPreviewNamesapces);SkillQuest</InterceptorsPreviewNamespaces>
   </PropertyGroup>
   <ItemGroup>
     <Content Include="Client\scenes\skillquest.client.tscn" />
@@ -20,6 +21,12 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="Fody" Version="6.9.1">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="FodyHelpers" Version="6.9.1" />
+    <PackageReference Include="MethodDecorator.Fody" Version="1.1.1" />
     <PackageReference Include="Steamworks.NET" Version="2024.8.0" />
   </ItemGroup>
 </Project>
