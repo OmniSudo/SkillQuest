@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Threading.Tasks;
@@ -13,8 +14,6 @@ using System.Threading.Tasks;
 namespace SkillQuest.Network;
 
 public static class Rpc {
-    private static Connection.Client _sender;
-
     public static Connection.Client Caller { get; internal set; }
 
     public static bool Calling { get; internal set; }
@@ -125,18 +124,12 @@ public abstract class RpcAttribute : Attribute, IMethodDecorator {
 
     public void OnException(Exception exception) {
         Rpc.Filter = _filter;
-        GD.PrintErr( "OnException: " + exception.Message );
     }
 
 
     protected Connection.Filter? _filter;
-
-    static RpcAttribute() {
-        _channel = Shared.Multiplayer.CreateChannel( new Uri( "packet://rpc.skill.quest/" ) );
-        _channel.Subscribe<RpcPacket>( OnRpcPacket );
-    }
-
-    private static void OnRpcPacket(Connection.Client connection, RpcPacket packet) {
+    
+    protected internal static void OnRpcRequestPacket(Connection.Client connection, RpcPacket.Request packet) {
         var type = Type.GetType( packet.TypeName );
         var method = type.GetMethod( packet.MethodName,
             BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static );
@@ -145,8 +138,10 @@ public abstract class RpcAttribute : Attribute, IMethodDecorator {
             return;
         }
 
-        Rpc.Caller = connection;
+        GD.Print( connection.EndPoint.ToString() + Guid.NewGuid()  );
         
+        var caller = Rpc.Caller;
+
         try {
             var args = new List<object>();
             foreach (var param in method.GetParameters()) {
@@ -158,16 +153,27 @@ public abstract class RpcAttribute : Attribute, IMethodDecorator {
                     args.Add( JsonSerializer.Deserialize( packet.Arguments[args.Count], param.ParameterType ) );
                 }
             }
+            
+            if (!Server.IsHost && Client.CL is null) {
+                void ClientOnConnected(Connection.Client client) {
+                    var caller = Rpc.Caller;
+                    Rpc.Caller = connection;
+                    method?.Invoke( null, args.ToArray() );
+                    Rpc.Caller = caller;
+                    Client.Connected -= ClientOnConnected;
+                }
 
-            method?.Invoke( null, args.ToArray() );
+                Client.Connected += ClientOnConnected;
+            } else {
+                Rpc.Caller = connection;
+                method?.Invoke( null, args.ToArray() );
+            }
         } catch (Exception e) {
             GD.PrintErr( $"Failed to finish invoking RPC request {e.Message}: {e.StackTrace}" );
-        }
-
-        Rpc.Caller = null;
+        } 
+        
+        Rpc.Caller = caller;
     }
-
-    protected static Channel _channel;
 
     protected static string[] FormatArgs(object[] args) {
         return args.Select( o => {
@@ -188,20 +194,17 @@ public class HostAttribute : RpcAttribute {
 
     public void Init(object instance, MethodBase method, object[] args) {
         if (Multiplayer.Host is not null) {
-            var _packet = new RpcPacket() {
+            var _packet = new RpcPacket.Request() {
                 MethodName = method.Name,
                 TypeName = method.DeclaringType.AssemblyQualifiedName,
                 Arguments = FormatArgs( args ),
             };
 
-            _channel.Send( Multiplayer.Host, _packet, true );
+            Shared.Multiplayer.SystemChannel.Send( Multiplayer.Host, _packet, true );
         }
     }
 
     public void OnEntry() {
-        if (!Rpc.Filter?.IsRecipient( Multiplayer.Host ) ?? false) throw new OperationCanceledException();
-        Rpc.Caller = Multiplayer.Host;
-
         _filter = Rpc.Filter;
     }
 }
@@ -214,7 +217,7 @@ public class BroadcastAttribute : RpcAttribute {
 
     public void Init(object instance, MethodBase method, object[] args) {
         if (Multiplayer.Host is null) {
-            var _packet = new RpcPacket() {
+            var _packet = new RpcPacket.Request() {
                 MethodName = method.Name,
                 TypeName = method.DeclaringType.AssemblyQualifiedName,
                 Arguments = FormatArgs( args ),
@@ -223,14 +226,12 @@ public class BroadcastAttribute : RpcAttribute {
             foreach (
                 var connection in
                 Shared.Multiplayer.Clients.Values.Where( (c) => (Rpc.Filter?.IsRecipient( c ) ?? true) )) {
-                _channel.Send( connection, _packet, true );
+                Shared.Multiplayer.SystemChannel.Send( connection, _packet, true );
             }
         }
     }
 
     public void OnEntry() {
-        Rpc.Caller = Multiplayer.Host;
-
         _filter = Rpc.Filter;
     }
 }

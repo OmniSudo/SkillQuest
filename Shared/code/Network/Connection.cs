@@ -70,8 +70,8 @@ public abstract class Connection {
                         Disconnected?.Invoke( this, clientConnection );
                         _clients.TryRemove( clientConnection.EndPoint, out var _ );
                     };
-
-                    OnConnected( connection );
+                    
+                    (connection as Connection.Local)?.Ready();
                 } catch (Exception e) {
                     GD.PrintErr( $"Unable to accept connection {e}" );
                 }
@@ -81,7 +81,6 @@ public abstract class Connection {
         }
         
         protected internal void OnConnected(Connection.Client connection) {
-            (connection as Connection.Local)?.Ready();
             Connected?.Invoke( this, connection );
             GD.Print( $"Connected @ {connection.EndPoint}" );
         }
@@ -457,6 +456,13 @@ public abstract class Connection {
 
         protected internal override void Ready() {
             base.Ready();
+            
+           Multiplayer._clients[EndPoint] = this;
+            this.Disconnected += connection => {
+                Multiplayer._clients.TryRemove( connection.EndPoint, out _ );
+                Multiplayer.Servers[this._client.Client.RemoteEndPoint as IPEndPoint].Disconnect( this );
+            };
+            
             SendRSAToClient();
         }
         

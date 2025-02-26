@@ -22,6 +22,8 @@ public partial class Multiplayer {
         SystemChannel.Subscribe<AESPacket>( OnAESPacket );
         SystemChannel.Subscribe<SteamAuthPacket>( OnSteamAuthPacket );
         
+        SystemChannel.Subscribe<RpcPacket.Request>( RpcAttribute.OnRpcRequestPacket );
+        
         SteamAPI.LoadLibrary();
         if (!Steamworks.SteamAPI.Init()) {
             GD.PrintErr( "Failed to initialize Steam API!" );
@@ -41,13 +43,13 @@ public partial class Multiplayer {
 
     public ImmutableDictionary<string, Channel> Channels => _channels.ToImmutableDictionary();
 
-    private ConcurrentDictionary<IPEndPoint, Connection.Client> _clients = new();
+    protected internal ConcurrentDictionary<IPEndPoint, Connection.Client> _clients = new();
 
-    private ConcurrentDictionary<IPEndPoint, Connection.Server> _servers = new();
+    protected internal ConcurrentDictionary<IPEndPoint, Connection.Server> _servers = new();
 
-    private ConcurrentDictionary<string, Channel> _channels = new();
+    protected internal ConcurrentDictionary<string, Channel> _channels = new();
 
-    private ConcurrentDictionary<string, Type> _packets = new();
+    protected internal ConcurrentDictionary<string, Type> _packets = new();
 
     public Channel CreateChannel(Uri uri) {
         var name = new UriBuilder( uri ) { Scheme = "packet" }.Uri.ToString();
@@ -110,14 +112,6 @@ public partial class Multiplayer {
         var server = new Connection.Server( this, port );
 
         _servers[server.EndPoint] = server;
-
-        server.Connected += (server, client) => {
-            _clients[client.EndPoint] = client;
-            client.Disconnected += connection => {
-                _clients.TryRemove( connection.EndPoint, out _ );
-                server.Disconnect( connection );
-            };
-        };
         
         return server;
     }
@@ -184,6 +178,7 @@ public partial class Multiplayer {
                 sender.SteamId = packet.SteamId;
                 GD.Print( $"Steam user {sender.Username} logged in." );
                 sender.OnConnected();
+                (sender as Connection.Local).Server.OnConnected( sender );
                 sender.Disconnected += connection => {
                     SteamGameServer.EndAuthSession( new CSteamID( packet.SteamId ) );
                 };

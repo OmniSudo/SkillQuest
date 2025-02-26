@@ -1,8 +1,10 @@
 using Godot;
+using SkillQuest.Actor;
 using SkillQuest.Network;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace SkillQuest.UI.Login.Select;
 
@@ -27,6 +29,8 @@ public partial class CharacterSelect : CanvasLayer {
 
     private RotateDirection _rotation = RotateDirection.NONE;
 
+    private Character.Info _selected;
+
     public override void _Ready() {
         Create.Pressed += CreateOnPressed;
         Confirm.Pressed += ConfirmOnPressed;
@@ -36,13 +40,6 @@ public partial class CharacterSelect : CanvasLayer {
 
         RotateRight.ButtonDown += RotateRightOnButtonDown;
         RotateRight.ButtonUp += RotateRightOnButtonUp;
-
-        var character = GD.Load<PackedScene>(
-            "Client/scenes/UI/Login/Select/character_button.tscn"
-        ).Instantiate<CharacterSelectButton>();
-        Selection.AddChild( character );
-        character.SetName( "OmniSudo" );
-        Characters = [character];
     }
 
     public override void _Process(double delta) {
@@ -52,7 +49,7 @@ public partial class CharacterSelect : CanvasLayer {
             0f
         );
     }
-    
+
     private void RotateRightOnButtonDown() {
         _rotation = RotateDirection.RIGHT;
     }
@@ -74,12 +71,107 @@ public partial class CharacterSelect : CanvasLayer {
     }
 
     private void ConfirmOnPressed() {
-        throw new System.NotImplementedException();
+        Select?.Invoke( _selected );
     }
 
     private enum RotateDirection {
         LEFT = -1,
         NONE = 0,
         RIGHT = 1
+    }
+
+    public static class Client {
+        private static TaskCompletionSource<Character.Info> _select;
+
+        public static Task<Character.Info> Open(Character.Info[] characters) {
+            var ui = GD.Load<PackedScene>(
+                "Client/scenes/UI/Login/Select/character_select.tscn"
+            ).Instantiate<CharacterSelect>();
+            ui.SetCharacters( characters );
+            SkillQuest.Client.UI.AddChild( ui );
+
+            _select = new TaskCompletionSource<Character.Info>();
+            ui.Select += UiOnSelect;
+
+            void UiOnSelect(Character.Info info) { 
+                _select.SetResult( info );
+                ui.Select -= UiOnSelect;
+                Close();
+            }
+
+            return _select.Task;
+        }
+
+        public static void Close() {
+            var node = SkillQuest.Client.UI.GetNode( "Character Select" );
+            SkillQuest.Client.UI.RemoveChild( node );
+        }
+    }
+
+    private void SetCharacters(Character.Info[] characters) {
+        var scene = GD.Load<PackedScene>(
+            "Client/scenes/UI/Login/Select/character_button.tscn"
+        );
+
+        var containers = new List<Container>();
+        foreach (var character in characters) {
+            var element = scene.Instantiate<CharacterSelectButton>();
+            Selection.AddChild( element );
+            element.SetName( "OmniSudo" );
+            var button = element.GetNode<Button>( "Button" );
+            button.Pressed += () => {
+                _selected = element.CharacterInfo;
+            };
+            containers.Add( element );
+        }
+
+        Characters = containers.ToArray();
+    }
+
+    private delegate void OnSelect(Character.Info info);
+
+    private event OnSelect Select;
+
+    public static class Server {
+        public static Task<Character.Info> GetSelection(Connection.Client client) {
+            var guid = Guid.NewGuid();
+            _getCharacter[client] = new TaskCompletionSource<Character.Info>();
+
+            using (Network.Rpc.FilterInclude( client )) {
+                _CL_Open();
+            }
+            
+            return _getCharacter[client].Task;
+        }
+
+        public static void CloseOn(Connection.Client client) {
+            using (Network.Rpc.FilterInclude( client )) {
+                _CL_Close();
+            }
+        }
+    }
+
+    private static Dictionary<Connection.Client, TaskCompletionSource<Character.Info>> _getCharacter = new();
+
+    [Broadcast]
+    private static async void _CL_Open() {
+        var selection = await Client.Open( new Character.Info[] {
+            new Character.Info() {
+                Name = "OmniSudo"
+            }
+        } );
+        _SV_Get( selection );
+    }
+
+    [Host]
+    private static async void _SV_Get(Character.Info info) {
+        if (_getCharacter.Remove( Network.Rpc.Caller, out var tcs )) {
+            tcs.SetResult( info );
+        }
+    }
+
+    [Broadcast]
+    private static async void _CL_Close() {
+        Client.Close();
     }
 }

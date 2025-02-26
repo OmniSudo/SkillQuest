@@ -11,6 +11,10 @@ public partial class Client : Node {
     public static Client CL;
 
     public static bool IsClient => !OS.GetCmdlineArgs().Contains( "--server" );
+
+    public static event Connection.Client.DoConnect Connected;
+
+    public static Control UI;
     
     public override void _Ready() {
         if (!IsClient) {
@@ -19,13 +23,17 @@ public partial class Client : Node {
         }
 
         CL = this;
-        
+
         GD.Print( "Initializing Client" );
-        
-        GD.Print( GetPath().ToString()  );
 
         try {
-            Shared.Multiplayer.Connect( IPEndPoint.Parse( "127.0.0.1:3698" ) );
+            UI = GetNode<Control>( "UI" );
+            
+            Shared.Multiplayer.Connect( IPEndPoint.Parse( "127.0.0.1:3698" ) ).ContinueWith(
+                task => {
+                    Connected?.Invoke( task.Result );
+                }
+            );
         } catch (Exception e) {
             GD.PrintErr( e );
         }

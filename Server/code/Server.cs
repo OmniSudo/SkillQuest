@@ -26,6 +26,11 @@ public partial class Server : Node {
 
         try {
             var server = Shared.Multiplayer.Bind( 3698 );
+            server.Connected += (s, c) => {
+                CharacterSelect.Server.GetSelection( c ).ContinueWith( task => {
+                    GD.Print( task.Result );
+                } );
+            };
         } catch (Exception e) {
             GD.PrintErr( e );
         }
