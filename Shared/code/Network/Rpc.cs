@@ -129,7 +129,7 @@ public abstract class RpcAttribute : Attribute, IMethodDecorator {
 
     protected Connection.Filter? _filter;
     
-    protected internal static void OnRpcRequestPacket(Connection.Client connection, RpcPacket.Request packet) {
+    protected internal static void OnRpcPacket(Connection.Client connection, RpcPacket packet) {
         var type = Type.GetType( packet.TypeName );
         var method = type.GetMethod( packet.MethodName,
             BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static );
@@ -192,7 +192,7 @@ public class HostAttribute : RpcAttribute {
 
     public void Init(object instance, MethodBase method, object[] args) {
         if (!Server.IsHost || (!Server.IsDedicated && Rpc.Caller is null)) {
-            var _packet = new RpcPacket.Request() {
+            var _packet = new RpcPacket() {
                 MethodName = method.Name,
                 TypeName = method.DeclaringType.AssemblyQualifiedName,
                 Arguments = FormatArgs( args ),
@@ -215,7 +215,7 @@ public class BroadcastAttribute : RpcAttribute {
 
     public void Init(object instance, MethodBase method, object[] args) {
         if (Server.IsHost && (Server.IsDedicated ||  (!Rpc.Filter?.IsRecipient( Rpc.Caller ) ?? false))) {
-            var _packet = new RpcPacket.Request() {
+            var _packet = new RpcPacket() {
                 MethodName = method.Name,
                 TypeName = method.DeclaringType.AssemblyQualifiedName,
                 Arguments = FormatArgs( args ),

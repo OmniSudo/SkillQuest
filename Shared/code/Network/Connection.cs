@@ -76,6 +76,8 @@ public abstract class Connection {
                     GD.PrintErr( $"Unable to accept connection {e}" );
                 }
             }
+
+
         }
         
         protected internal void OnConnected(Connection.Client connection) {
@@ -236,9 +238,8 @@ public abstract class Connection {
         public delegate void DoDisconnect(Connection.Client connection);
 
         public event DoDisconnect? Disconnected;
-
+        private int delimiters = 0;
         private IEnumerable<byte> buffer = Array.Empty<byte>();
-        int delimiters = 0;
         Timer _keepalive;
 
         private bool PendingSplit(byte b) {
@@ -247,21 +248,24 @@ public abstract class Connection {
 
         public bool Receive() {
             bool completed = false;
+            List<byte> temp = new List<byte>( buffer );
 
             while (_stream?.DataAvailable ?? false) {
                 var data = new byte[1024];
                 var len = _stream.Read( data, 0, data.Length );
                 data = data.Take( len ).ToArray();
 
-                do {
-                    var take = data.SkipWhile( (b) => b == 0 ).TakeWhile( PendingSplit );
+                temp.AddRange( data );
+
+                while ( temp.Count > 0 ) {
+                    var take = temp.SkipWhile( (b) => b == 0 ).TakeWhile( PendingSplit );
                     if (take.Count() == 0) break;
 
-                    var leftover = len - take.Count();
+                    var leftover = temp.Count - take.Count();
 
                     buffer = buffer.Concat( take ).Concat( leftover >= 1 ? [0x00] : Array.Empty<byte>() );
-                    data = data.Skip( take.Count() ).Skip( leftover >= 1 ? 1 : 0 ).ToArray();
-
+                    temp = temp.Skip( take.Count() ).Skip( leftover >= 1 ? 1 : 0 ).ToList();
+                    
                     len = leftover - (leftover >= 1 ? 1 : 0);
 
                     if (leftover >= 1) {
@@ -270,11 +274,11 @@ public abstract class Connection {
                         if (delimiters >= 2) {
                             try {
                                 completed = true;
-                                delimiters = 0;
+                                delimiters -= 2;
 
                                 string typename = "";
                                 string packetdata = "";
-
+                                
                                 if (buffer.First() == 0xF0) {
                                     ICryptoTransform decryptor = AES.CreateDecryptor();
                                     byte[] decryptedBytes;
@@ -302,9 +306,7 @@ public abstract class Connection {
                                     var buffer_packet = Encoding.ASCII.GetString(
                                         buffer
                                             .Skip( 1 ).SkipWhile( PendingSplit )
-                                            .Skip( 1 )
-                                            .Reverse().Skip( 1 )
-                                            .Reverse().TakeWhile( PendingSplit )
+                                            .Skip( 1 ).TakeWhile( PendingSplit )
                                             .ToArray()
                                     );
 
@@ -361,7 +363,7 @@ public abstract class Connection {
 
 
                     }
-                } while (data.Length > 0);
+                };
             }
 
             return completed;

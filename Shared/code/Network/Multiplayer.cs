@@ -22,7 +22,7 @@ public partial class Multiplayer {
         SystemChannel.Subscribe<AESPacket>( OnAESPacket );
         SystemChannel.Subscribe<SteamAuthPacket>( OnSteamAuthPacket );
         
-        SystemChannel.Subscribe<RpcPacket.Request>( RpcAttribute.OnRpcRequestPacket );
+        SystemChannel.Subscribe<RpcPacket>( RpcAttribute.OnRpcPacket );
         
         SteamAPI.LoadLibrary();
         if (!Steamworks.SteamAPI.Init()) {

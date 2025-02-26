@@ -22,7 +22,7 @@ public class Channel {
 
     public async Task Send(Connection.Client? connection, Network.Packet packet, bool encrypt = true){
         packet.Channel = Name;
-        if ( DEBUG ) GD.Print( $"{Name} -> {packet.GetType().Name}");
+        if (DEBUG) GD.Print( $"{Name} -> {packet.GetType().Name}");
 
         try {
             if (connection is not null ) {
