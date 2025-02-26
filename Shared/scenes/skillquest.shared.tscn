@@ -1,6 +1,10 @@
-[gd_scene load_steps=2 format=3 uid="uid://cy730oecagcjh"]
+[gd_scene load_steps=6 format=3 uid="uid://cy730oecagcjh"]
 
 [ext_resource type="Script" path="res://Shared/code/Shared.cs" id="1_k2l27"]
+[ext_resource type="Script" path="res://Shared/code/Universe.cs" id="2_24n2o"]
+[ext_resource type="Script" path="res://Shared/code/Procedural/World/WorldGenPipeline.cs" id="3_yhobo"]
+[ext_resource type="Script" path="res://Shared/code/Procedural/World/EntryPointNodeWorldRegion.cs" id="4_1tca5"]
+[ext_resource type="Script" path="res://Shared/code/Procedural/World/Voronoi2DGenerator.cs" id="5_e1swc"]
 
 [node name="Shared" type="Node"]
 script = ExtResource("1_k2l27")
@@ -13,6 +17,22 @@ script = ExtResource("1_k2l27")
 
 [node name="ItemStacks" type="Node" parent="Ledger"]
 
-[node name="Universe" type="Node" parent="."]
+[node name="Universe" type="Node3D" parent="." node_paths=PackedStringArray("TerrainGenerator", "RegionContainer")]
+script = ExtResource("2_24n2o")
+TerrainGenerator = NodePath("Procgen/Terrain")
+RegionContainer = NodePath("Regions")
+
+[node name="Procgen" type="Node" parent="Universe"]
+
+[node name="Terrain" type="Node" parent="Universe/Procgen"]
+script = ExtResource("3_yhobo")
+
+[node name="EntryPoint" type="Node" parent="Universe/Procgen/Terrain"]
+script = ExtResource("4_1tca5")
+
+[node name="VoronoiGenerator" type="Node" parent="Universe/Procgen/Terrain/EntryPoint"]
+script = ExtResource("5_e1swc")
+
+[node name="Regions" type="Node3D" parent="Universe"]
 
 [node name="System" type="Node" parent="."]

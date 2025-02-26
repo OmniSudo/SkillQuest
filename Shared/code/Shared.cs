@@ -1,6 +1,8 @@
 using Godot;
 using SkillQuest.Network;
 using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -38,5 +40,15 @@ public partial class Shared : Node {
 
     public override void _Process(double delta) {
         Multiplayer.Update( delta );
+
+        while (_defferedActions.TryDequeue( out var action )) {
+            action?.Invoke();
+        }
+    }
+
+    private ConcurrentQueue<Action> _defferedActions = new();
+    
+    public void CallDeferred(Action action) {
+        _defferedActions.Enqueue( action );
     }
 }

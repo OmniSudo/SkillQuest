@@ -19,7 +19,7 @@ public partial class Server : Node {
             QueueFree();
             return;
         }
-        
+
         SV = this;
 
         GD.Print( "Initializing Server" );
@@ -28,7 +28,11 @@ public partial class Server : Node {
             var server = Shared.Multiplayer.Bind( 3698 );
             server.Connected += (s, c) => {
                 CharacterSelect.Server.GetSelection( c ).ContinueWith( task => {
-                    GD.Print( task.Result.Name );
+                    for (var x = -16; x < 16; x++) {
+                        for (var y = -16; y < 16; y++) {
+                            Universe.World.Generate( c, new Vector3( x, y, 0 ) );
+                        }
+                    }
                 } );
             };
         } catch (Exception e) {
@@ -50,7 +54,7 @@ public partial class Server : Node {
         if (!initialized) return;
 
         try {
-            
+
         } catch (Exception e) {
             GD.PrintErr( e );
         }
