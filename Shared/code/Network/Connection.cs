@@ -537,10 +537,10 @@ public abstract class Connection {
             if (this.Type == Connection.Filter.FilterType.Exclude)
             {
                 Predicate<Connection.Client> predicate = this.Predicate;
-                return predicate == null ? !this.Connections.Contains<Connection.Client>(connection) : !predicate(connection);
+                return predicate == null ? !(this.Connections == null || this.Connections.Contains<Connection.Client>(connection) ) : !predicate(connection);
             }
             Predicate<Connection.Client> predicate1 = this.Predicate;
-            return predicate1 == null ? this.Connections.Contains<Connection.Client>(connection) : predicate1(connection);
+            return predicate1 == null ? (this.Connections == null || this.Connections.Contains<Connection.Client>(connection) ) : predicate1(connection);
         }
 
         public enum FilterType

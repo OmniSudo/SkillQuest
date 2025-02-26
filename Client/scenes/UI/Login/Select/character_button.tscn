@@ -1,0 +1,18 @@
+[gd_scene load_steps=2 format=3 uid="uid://ptbeyttwn6vm"]
+
+[ext_resource type="Script" path="res://Client/code/UI/Login/Select/CharacterSelectButton.cs" id="1_7dqw6"]
+
+[node name="Character" type="MarginContainer"]
+theme_override_constants/margin_left = 5
+theme_override_constants/margin_top = 5
+theme_override_constants/margin_right = 5
+theme_override_constants/margin_bottom = 5
+script = ExtResource("1_7dqw6")
+
+[node name="Button" type="Button" parent="."]
+custom_minimum_size = Vector2(0, 25)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+text = "Text"
+alignment = 0

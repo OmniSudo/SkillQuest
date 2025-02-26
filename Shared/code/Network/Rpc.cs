@@ -137,8 +137,6 @@ public abstract class RpcAttribute : Attribute, IMethodDecorator {
             method?.GetCustomAttribute<BroadcastAttribute>() is null) {
             return;
         }
-
-        GD.Print( connection.EndPoint.ToString() + Guid.NewGuid()  );
         
         var caller = Rpc.Caller;
 
@@ -154,7 +152,7 @@ public abstract class RpcAttribute : Attribute, IMethodDecorator {
                 }
             }
             
-            if (!Server.IsHost && Client.CL is null) {
+            if (Server.IsHost && !Server.IsDedicated && Client.CL is null) {
                 void ClientOnConnected(Connection.Client client) {
                     var caller = Rpc.Caller;
                     Rpc.Caller = connection;
@@ -189,11 +187,11 @@ public abstract class RpcAttribute : Attribute, IMethodDecorator {
 [AttributeUsage( AttributeTargets.Method, AllowMultiple = true )]
 public class HostAttribute : RpcAttribute {
     public bool NeedBypass() {
-        return Multiplayer.Host is not null || (!Rpc.Filter?.IsRecipient( Multiplayer.Host ) ?? false);
+        return !Server.IsHost || (!Server.IsDedicated && Rpc.Caller is null);
     }
 
     public void Init(object instance, MethodBase method, object[] args) {
-        if (Multiplayer.Host is not null) {
+        if (!Server.IsHost || (!Server.IsDedicated && Rpc.Caller is null)) {
             var _packet = new RpcPacket.Request() {
                 MethodName = method.Name,
                 TypeName = method.DeclaringType.AssemblyQualifiedName,
@@ -212,11 +210,11 @@ public class HostAttribute : RpcAttribute {
 [AttributeUsage( AttributeTargets.Method, AllowMultiple = true )]
 public class BroadcastAttribute : RpcAttribute {
     public bool NeedBypass() {
-        return (Server.IsHost && Server.IsDedicated) || (!Rpc.Filter?.IsRecipient( Multiplayer.Host ) ?? false);
+        return (Server.IsHost && (Server.IsDedicated || (!Rpc.Filter?.IsRecipient( Rpc.Caller ) ?? false)));
     }
 
     public void Init(object instance, MethodBase method, object[] args) {
-        if (Multiplayer.Host is null) {
+        if (Server.IsHost && (Server.IsDedicated ||  (!Rpc.Filter?.IsRecipient( Rpc.Caller ) ?? false))) {
             var _packet = new RpcPacket.Request() {
                 MethodName = method.Name,
                 TypeName = method.DeclaringType.AssemblyQualifiedName,

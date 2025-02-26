@@ -10,7 +10,7 @@ namespace SkillQuest;
 public partial class Client : Node {
     public static Client CL;
 
-    public static bool IsClient => !OS.GetCmdlineArgs().Contains( "--server" );
+    public static bool IsClient => !OS.GetCmdlineArgs().Contains( "--dedicated" );
 
     public static event Connection.Client.DoConnect Connected;
 

@@ -93,7 +93,7 @@ public partial class CharacterSelect : CanvasLayer {
             _select = new TaskCompletionSource<Character.Info>();
             ui.Select += UiOnSelect;
 
-            void UiOnSelect(Character.Info info) { 
+            void UiOnSelect(Character.Info info) {
                 _select.SetResult( info );
                 ui.Select -= UiOnSelect;
                 Close();
@@ -118,6 +118,7 @@ public partial class CharacterSelect : CanvasLayer {
             var element = scene.Instantiate<CharacterSelectButton>();
             Selection.AddChild( element );
             element.SetName( "OmniSudo" );
+            element.CharacterInfo = character;
             var button = element.GetNode<Button>( "Button" );
             button.Pressed += () => {
                 _selected = element.CharacterInfo;
