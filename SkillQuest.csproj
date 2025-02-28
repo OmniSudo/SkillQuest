@@ -9,7 +9,9 @@
     <InterceptorsPreviewNamespaces>$(InterceptorsPreviewNamesapces);SkillQuest</InterceptorsPreviewNamespaces>
   </PropertyGroup>
   <ItemGroup>
+    <Content Include="Client\scenes\Main.tscn" />
     <Content Include="Client\scenes\skillquest.client.tscn" />
+    <Content Include="Client\shaders\compute.glsl" />
     <Content Include="icon.svg" />
   </ItemGroup>
   <ItemGroup>
@@ -35,5 +37,9 @@
     <Compile Update="Shared\code\Network\Connection.cs">
       <DependentUpon>Channel.cs</DependentUpon>
     </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Server\shaders\" />
+    <Folder Include="Shared\shaders\" />
   </ItemGroup>
 </Project>

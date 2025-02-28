@@ -39,8 +39,6 @@ public partial class Shared : Node {
     }
 
     public override void _Process(double delta) {
-        Multiplayer.Update( delta );
-
         while (_defferedActions.TryDequeue( out var action )) {
             action?.Invoke();
         }

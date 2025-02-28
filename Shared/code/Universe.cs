@@ -53,21 +53,21 @@ public partial class Universe : Node3D {
         if (!Server.IsDedicated) return;
 
         using (Network.Rpc.FilterInclude( client )) {
-            _CL_Generate( position );
+            _CL_Generate( position.X, position.Y, position.Z );
         }
     }
 
     [Broadcast]
-    private static async void _CL_Generate(Vector3 position) {
+    private static async void _CL_Generate(float x, float y, float z) {
+        var position = new Vector3( x, y, z );
         if (World.Regions.ContainsKey( position )) return;
 
-        var region = await World.Generate( position );
-
-        if (region is not null) {
+        World.Generate( position ).ContinueWith( task => {
+            var region = task.Result;
             World.Regions[region.Position] = region;
             Shared.SH.CallDeferred( () => {
                 World.RegionContainer.AddChild( region );
             } );
-        }
+        } );
     }
 }

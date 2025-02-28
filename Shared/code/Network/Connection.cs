@@ -34,6 +34,8 @@ public abstract class Connection {
 
         ConcurrentDictionary<IPEndPoint, Connection.Client> _clients = new();
 
+        private CancellationTokenSource _cts = new();
+
         public Server(Multiplayer multiplayer, short port) {
             Multiplayer = multiplayer;
             EndPoint = new IPEndPoint( IPAddress.Any, port );
@@ -41,21 +43,18 @@ public abstract class Connection {
             _server = new TcpListener( EndPoint );
             _server.Start();
 
+            ThreadPool.QueueUserWorkItem(
+                Start,
+                _cts.Token
+            );
+
             GD.Print( $"Listening @ {EndPoint}" );
         }
 
-        ~Server() {
-            _server.Stop();
-        }
-        
-        public TcpListener _server { get; private set; }
+        private void Start(object state) {
+            CancellationToken token = (CancellationToken)state;
 
-        public RSA RSA { get; } = new RSACryptoServiceProvider();
-
-        Thread _thread;
-
-        public void Update(double delta) {
-            if (_server.Pending()) {
+            while (!token.IsCancellationRequested) {
                 try {
                     var client = _server.AcceptTcpClient();
                     GD.Print( $"Accepted @ {client.Client.RemoteEndPoint}" );
@@ -70,16 +69,24 @@ public abstract class Connection {
                         Disconnected?.Invoke( this, clientConnection );
                         _clients.TryRemove( clientConnection.EndPoint, out var _ );
                     };
-                    
+
                     (connection as Connection.Local)?.Ready();
                 } catch (Exception e) {
                     GD.PrintErr( $"Unable to accept connection {e}" );
                 }
             }
-
-
         }
-        
+
+        ~Server() {
+            _server.Stop();
+        }
+
+        public TcpListener _server { get; private set; }
+
+        public RSA RSA { get; } = new RSACryptoServiceProvider();
+
+        Thread _thread;
+
         protected internal void OnConnected(Connection.Client connection) {
             Connected?.Invoke( this, connection );
             GD.Print( $"Connected @ {connection.EndPoint}" );
@@ -88,7 +95,7 @@ public abstract class Connection {
         public delegate void DoConnected(Connection.Server server, Connection.Client client);
 
         public event DoConnected Connected;
-        
+
         protected internal void OnDisconnected(Connection.Client connection) {
             Disconnected?.Invoke( this, connection );
             GD.Print( $"Disconnected @ {connection.EndPoint}" );
@@ -109,7 +116,8 @@ public abstract class Connection {
             foreach (var client in _clients.Values) {
                 client.Disconnect();
             }
-            
+
+            _cts.Cancel();
             _server.Stop();
         }
     }
@@ -118,17 +126,16 @@ public abstract class Connection {
         protected internal TcpClient? _client { get; set; } = null;
 
         protected NetworkStream? _stream;
-        
-        public string Username {
+
+        public string? Username {
             get {
-                var steamid = new CSteamID(this.SteamId);
-                bool needsToRetreiveInformationFromInternet = SteamFriends.RequestUserInformation(steamid, true);
-                if (!needsToRetreiveInformationFromInternet)
-                {
-                    return SteamFriends.GetFriendPersonaName(steamid);
+                var steamid = new CSteamID( this.SteamId );
+                bool needsToRetreiveInformationFromInternet = SteamFriends.RequestUserInformation( steamid, true );
+                if (!needsToRetreiveInformationFromInternet) {
+                    return SteamFriends.GetFriendPersonaName( steamid );
                 }
 
-                return "nil";
+                return null;
             }
         }
 
@@ -155,8 +162,8 @@ public abstract class Connection {
 
                 using (var msEncrypt = new MemoryStream()) {
                     using (var csEncrypt = new CryptoStream( msEncrypt, encryptor, CryptoStreamMode.Write )) {
-                        byte[] plainBytes = Encoding.UTF8.GetBytes( typename );
-                        csEncrypt.Write( plainBytes, 0, plainBytes.Length );
+                        byte[] plainBytes = Encoding.ASCII.GetBytes( typename );
+                        await csEncrypt.WriteAsync( plainBytes, 0, plainBytes.Length );
                     }
 
                     var b64 = Convert.ToBase64String( msEncrypt.ToArray() );
@@ -167,7 +174,7 @@ public abstract class Connection {
 
                 using (var msEncrypt = new MemoryStream()) {
                     using (var csEncrypt = new CryptoStream( msEncrypt, encryptor, CryptoStreamMode.Write )) {
-                        byte[] plainBytes = Encoding.UTF8.GetBytes( serialized );
+                        byte[] plainBytes = Encoding.ASCII.GetBytes( serialized );
                         csEncrypt.Write( plainBytes, 0, plainBytes.Length );
                     }
 
@@ -175,19 +182,19 @@ public abstract class Connection {
                     bytes_packet = Encoding.ASCII.GetBytes( b64 ).ToArray();
                 }
 
-                ciphertext = new byte[] { (byte)0xF0 }
+                ciphertext = new byte[] { (byte)0xFF }
+                    .Concat( BitConverter.GetBytes( IPAddress.HostToNetworkOrder( (short)bytes_typename.Length ) ) )
                     .Concat( bytes_typename )
-                    .Concat( [(byte)0x00] )
+                    .Concat( BitConverter.GetBytes( IPAddress.HostToNetworkOrder( (int)bytes_packet.Length ) ) )
                     .Concat( bytes_packet )
-                    .Concat( [(byte)0x00] )
                     .ToArray();
                 _stream.Write( ciphertext, 0, ciphertext.Length );
             } else {
-                ciphertext = new byte[] { (byte)0x0F }
-                    .Concat( Encoding.UTF8.GetBytes( typename ) )
-                    .Concat( [(byte)0x00] )
-                    .Concat( Encoding.UTF8.GetBytes( serialized ) )
-                    .Concat( [(byte)0x00] )
+                ciphertext = new byte[] { (byte)0x00 }
+                    .Concat( BitConverter.GetBytes( IPAddress.HostToNetworkOrder( (short)typename.Length ) ) )
+                    .Concat( Encoding.ASCII.GetBytes( typename ) )
+                    .Concat( BitConverter.GetBytes( IPAddress.HostToNetworkOrder( (int)serialized.Length ) ) )
+                    .Concat( Encoding.ASCII.GetBytes( serialized ) )
                     .ToArray();
                 _stream.Write( ciphertext, 0, ciphertext.Length );
             }
@@ -202,6 +209,7 @@ public abstract class Connection {
             GD.Print( $"Disconnecting @ {ep}" );
             OnDisconnect();
             GD.Print( $"Disconnected @ {ep}" );
+            _cts.Cancel();
             _client?.Client?.Disconnect( false );
             _client?.Client?.Shutdown( SocketShutdown.Both );
             _stream = null;
@@ -209,7 +217,7 @@ public abstract class Connection {
             _client = null;
             GD.Print( $"Disposed @ {ep}" );
         }
-        
+
         protected internal virtual void Ready() {
             _stream = _client.GetStream();
 
@@ -221,6 +229,23 @@ public abstract class Connection {
                 }
             };
             _keepalive.Start();
+
+            ThreadPool.QueueUserWorkItem( Listen, _cts.Token );
+        }
+
+        private CancellationTokenSource _cts = new();
+
+        private async void Listen(object state) {
+            CancellationToken token = (CancellationToken)state;
+
+            try {
+                while (!token.IsCancellationRequested) {
+                    await Receive();
+                }
+            } catch (Exception e) {
+                GD.PrintErr( e );
+                Disconnect();
+            }
         }
 
         protected internal void OnConnected() {
@@ -238,135 +263,136 @@ public abstract class Connection {
         public delegate void DoDisconnect(Connection.Client connection);
 
         public event DoDisconnect? Disconnected;
-        private int delimiters = 0;
-        private IEnumerable<byte> buffer = Array.Empty<byte>();
+
         Timer _keepalive;
 
-        private bool PendingSplit(byte b) {
-            return b != 0x00;
+        private List<byte> buffer = new();
+
+        private byte[] data = new byte[1024 * 1024];
+
+        private void Read() {
+            var len = _stream.Read( data, 0, data.Length );
+            if (len == 0) return;
+
+            buffer.AddRange( data.Take( len ) );
         }
 
-        public bool Receive() {
-            bool completed = false;
-            List<byte> temp = new List<byte>( buffer );
+        public async Task Receive() {
+            do {
+                Read();
+                buffer = buffer.SkipWhile( b => b != 0xFF && b != 0x00 ).ToList();
+            } while (buffer.Count < 1 + sizeof( short ));
 
-            while (_stream?.DataAvailable ?? false) {
-                var data = new byte[1024];
-                var len = _stream.Read( data, 0, data.Length );
-                data = data.Take( len ).ToArray();
+            string typename = "";
+            short typename_len = 0;
 
-                temp.AddRange( data );
+            string packetdata = "";
+            int packetdata_len = 0;
 
-                while ( temp.Count > 0 ) {
-                    var take = temp.SkipWhile( (b) => b == 0 ).TakeWhile( PendingSplit );
-                    if (take.Count() == 0) break;
+            if (buffer[0] == 0xFF) {
+                // ENCRYPT
+                ICryptoTransform decryptor = AES.CreateDecryptor();
+                byte[] decryptedBytes;
 
-                    var leftover = temp.Count - take.Count();
+                typename_len = IPAddress.NetworkToHostOrder( BitConverter.ToInt16( buffer[1 .. (1 + sizeof( short )) ].ToArray() ) );
 
-                    buffer = buffer.Concat( take ).Concat( leftover >= 1 ? [0x00] : Array.Empty<byte>() );
-                    temp = temp.Skip( take.Count() ).Skip( leftover >= 1 ? 1 : 0 ).ToList();
-                    
-                    len = leftover - (leftover >= 1 ? 1 : 0);
+                while (buffer.Count < 1 + sizeof( short ) + typename_len + sizeof(int)) {
+                    Read();
+                }
 
-                    if (leftover >= 1) {
-                        delimiters++;
+                var buffer_typename = Encoding.ASCII.GetString( buffer[(1+sizeof( short ))..(1+sizeof( short )+typename_len)].ToArray() );
+                var bytes_typename = Convert.FromBase64String( buffer_typename );
 
-                        if (delimiters >= 2) {
-                            try {
-                                completed = true;
-                                delimiters -= 2;
-
-                                string typename = "";
-                                string packetdata = "";
-                                
-                                if (buffer.First() == 0xF0) {
-                                    ICryptoTransform decryptor = AES.CreateDecryptor();
-                                    byte[] decryptedBytes;
-
-                                    var buffer_typename = Encoding.ASCII.GetString(
-                                        buffer
-                                            .Skip( 1 ).TakeWhile( PendingSplit )
-                                            .ToArray()
-                                    );
-
-                                    var bytes_typename = Convert.FromBase64String( buffer_typename );
-
-                                    using (var msDecrypt = new MemoryStream( bytes_typename )) {
-                                        using (var csDecrypt =
-                                               new CryptoStream( msDecrypt, decryptor, CryptoStreamMode.Read )) {
-                                            using (var msPlain = new MemoryStream()) {
-                                                csDecrypt.CopyTo( msPlain );
-                                                decryptedBytes = msPlain.ToArray();
-                                            }
-                                        }
-                                    }
-
-                                    typename = Encoding.UTF8.GetString( decryptedBytes );
-
-                                    var buffer_packet = Encoding.ASCII.GetString(
-                                        buffer
-                                            .Skip( 1 ).SkipWhile( PendingSplit )
-                                            .Skip( 1 ).TakeWhile( PendingSplit )
-                                            .ToArray()
-                                    );
-
-                                    var bytes_packet = Convert.FromBase64String( buffer_packet );
-
-                                    using (var msDecrypt = new MemoryStream( bytes_packet )) {
-                                        using (var csDecrypt =
-                                               new CryptoStream( msDecrypt, decryptor, CryptoStreamMode.Read )) {
-                                            using (var msPlain = new MemoryStream()) {
-                                                csDecrypt.CopyTo( msPlain );
-                                                decryptedBytes = msPlain.ToArray();
-                                            }
-                                        }
-                                    }
-
-                                    packetdata = Encoding.UTF8.GetString( decryptedBytes );
-                                } else if (buffer.First() == 0x0F) {
-                                    typename = Encoding.UTF8.GetString(
-                                        buffer
-                                            .Skip( 1 ).TakeWhile( PendingSplit )
-                                            .ToArray()
-                                    );
-
-                                    packetdata = Encoding.UTF8.GetString(
-                                        buffer
-                                            .Skip( 1 ).SkipWhile( PendingSplit )
-                                            .Skip( 1 ).TakeWhile( PendingSplit )
-                                            .ToArray()
-                                    );
-                                }
-
-                                buffer = [];
-
-                                if (Multiplayer.Packets.TryGetValue( typename, out var packetType )) {
-                                    var packet = JsonSerializer.Deserialize( packetdata, packetType ) as Network.Packet;
-
-                                    if (packet is not null) {
-                                        if (Multiplayer.Channels.TryGetValue( packet.Channel, out var channel )) {
-                                            channel.Receive( this, packet );
-                                        } else {
-                                            GD.PrintErr( $"No '{packet.Channel}' channel to receive '{packet}'" );
-                                        }
-                                    } else {
-                                        GD.PrintErr( $"Malformed packet: '{typename}'" );
-                                    }
-                                } else {
-                                    GD.PrintErr( $"Unknown Packet: '{typename}'" );
-                                }
-
-                            } catch (Exception e) {
-                                GD.PrintErr( $"{e}" );
-                            }
+                using (var msDecrypt = new MemoryStream( bytes_typename )) {
+                    using (var csDecrypt =
+                           new CryptoStream( msDecrypt, decryptor, CryptoStreamMode.Read )) {
+                        using (var msPlain = new MemoryStream()) {
+                            csDecrypt.CopyTo( msPlain );
+                            decryptedBytes = msPlain.ToArray();
                         }
-
-
                     }
-                };
+                }
+
+                typename = Encoding.ASCII.GetString( decryptedBytes );
+
+                packetdata_len = IPAddress.NetworkToHostOrder(
+                    BitConverter.ToInt32(
+                        buffer[(1+sizeof( short ) + typename_len) .. (1+sizeof( short ) + typename_len + sizeof(int))].ToArray()
+                    )
+                );
+                while (buffer.Count < 1+sizeof( short ) + typename_len + sizeof(int) + packetdata_len) {
+                    Read();
+                }
+
+                var buffer_packet = Encoding.ASCII.GetString(
+                    buffer[
+                        (1+sizeof( short ) + typename_len + sizeof(int)) ..
+                        (1+sizeof( short ) + typename_len + sizeof(int) + packetdata_len)
+                    ].ToArray()
+                );
+                var bytes_packet = Convert.FromBase64String( buffer_packet );
+
+                using (var msDecrypt = new MemoryStream( bytes_packet )) {
+                    using (var csDecrypt =
+                           new CryptoStream( msDecrypt, decryptor, CryptoStreamMode.Read )) {
+                        using (var msPlain = new MemoryStream()) {
+                            csDecrypt.CopyTo( msPlain );
+                            decryptedBytes = msPlain.ToArray();
+                        }
+                    }
+                }
+
+                packetdata = Encoding.ASCII.GetString( decryptedBytes );
+            } else if (buffer[0] == 0x00) {
+                // PLAINTEXT
+                typename_len = IPAddress.NetworkToHostOrder( BitConverter.ToInt16( buffer[1 .. (1+sizeof( short )) ].ToArray() ) );
+
+                while (buffer.Count < 1+sizeof( short )+typename_len + sizeof(int)) {
+                    Read();
+                }
+
+                typename = Encoding.ASCII.GetString( buffer[(1+sizeof( short ))..(1+sizeof( short )+typename_len)].ToArray() );
+
+                packetdata_len = IPAddress.NetworkToHostOrder(
+                    BitConverter.ToInt32(
+                        buffer[(1+sizeof( short ) + typename_len) .. (1+sizeof( short ) + typename_len + sizeof(int))].ToArray()
+                    )
+                );
+                while (buffer.Count < 1+sizeof( short ) + typename_len + sizeof(int) + packetdata_len) {
+                    Read();
+                }
+
+                packetdata = Encoding.ASCII.GetString(
+                    buffer[
+                        (1+sizeof( short ) + typename_len + sizeof(int)) ..
+                        (1+sizeof( short ) + typename_len + sizeof(int) + packetdata_len)
+                    ].ToArray()
+                );
             }
 
-            return completed;
+            buffer = buffer.Skip( 1+sizeof( short ) + typename_len + sizeof(int) + packetdata_len ).ToList();
+
+            GD.Print( typename, packetdata );
+
+            if (Multiplayer.Packets.TryGetValue( typename, out var packetType )) {
+                var packet = JsonSerializer.Deserialize( packetdata, packetType ) as Network.Packet;
+
+                if (packet is not null) {
+                    if (Multiplayer.Channels.TryGetValue( packet.Channel, out var channel )) {
+                        try {
+                            _ = channel.Receive( this, packet );
+                        } catch (Exception e) {
+                            GD.PrintErr( e );
+                        }
+                    } else {
+                        GD.PrintErr( $"No '{packet.Channel}' channel to receive '{packet}'" );
+                    }
+                } else {
+                    GD.PrintErr( $"Malformed packet: '{typename}'" );
+                }
+            } else {
+                GD.PrintErr( $"Unknown Packet: '{typename}'" );
+            }
         }
 
         public bool IsOpen => _stream?.Socket?.Connected ?? false;
@@ -428,13 +454,13 @@ public abstract class Connection {
 
     public class Local : Client {
         public Local(Connection.Server server, TcpClient tcpconnection
-            ){
+            ) {
             Server = server;
             _client = tcpconnection;
-            _timeout = new Timer(TimeSpan.FromSeconds(10));
-        
+            _timeout = new Timer( TimeSpan.FromSeconds( 10 ) );
+
             _timeout.Elapsed += (sender, args) => {
-                Server.Disconnect(this);
+                Server.Disconnect( this );
                 _timeout.Enabled = false;
             };
         }
@@ -446,26 +472,26 @@ public abstract class Connection {
         public override IPEndPoint? EndPoint => _client.Client.RemoteEndPoint as IPEndPoint;
 
         Timer _timeout;
-    
+
         public override RSA RSA => Server.RSA;
-    
-        public override void InterruptTimeout(){
+
+        public override void InterruptTimeout() {
             _timeout.Enabled = false;
             _stream = _client.GetStream();
         }
 
         protected internal override void Ready() {
             base.Ready();
-            
-           Multiplayer._clients[EndPoint] = this;
+
+            Multiplayer._clients[EndPoint] = this;
             this.Disconnected += connection => {
                 Multiplayer._clients.TryRemove( connection.EndPoint, out _ );
                 Multiplayer.Servers[this._client.Client.RemoteEndPoint as IPEndPoint].Disconnect( this );
             };
-            
+
             SendRSAToClient();
         }
-        
+
         void SendRSAToClient() {
             Multiplayer.SystemChannel.Send(
                 this,
@@ -476,25 +502,25 @@ public abstract class Connection {
     }
 
     public class Remote : Client {
-        public Remote(Multiplayer multiplayer, IPEndPoint endpoint){
+        public Remote(Multiplayer multiplayer, IPEndPoint endpoint) {
             Multiplayer = multiplayer;
             EndPoint = endpoint;
             _client = new TcpClient();
         }
 
-        public override void InterruptTimeout(){
+        public override void InterruptTimeout() {
             AES = Aes.Create();
             var key = new byte[16];
-            new Random().NextBytes(key);
+            new Random().NextBytes( key );
             var iv = new byte[16];
-            new Random().NextBytes(iv);
+            new Random().NextBytes( iv );
             AES.Key = key;
             AES.IV = iv;
         }
 
-        public void Connect(){
-            _client.Connect(EndPoint);
-            if ( Multiplayer.Host is null ) Multiplayer.Host = this;
+        public void Connect() {
+            _client.Connect( EndPoint );
+            if (Multiplayer.Host is null) Multiplayer.Host = this;
             base.Ready();
         }
     }
@@ -507,24 +533,21 @@ public abstract class Connection {
         Connected,
         Disconnecting
     }
-    
-    public struct Filter
-    {
+
+    public struct Filter {
         private IEnumerable<Connection.Client> Connections { get; set; }
 
         private Predicate<Connection.Client> Predicate { get; set; }
 
         private FilterType Type { get; set; }
 
-        public Filter(Connection.Filter.FilterType type, Predicate<Connection.Client> predicate)
-        {
+        public Filter(Connection.Filter.FilterType type, Predicate<Connection.Client> predicate) {
             // ISSUE: reference to a compiler-generated field
             this.Predicate = predicate;
             this.Type = type;
         }
 
-        public Filter(Connection.Filter.FilterType type, IEnumerable<Connection.Client> connections)
-        {
+        public Filter(Connection.Filter.FilterType type, IEnumerable<Connection.Client> connections) {
             this.Connections = connections;
             this.Type = type;
         }
@@ -532,23 +555,26 @@ public abstract class Connection {
         /// <summary>
         /// Is the specified <see cref="T:Sandbox.Connection" /> a valid recipient?
         /// </summary>
-        public bool IsRecipient(Connection.Client connection)
-        {
-            if (this.Type == Connection.Filter.FilterType.Exclude)
-            {
+        public bool IsRecipient(Connection.Client connection) {
+            if (this.Type == Connection.Filter.FilterType.Exclude) {
                 Predicate<Connection.Client> predicate = this.Predicate;
-                return predicate == null ? !(this.Connections == null || this.Connections.Contains<Connection.Client>(connection) ) : !predicate(connection);
+                return predicate == null
+                    ? !(this.Connections == null || this.Connections.Contains<Connection.Client>( connection ))
+                    : !predicate( connection );
             }
+
             Predicate<Connection.Client> predicate1 = this.Predicate;
-            return predicate1 == null ? (this.Connections == null || this.Connections.Contains<Connection.Client>(connection) ) : predicate1(connection);
+            return predicate1 == null
+                ? (this.Connections == null || this.Connections.Contains<Connection.Client>( connection ))
+                : predicate1( connection );
         }
 
-        public enum FilterType
-        {
+        public enum FilterType {
             /// <summary>
             /// Only include the connections in the filter when sending a message.
             /// </summary>
             Include,
+
             /// <summary>
             /// Exclude the connections in the filter when sending a message.
             /// </summary>

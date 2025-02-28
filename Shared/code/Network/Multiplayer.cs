@@ -67,22 +67,7 @@ public partial class Multiplayer {
     public void DestroyChannel(Channel channel) {
         _channels.TryRemove( channel.Name, out _ );
     }
-
-    public void Update(double delta) {
-        foreach (var (endpoint, client) in _clients) {
-            try {
-                client.Receive();
-            } catch (Exception e) {
-                GD.PrintErr( $"Unable to process connection {e}" );
-                if (client.IsOpen) client.Disconnect();
-            }
-        }
-
-        foreach (var (endpoint, server) in _servers) {
-            server.Update( delta );
-        }
-    }
-
+    
     public Task<Connection.Client?> Connect(IPEndPoint endpoint) {
 
         var client = new Connection.Remote( this, endpoint );

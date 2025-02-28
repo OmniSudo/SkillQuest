@@ -88,7 +88,7 @@ public class Polygon : TwoDimensional{
 
 
     public bool Colliding(Vector2 pos){
-        return Edges.AsParallel().Where(
+        return Edges.Where(
             edge => {
                 Vector2 vc = edge.PointA;
                 Vector2 vn = edge.PointB;

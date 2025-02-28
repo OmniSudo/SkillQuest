@@ -9,7 +9,7 @@ namespace SkillQuest.Procedural.World;
 
 public partial class WorldGenPipeline : ProcGenPipeline {
     public async Task<Region?> Generate(SkillQuest.Universe universe, Vector3 position) {
-        var region = new Region(universe, position);
+        var region = new Region(universe, position * 16);
 
         List<Task> tasks;
 

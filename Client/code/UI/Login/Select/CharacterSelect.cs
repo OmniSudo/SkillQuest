@@ -73,7 +73,7 @@ public partial class CharacterSelect : CanvasLayer {
     }
 
     private void ConfirmOnPressed() {
-        if ( _selected is not null ) Select?.Invoke( _selected );
+        if (_selected is not null) Select?.Invoke( _selected );
     }
 
     private enum RotateDirection {
@@ -90,7 +90,10 @@ public partial class CharacterSelect : CanvasLayer {
                 "Client/scenes/UI/Login/Select/character_select.tscn"
             ).Instantiate<CharacterSelect>();
             ui.SetCharacters( characters );
-            SkillQuest.Client.UI.AddChild( ui );
+            Shared.SH.CallDeferred( () => {
+                    SkillQuest.Client.UI.AddChild( ui );
+                }
+            );
 
             _select = new TaskCompletionSource<Character.Info>();
             ui.Select += UiOnSelect;
@@ -143,7 +146,7 @@ public partial class CharacterSelect : CanvasLayer {
             using (Network.Rpc.FilterInclude( client )) {
                 _CL_Open();
             }
-            
+
             return _getCharacter[client].Task;
         }
 
