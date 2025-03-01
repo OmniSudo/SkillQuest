@@ -3,6 +3,10 @@ cmake_minimum_required(VERSION 3.20)
 project(SkillQuest)
 
 set(CMAKE_INSTALL_LIBDIR "${PROJECT_SOURCE_DIR}/lib/")
+set(CMAKE_CXX_STANDARD 23)
+
+# OMNISUDO LIBRARIES
+include("${PROJECT_SOURCE_DIR}/omnisudo/CMakeLists.txt")
 
 # SKILLQUEST ENGINE
 include("${PROJECT_SOURCE_DIR}/skillquest/engine/shared/CMakeLists.txt")

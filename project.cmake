@@ -14,6 +14,8 @@ function(PROJECT_TEMPLATE)
     set(TARGET ${EXE_ARG_MODULE})
 
     set(TARGET_DIR ${EXE_ARG_PROJECT_DIR})
+    string(REPLACE "." "/" TARGET_PATH ${TARGET})
+
     if (NOT DEFINED TARGET_DIR)
         string(REPLACE "." "/" TARGET_DIR ${TARGET})
     endif ()
@@ -22,20 +24,20 @@ function(PROJECT_TEMPLATE)
 
     set(SRC_DIR ${EXE_ARG_SOURCE_DIR})
     if (NOT DEFINED SRC_DIR)
-        set(SRC_DIR ${PROJECT_SOURCE_DIR}/${TARGET_DIR}/src)
+        set(SRC_DIR ${PROJECT_SOURCE_DIR}/${TARGET_PATH}/src)
     endif ()
 
     set(INC_DIR ${EXE_ARG_INCLUDE_DIR})
     if (NOT DEFINED INC_DIR)
-        set(INC_DIR ${PROJECT_SOURCE_DIR}/${TARGET_DIR}/inc)
+        set(INC_DIR ${PROJECT_SOURCE_DIR}/${TARGET_PATH}/inc)
     endif ()
 
     if (${EXE_ARG_GLOB_SOURCES})
-        file(GLOB_RECURSE SRC ${SRC_DIR}/*.cpp ${SRC_DIR}/*.hpp ${SRC_DIR}/*.c ${SRC_DIR}/*.h)
+        file(GLOB_RECURSE SRC ${SRC_DIR}/*.cpp ${SRC_DIR}/*.hpp ${SRC_DIR}/*.c++ ${SRC_DIR}/*.h++ ${SRC_DIR}/*.c ${SRC_DIR}/*.h)
     endif ()
 
     if (${EXE_ARG_GLOB_INCLUDES})
-        file(GLOB_RECURSE INC ${INC_DIR}/*.hpp ${INC_DIR}/*.h)
+        file(GLOB_RECURSE INC ${INC_DIR}/*.hpp ${INC_DIR}/*.h++ ${INC_DIR}/*.h)
     endif ()
 
     if (${EXE_ARG_EXECUTABLE})
@@ -50,6 +52,15 @@ function(PROJECT_TEMPLATE)
             ${TARGET}
             PUBLIC ${INC_DIR}
             PRIVATE ${SRC_DIR}
+            PUBLIC ${MOD_DIR}
+    )
+
+    target_sources(
+            ${TARGET}
+            PUBLIC
+                FILE_SET skillquest
+                TYPE CXX_MODULES
+                FILES ${MOD}
     )
 
     set_target_properties(

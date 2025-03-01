@@ -3,6 +3,8 @@
  * @date    2024.12.08
  */
 
-int main ( int argc, const char** argv ) {
+import omnisudo;
 
+int main ( int argc, const char** argv ) {
+    omni::test( "asdf" );
 }
