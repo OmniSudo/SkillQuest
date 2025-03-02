@@ -6,9 +6,5 @@
 #pragma once
 
 namespace skillquest::engine::api {
-  enum class Side {
-    SHARED,
-    CLIENT,
-    SERVER
-  };
+    enum class Side { SHARED, CLIENT, SERVER };
 }
