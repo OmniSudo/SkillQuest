@@ -3,6 +3,9 @@
  * @date    2024.12.08
  */
 
-int main ( int argc, const char** argv ) {
+#include "skillquest/shared.h++"
+#include "skillquest/server.h++"
 
+int main ( int argc, const char** argv ) {
+    skillquest::SH()->Application = new skillquest::engine::core::Application();
 }

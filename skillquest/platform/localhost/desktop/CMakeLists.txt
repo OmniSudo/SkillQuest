@@ -11,4 +11,8 @@ PROJECT_TEMPLATE(
         GLOB_SOURCES
         GLOB_INCLUDES
         SHARED_LINK
+        skillquest.engine.shared.api
+        skillquest.engine.shared.core
+        skillquest.engine.client.core
+        skillquest.engine.server.core
 )

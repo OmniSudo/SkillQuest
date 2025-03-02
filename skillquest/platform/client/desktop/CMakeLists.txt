@@ -11,5 +11,7 @@ PROJECT_TEMPLATE(
         GLOB_SOURCES
         GLOB_INCLUDES
         SHARED_LINK
-        omnisudo
+        skillquest.engine.shared.api
+        skillquest.engine.shared.core
+        skillquest.engine.client.core
 )

@@ -5,9 +5,6 @@ project(SkillQuest)
 set(CMAKE_INSTALL_LIBDIR "${PROJECT_SOURCE_DIR}/lib/")
 set(CMAKE_CXX_STANDARD 23)
 
-# OMNISUDO LIBRARIES
-include("${PROJECT_SOURCE_DIR}/omnisudo/CMakeLists.txt")
-
 # SKILLQUEST ENGINE
 include("${PROJECT_SOURCE_DIR}/skillquest/engine/shared/CMakeLists.txt")
 include("${PROJECT_SOURCE_DIR}/skillquest/engine/client/CMakeLists.txt")
@@ -34,6 +31,7 @@ endforeach ()
 if (NOT EMSCRIPTEN)
     include("${PROJECT_SOURCE_DIR}/skillquest/platform/client/desktop/CMakeLists.txt")
     include("${PROJECT_SOURCE_DIR}/skillquest/platform/server/terminal/CMakeLists.txt")
+    include("${PROJECT_SOURCE_DIR}/skillquest/platform/localhost/desktop/CMakeLists.txt")
 else ()
     include("${PROJECT_SOURCE_DIR}/skillquest/platform/client/web/CMakeLists.txt")
 endif ()

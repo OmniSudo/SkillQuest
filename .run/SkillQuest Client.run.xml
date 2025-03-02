@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="SkillQuest Client" type="CMakeRunConfiguration" factoryName="Application" singleton="false" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="skillquest.platform.server.terminal" TARGET_NAME="skillquest.platform.client.desktop" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="skillquest.platform.server.terminal" RUN_TARGET_NAME="skillquest.platform.client.desktop">
+  <configuration default="false" name="SkillQuest Client" type="CMakeRunConfiguration" factoryName="Application" singleton="false" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="skillquest.platform.localhost.desktop" TARGET_NAME="skillquest.platform.client.desktop" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="skillquest.platform.localhost.desktop" RUN_TARGET_NAME="skillquest.platform.client.desktop">
     <method v="2">
       <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
     </method>
