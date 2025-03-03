@@ -13,63 +13,68 @@ namespace skillquest::engine::core {
 
     class Addon {
     public:
-        Addon();
+      Addon() = default;
 
-        ~Addon();
-
-    public:
-        virtual std::string name() {
-            return "";
-        }
-
-        virtual std::string description() {
-            return "";
-        }
-
-        virtual std::string version() {
-            return "";
-        }
-
-        virtual std::string author() {
-            return "";
-        }
-
-        virtual std::string license() {
-            return "";
-        }
-
-        virtual std::string icon() {
-            return "";
-        }
-
-        virtual std::string category() {
-            return "";
-        }
+      ~Addon();
 
     public:
-        Application* application() {
-            return _application;
-        }
+      virtual std::string name() { return ""; }
 
-        Addon* application(Application* app) {
-            if (_application == app) {
-                return this;
-            }
+      virtual std::string description() { return ""; }
 
-            if (_application != nullptr) {
-                // TODO: unmounted
-            }
+      virtual std::string version() { return ""; }
 
-            _application = app;
+      virtual std::string author() { return ""; }
 
-            if (_application != nullptr) {
-                // TODO: mounted
-            }
+      virtual std::string license() { return ""; }
 
-            return this;
-        }
+      virtual std::string icon() { return ""; }
+
+      virtual std::string category() { return ""; }
+
+    public:
+      Event<Application *, Addon *> mounted = {};
+
+      Event<Application *, Addon *> unmounted = {};
+
+    protected:
+      virtual void onMounted(Application *application) {}
+
+      virtual void onUnmounted(Application *application) {}
 
     private:
-        Application* _application;
+      inline static void _mounted(Application *application, Addon* addon ) {
+        addon->onMounted(application);
+        addon->mounted( application, addon );
+      }
+
+      inline static void _unmounted(Application *application, Addon* addon ) {
+        addon->unmounted(application, addon);
+        addon->onUnmounted(application);
+      }
+
+    public:
+      Application *application() { return _application; }
+
+      Addon *application(Application *app) {
+        if (_application == app) {
+          return this;
+        }
+
+        if (_application != nullptr) {
+          _unmounted( _application, this );
+        }
+
+        _application = app;
+
+        if (_application != nullptr) {
+          _mounted( _application, this );
+        }
+
+        return this;
+      }
+
+    private:
+      Application *_application;
     };
-} // namespace skillquest::engine::core
+    } // namespace skillquest::engine::core

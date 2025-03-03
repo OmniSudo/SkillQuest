@@ -5,18 +5,29 @@
 
 #pragma once
 
-#include <vector>
-#include <string>
 #include "Addon.h++"
+#include <string>
+#include <vector>
 
 namespace skillquest::engine::core {
-    class Application {
-    public:
-        Application(int argc, const char **argv);
+class Application {
+public:
+  Application(int argc, const char **argv);
 
-        ~Application();
+  ~Application();
 
-    public:
-        std::vector<std::string> args = {};
-    };
+public:
+  std::vector<std::string> args = {};
+
+public:
+  Application *mount(Addon *addon);
+
+  Application *unmount(Addon *addon);
+
+public:
+  Application(const Application &) = delete;
+  Application(Application &&) = delete;
+  Application &operator=(const Application &) = delete;
+  Application &operator=(Application &&) = delete;
+};
 } // namespace skillquest::engine::core

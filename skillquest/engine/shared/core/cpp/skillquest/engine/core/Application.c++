@@ -14,7 +14,7 @@ namespace skillquest::engine::core {
         }
     }
 
-    Application::~Application() {
-
-    }
-}
+    Application::~Application() {}
+    Application *Application::mount(Addon *addon) {}
+    Application *Application::unmount(Addon *addon) {}
+    } // namespace skillquest::engine::core
