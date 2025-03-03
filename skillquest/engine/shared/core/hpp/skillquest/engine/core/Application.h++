@@ -7,6 +7,7 @@
 
 #include <vector>
 #include <string>
+#include "Addon.h++"
 
 namespace skillquest::engine::core {
     class Application {
