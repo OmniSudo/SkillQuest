@@ -7,5 +7,5 @@
 #include "skillquest/server.h++"
 
 int main ( int argc, const char** argv ) {
-    skillquest::SH()->Application = new skillquest::engine::core::Application();
+    skillquest::SH()->Application = new skillquest::engine::core::Application(argc,argv);
 }
