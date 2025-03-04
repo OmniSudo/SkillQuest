@@ -5,7 +5,9 @@
 
 #include "skillquest/client.h++"
 #include "skillquest/shared.h++"
+#include "skillquest/addon/base/core/AddonSkillQuestBaseClient.h++"
 
 int main(int argc, const char **argv) {
-    (skillquest::SH()->Application = new skillquest::engine::core::Application(argc, argv));
+    (skillquest::SH()->Application = new skillquest::engine::core::Application(argc, argv))
+            ->mount(new skillquest::addon::base::core::AddonSkillQuestBaseClient());
 }

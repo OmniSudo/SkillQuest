@@ -15,7 +15,7 @@ namespace skillquest::engine::core {
     public:
       Addon() = default;
 
-      ~Addon();
+      virtual ~Addon();
 
     public:
       virtual std::string name() { return ""; }

@@ -18,7 +18,7 @@ namespace skillquest::engine::core {
         public:
             virtual void fire(T... args) = 0;
 
-            virtual bool operator==(Handler& rhs) = 0;
+            virtual bool operator==(Handler &rhs) = 0;
 
         protected:
             Handler() = default;
@@ -31,104 +31,96 @@ namespace skillquest::engine::core {
     private:
         class HandlerWithStaticMethod : public Handler {
         public:
-            HandlerWithStaticMethod(void (* callback)(T... args)) {
-                _method = callback;
-            }
+            HandlerWithStaticMethod(void (*callback)(T... args)) { _method = callback; }
 
-            void fire(T... args) override {
-                _method(args...);
-            }
+            void fire(T... args) override { _method(args...); }
 
-            bool operator==(Handler& rhs) override {
-                auto other = dynamic_cast<Event<T...>::HandlerWithStaticMethod*>(&rhs);
+            bool operator==(Handler &rhs) override {
+                auto other = dynamic_cast<Event<T...>::HandlerWithStaticMethod *>(&rhs);
                 return typeid(*this) == typeid(rhs) && other != nullptr &&
                        _method == other->_method;
             }
 
         private:
-            void (* _method)(T... args);
+            void (*_method)(T... args);
         };
 
         template<typename Self>
         class HandlerWithMemberMethod : public Handler {
         public:
-            HandlerWithMemberMethod(void (Self::* callback)(T... args), Self* self) {
-                if (!self)
-                    throw std::invalid_argument("self is null");
-                _self = self;
+            HandlerWithMemberMethod(void (Self::*callback)(T... args), Self *self) {
+                if (!self) throw std::invalid_argument("self is null");
+                _self   = self;
                 _method = callback;
             }
 
             void fire(T... args) override {
-                if (!_self)
-                    throw std::invalid_argument("self is null");
+                if (!_self) throw std::invalid_argument("self is null");
                 (_self->*_method)(args...);
             }
 
-            bool operator==(Handler& rhs) override {
-                auto other = dynamic_cast<HandlerWithMemberMethod<Self>*>(&rhs);
+            bool operator==(Handler &rhs) override {
+                auto other = dynamic_cast<HandlerWithMemberMethod<Self> *>(&rhs);
                 return typeid(*this) == typeid(rhs) && other != nullptr &&
                        _method == other->_method && _self == other->_self;
             }
 
         private:
-            Self* _self;
+            Self *_self;
 
-            void (Self::* _method)(T... args);
+            void (Self::*_method)(T... args);
         };
 
     public:
-        inline static std::shared_ptr<Handler> bind(void (* callback)(T... args)) {
+        inline static std::shared_ptr<Handler> bind(void (*callback)(T... args)) {
             return std::dynamic_pointer_cast<Handler>(
-                std::make_shared<HandlerWithStaticMethod>(callback));
+                std::make_shared<HandlerWithStaticMethod>(callback)
+            );
         }
 
         template<typename Self>
-        inline static std::shared_ptr<Handler> bind(void (Self::* callback)(T... args),
-                                                    Self* self) {
+        inline static std::shared_ptr<Handler> bind(
+            void (Self::*callback)(T... args),
+            Self *       self
+        ) {
             return std::dynamic_pointer_cast<Handler>(
-                std::make_shared<HandlerWithMemberMethod<Self> >(callback, self));
+                std::make_shared<HandlerWithMemberMethod<Self> >(callback, self)
+            );
         }
 
     public:
-        Event() {}
-
-        ~Event() {
-            m_eventHandlers.clear();
+        Event() {
         }
 
-        void operator()(T... args) {
-            for (auto handler: m_eventHandlers) {
-                handler->fire(args...);
-            }
-        }
+        ~Event() { m_eventHandlers.clear(); }
 
-        Event& operator+=(std::shared_ptr<Handler> add) {
-            if (!add)
-                return *this;
+        void operator()(T... args) { for (auto handler: m_eventHandlers) { handler->fire(args...); } }
+
+        Event &operator+=(std::shared_ptr<Handler> add) {
+            if (!add) return *this;
 
             m_eventHandlers.push_back(add);
 
             return *this;
         }
 
-        Event& operator-=(std::shared_ptr<Handler> remove) {
+        Event &operator-=(std::shared_ptr<Handler> remove) {
             if (!remove) {
                 return *this; // a null passed, so nothing to do
             }
 
-            std::erase_if(m_eventHandlers,
-                          [this, remove](std::shared_ptr<Handler>& handler) {
-                              return handler->operator==(*remove);
-                          });
+            std::erase_if(
+                m_eventHandlers,
+                [this, remove](std::shared_ptr<Handler> &handler) { return handler->operator==(*remove); }
+            );
 
             return *this;
         }
 
     private:
-        Event(const Event&);
+        Event(const Event &);
 
-        Event& operator=(const Event&);
+        Event &operator=(const Event &);
 
     protected:
         std::vector<std::shared_ptr<Handler> > m_eventHandlers;

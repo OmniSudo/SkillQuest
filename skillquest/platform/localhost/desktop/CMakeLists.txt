@@ -13,6 +13,10 @@ PROJECT_TEMPLATE(
         SHARED_LINK
         skillquest.engine.shared.api
         skillquest.engine.shared.core
+
         skillquest.engine.client.core
+        skillquest.addon.base.client
+
         skillquest.engine.server.core
+        skillquest.addon.base.server
 )

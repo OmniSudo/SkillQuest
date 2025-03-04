@@ -6,7 +6,5 @@
 #include "skillquest\engine\core\Addon.h++"
 
 namespace skillquest::engine::core {
-Addon::~Addon() {
-  _application = nullptr;
-}
+    Addon::~Addon() { _application = nullptr; }
 } // namespace skillquest::engine::core

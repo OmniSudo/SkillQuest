@@ -13,4 +13,6 @@ PROJECT_TEMPLATE(
         skillquest.engine.shared.api
         skillquest.engine.shared.core
         skillquest.engine.server.core
+
+        skillquest.addon.${addon}.shared
 )
