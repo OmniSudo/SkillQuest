@@ -371,9 +371,7 @@ public abstract class Connection {
             }
 
             buffer = buffer.Skip( 1+sizeof( short ) + typename_len + sizeof(int) + packetdata_len ).ToList();
-
-            GD.Print( typename, packetdata );
-
+            
             if (Multiplayer.Packets.TryGetValue( typename, out var packetType )) {
                 var packet = JsonSerializer.Deserialize( packetdata, packetType ) as Network.Packet;
 

@@ -1,10 +1,11 @@
-[gd_scene load_steps=6 format=3 uid="uid://cy730oecagcjh"]
+[gd_scene load_steps=7 format=3 uid="uid://cy730oecagcjh"]
 
 [ext_resource type="Script" path="res://Shared/code/Shared.cs" id="1_k2l27"]
 [ext_resource type="Script" path="res://Shared/code/Universe.cs" id="2_24n2o"]
 [ext_resource type="Script" path="res://Shared/code/Procedural/World/WorldGenPipeline.cs" id="3_yhobo"]
 [ext_resource type="Script" path="res://Shared/code/Procedural/World/EntryPointNodeWorldRegion.cs" id="4_1tca5"]
 [ext_resource type="Script" path="res://Shared/code/Procedural/World/Voronoi2DGenerator.cs" id="5_e1swc"]
+[ext_resource type="PackedScene" uid="uid://dqi2xr32v0dmb" path="res://Client/scenes/Main.tscn" id="6_5v172"]
 
 [node name="Shared" type="Node"]
 script = ExtResource("1_k2l27")
@@ -36,3 +37,5 @@ script = ExtResource("5_e1swc")
 [node name="Regions" type="Node3D" parent="Universe"]
 
 [node name="System" type="Node" parent="."]
+
+[node name="Main" parent="." instance=ExtResource("6_5v172")]

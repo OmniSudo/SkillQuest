@@ -1,0 +1,23 @@
+﻿#version 460
+
+#include "res://Shared/shaders/inc.comp"
+
+layout(local_size_x = 20, local_size_y = 20, local_size_z = 1) in;
+
+layout(set = 0, binding = 0, std430) restrict buffer Colors {
+    vec4[] data;
+}
+colors;
+
+
+layout(set = 0, binding = 1, std430) restrict buffer SettingsDataBuffer {
+    int dimX;
+    int dimY;
+}
+settings;
+
+void main() {
+    const ivec2 coord = ivec2(gl_GlobalInvocationID.xy);
+    float r = rand( coord );
+    colors.data[ coord.x + settings.dimX * coord.y ] = vec4( r, r, r, 1 );
+}

@@ -11,7 +11,7 @@
   <ItemGroup>
     <Content Include="Client\scenes\Main.tscn" />
     <Content Include="Client\scenes\skillquest.client.tscn" />
-    <Content Include="Client\shaders\compute.glsl" />
+    <Content Include="Client\shaders\main.comp" />
     <Content Include="icon.svg" />
   </ItemGroup>
   <ItemGroup>
@@ -40,6 +40,5 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Server\shaders\" />
-    <Folder Include="Shared\shaders\" />
   </ItemGroup>
 </Project>

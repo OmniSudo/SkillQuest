@@ -90,7 +90,7 @@ stretch = true
 
 [node name="Preview" type="SubViewport" parent="MarginContainer/VBoxContainer/HBoxContainer/View/VBoxContainer/PreviewContainer/HBoxContainer/SubViewportContainer"]
 handle_input_locally = false
-size = Vector2i(180, 161)
+size = Vector2i(2, 2)
 render_target_update_mode = 4
 
 [node name="Rotation" type="Node3D" parent="MarginContainer/VBoxContainer/HBoxContainer/View/VBoxContainer/PreviewContainer/HBoxContainer/SubViewportContainer/Preview"]
