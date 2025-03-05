@@ -19,5 +19,5 @@ settings;
 void main() {
     const ivec2 coord = ivec2(gl_GlobalInvocationID.xy);
     float r = rand( coord );
-    colors.data[ coord.x + settings.dimX * coord.y ] = vec4( r, r, r, 1 );
+    colors.data[ coord.x + settings.dimX * coord.y ] = vec4( rand( coord.x ) % 255, 0, 0, 1 );
 }
