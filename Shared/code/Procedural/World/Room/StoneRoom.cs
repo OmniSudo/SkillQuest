@@ -17,11 +17,6 @@ public partial class StoneRoom : Node3D {
             CreateFloor();
             CreateWalls();
         }
-    } 
-
-    public override void _Ready() {
-        // CreateFloor();
-        //CreateWalls();
     }
 
     private void CreateWalls() {
