@@ -4,6 +4,7 @@ using System.Collections.Generic;
 
 namespace SkillQuest.Procedural.World.Room;
 
+[Tool]
 public partial class StoneRoom : Node3D {
     private Vector2I _size = new Vector2I(1, 1);
 
@@ -24,15 +25,16 @@ public partial class StoneRoom : Node3D {
     }
 
     private void CreateWalls() {
-        this.RemoveChild(GetNodeOrNull("Wall"));
-        var node = new Node3D() { Name = "Wall" };
+        var node = GetNodeOrNull( "Wall" );
+        if ( node is not null ) RemoveChild( node );
+        node = new Node3D() { Name = "Wall" };
         AddChild( node );
         
         var wall = GD.Load<PackedScene>( "res://Shared/assets/props/dungeon/wall.gltf" );
         var half = GD.Load<PackedScene>( "res://Shared/assets/props/dungeon/wall_half.gltf" );
         var corner = GD.Load<PackedScene>( "res://Shared/assets/props/dungeon/wall_corner.gltf" );
 
-        for (int x = 1; x < Size.X; x += 2) {
+        for (int x = 1; x < Size.X - 1; x += 2) {
             if (x + 1 < this.Size.X - 1) {
                 var l = wall.Instantiate<Node3D>();
                 l.Position = new Vector3( x * 2 + 2, 0, 0 );
@@ -46,7 +48,7 @@ public partial class StoneRoom : Node3D {
             }
         }
 
-        for (int x = 1; x < Size.X; x += 2) {
+        for (int x = 1; x < Size.X - 1; x += 2) {
             if (x + 1 < this.Size.X - 1) {
                 var l = wall.Instantiate<Node3D>();
                 l.Position = new Vector3( x * 2 + 2, 0, Size.Y * 2 );
@@ -60,7 +62,7 @@ public partial class StoneRoom : Node3D {
             }
         }
         
-        for (int y = 1; y < Size.Y; y += 2) {
+        for (int y = 1; y < Size.Y - 1; y += 2) {
             if (y + 1 < this.Size.Y - 1) {
                 var l = wall.Instantiate<Node3D>();
                 l.Position = new Vector3( 0,0,y * 2 + 2 );   
@@ -76,7 +78,7 @@ public partial class StoneRoom : Node3D {
             }
         }
 
-        for (int y = 1; y < Size.Y; y += 2) {
+        for (int y = 1; y < Size.Y - 1; y += 2) {
             if (y + 1 < this.Size.Y - 1) {
                 var l = wall.Instantiate<Node3D>();
                 l.Position = new Vector3( Size.X * 2,0,y * 2 + 2 );   
@@ -117,9 +119,11 @@ public partial class StoneRoom : Node3D {
     }
 
     public void CreateFloor() {
-        this.RemoveChild(GetNodeOrNull("Floor"));
-        var floor = new Node3D() { Name = "Floor" };
-        AddChild( floor );
+        var node = GetNodeOrNull( "Floor" );
+        if ( node is not null ) RemoveChild( node );
+        node = new Node3D() { Name = "Floor" };
+        AddChild( node );
+        
         var large = GD.Load<PackedScene>( "res://Shared/assets/props/dungeon/floor_tile_large.gltf" );
         var small = GD.Load<PackedScene>( "res://Shared/assets/props/dungeon/floor_tile_small.gltf" );
 
@@ -129,14 +133,14 @@ public partial class StoneRoom : Node3D {
                     var l = large.Instantiate<Node3D>();
                     l.Position = new Vector3( x * 2 + 2f, 0, y * 2 + 2f );
                     l.Name = $"Floor_{x}_{y}";
-                    floor.AddChild( l );
+                    node.AddChild( l );
                 } else {
                     if (x + 1 == Size.X) {
                         for (var i = 0; i <( ( y + 1 == Size.Y ) ? 1 : 2); i++) {
                             var s = small.Instantiate<Node3D>();
                             s.Position = new Vector3( x * 2 + 1, 0f, (y + i)* 2 + 1 );
                             s.Name = $"Floor_{x + i}_{y}";
-                            floor.AddChild( s );
+                            node.AddChild( s );
                         }
                     }
                     if (y + 1 == Size.Y) {
@@ -144,7 +148,7 @@ public partial class StoneRoom : Node3D {
                             var s = small.Instantiate<Node3D>();
                             s.Position = new Vector3( ( x + i ) * 2 + 1, 0f, y* 2 + 1 );
                             s.Name = $"Floor_{x + i}_{y}";
-                            floor.AddChild( s );
+                            node.AddChild( s );
                         }
                     }
                 }

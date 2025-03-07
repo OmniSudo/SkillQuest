@@ -41,7 +41,7 @@ script = ExtResource("5_e1swc")
 
 [node name="Room" type="Node3D" parent="Universe/Testing"]
 script = ExtResource("6_oakkq")
-Size = Vector2i(14, 1)
+Size = Vector2i(7, 8)
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="Universe/Testing"]
 transform = Transform3D(0.896643, 0.182795, 0.403259, -0.156974, -0.720386, 0.675576, 0.413994, -0.669052, -0.617235, 0, 0, 0)
