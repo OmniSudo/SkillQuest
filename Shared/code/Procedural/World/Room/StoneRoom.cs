@@ -20,13 +20,14 @@ public partial class StoneRoom : Node3D {
     } 
 
     public override void _Ready() {
-        CreateFloor();
-        CreateWalls();
+        // CreateFloor();
+        //CreateWalls();
     }
 
     private void CreateWalls() {
         var node = GetNodeOrNull( "Wall" );
         if ( node is not null ) RemoveChild( node );
+        node?.Dispose();
         node = new Node3D() { Name = "Wall" };
         AddChild( node );
         
@@ -121,6 +122,7 @@ public partial class StoneRoom : Node3D {
     public void CreateFloor() {
         var node = GetNodeOrNull( "Floor" );
         if ( node is not null ) RemoveChild( node );
+        node?.Dispose();
         node = new Node3D() { Name = "Floor" };
         AddChild( node );
         
