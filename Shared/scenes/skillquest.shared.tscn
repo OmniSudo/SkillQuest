@@ -1,4 +1,4 @@
-[gd_scene load_steps=10 format=3 uid="uid://cy730oecagcjh"]
+[gd_scene load_steps=8 format=3 uid="uid://cy730oecagcjh"]
 
 [ext_resource type="Script" path="res://Shared/code/Shared.cs" id="1_k2l27"]
 [ext_resource type="Script" path="res://Shared/code/Universe.cs" id="2_24n2o"]
@@ -7,8 +7,6 @@
 [ext_resource type="Script" path="res://Shared/code/Procedural/World/Voronoi2DGenerator.cs" id="5_e1swc"]
 [ext_resource type="Script" path="res://Shared/code/Procedural/World/Room/StoneRoom.cs" id="6_oakkq"]
 [ext_resource type="Script" path="res://Shared/code/FreeLookCamera.cs" id="7_ojhxs"]
-[ext_resource type="PackedScene" uid="uid://c3mcmp3cpaabm" path="res://Shared/assets/props/dungeon/wall_pillar.gltf" id="8_jeu8s"]
-[ext_resource type="PackedScene" uid="uid://bcn2wldxmlxbl" path="res://Shared/assets/props/dungeon/wall_corner.gltf" id="9_oyf3m"]
 
 [node name="Shared" type="Node"]
 script = ExtResource("1_k2l27")
@@ -43,21 +41,12 @@ script = ExtResource("5_e1swc")
 
 [node name="Room" type="Node3D" parent="Universe/Testing"]
 script = ExtResource("6_oakkq")
-Size = Vector2i(3, 7)
+Size = Vector2i(14, 1)
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="Universe/Testing"]
 transform = Transform3D(0.896643, 0.182795, 0.403259, -0.156974, -0.720386, 0.675576, 0.413994, -0.669052, -0.617235, 0, 0, 0)
 
 [node name="Camera3D" type="Camera3D" parent="Universe/Testing"]
 script = ExtResource("7_ojhxs")
-
-[node name="wall_pillar2" parent="Universe/Testing" instance=ExtResource("8_jeu8s")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4, 0, 0)
-
-[node name="wall_pillar3" parent="Universe/Testing" instance=ExtResource("8_jeu8s")]
-transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, 0, 0, 4)
-
-[node name="wall_corner2" parent="Universe/Testing" instance=ExtResource("9_oyf3m")]
-transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, 0, 0, 0)
 
 [node name="System" type="Node" parent="."]
