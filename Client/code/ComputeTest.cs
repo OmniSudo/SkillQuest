@@ -4,7 +4,7 @@ using SkillQuest.Graphics;
 using System;
 using System.Threading;
 
-public partial class Main : Control {
+public partial class ComputeTest : Control {
 	public ComputeShader shader;
 	[ Export ] public MeshInstance2D Mesh { get; set; }
 

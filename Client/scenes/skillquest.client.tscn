@@ -21,9 +21,3 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-
-[node name="Camera3D" type="Camera3D" parent="Client"]
-transform = Transform3D(1, -1.13133e-08, -2.98023e-08, 2.98023e-08, -4.2222e-08, 1, -1.13133e-08, -1, -4.2222e-08, 0.602197, 5.45821, 1.24077)
-
-[node name="DirectionalLight3D" type="DirectionalLight3D" parent="Client"]
-transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 2.16161, 0)
