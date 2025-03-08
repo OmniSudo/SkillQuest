@@ -18,6 +18,8 @@
     <Content Include="Shared\lib\**">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="Shared\shaders\graph.comp" />
+    <Content Include="Shared\shaders\random.comp" />
     <Content Include="steam_appid.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>

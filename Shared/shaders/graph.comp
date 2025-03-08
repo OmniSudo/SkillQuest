@@ -1,0 +1,19 @@
+﻿#version 460
+
+layout( binding = 0 ) buffer Data {
+    float delta;
+    uint numNodes;
+    uint numEdges;
+} data;
+
+layout( binding = 1 ) buffer Nodes {
+    vec2 positions[];
+} nodes;
+
+layout( binding = 2 ) buffer Edges {
+    ivec2 connections[];
+} edges;
+
+void main () {
+    
+}
