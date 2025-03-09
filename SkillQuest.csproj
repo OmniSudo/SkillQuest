@@ -9,12 +9,17 @@
     <InterceptorsPreviewNamespaces>$(InterceptorsPreviewNamesapces);SkillQuest</InterceptorsPreviewNamespaces>
   </PropertyGroup>
   <ItemGroup>
+    <Content Include="Client\assets\textures\Rect.png" />
+    <Content Include="Client\assets\textures\Rect.png.import" />
     <Content Include="Client\scenes\Main.tscn" />
     <Content Include="Client\scenes\skillquest.client.tscn" />
     <Content Include="Client\shaders\main.comp" />
     <Content Include="icon.svg" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Shared\assets\creatures\human\male\male.blend" />
+    <Content Include="Shared\assets\creatures\human\male\male.blend.import" />
+    <Content Include="Shared\assets\creatures\human\male\male.blend1" />
     <Content Include="Shared\lib\**">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -30,6 +35,7 @@
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
     <PackageReference Include="FodyHelpers" Version="6.9.1" />
+    <PackageReference Include="Lua.NET" Version="5.0.3" />
     <PackageReference Include="MethodDecorator.Fody" Version="1.1.1" />
     <PackageReference Include="SharpVoronoiLib" Version="1.0.4" />
     <PackageReference Include="Steamworks.NET" Version="2024.8.0" />
@@ -41,6 +47,18 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="Client\assets\interface\" />
+    <Folder Include="Server\assets\interface\" />
     <Folder Include="Server\shaders\" />
+    <Folder Include="Shared\assets\creatures\goblin\" />
+    <Folder Include="Shared\assets\loot\" />
+    <Folder Include="Shared\assets\quests\" />
+    <Folder Include="Shared\assets\recipes\" />
+    <Folder Include="Shared\assets\tech\" />
+    <Folder Include="Shared\assets\weather\" />
+    <Folder Include="Shared\code\Items\Cooking\Cooked\" />
+    <Folder Include="Shared\code\Items\Cooking\Intermediate\" />
+    <Folder Include="Shared\code\Items\Cooking\Raw\" />
+    <Folder Include="Shared\code\Skill\Cooking\" />
   </ItemGroup>
 </Project>

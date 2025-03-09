@@ -1,6 +1,6 @@
 ﻿using Godot;
 using SkillQuest.Procedural.Node;
-using SkillQuest.World;
+using SkillQuest.Terrain;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Threading.Tasks;
@@ -8,8 +8,8 @@ using System.Threading.Tasks;
 namespace SkillQuest.Procedural.World;
 
 public partial class WorldGenPipeline : ProcGenPipeline {
-    public async Task<Region?> Generate(SkillQuest.Universe universe, Vector3 position) {
-        var region = new Region(universe, position * 16);
+    public async Task<Region?> Generate(SkillQuest.World world, Vector3 position) {
+        var region = new Region(world, position * 16);
 
         List<Task> tasks;
 

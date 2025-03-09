@@ -1,12 +1,12 @@
 ﻿using SkillQuest.Procedural.Node;
-using SkillQuest.World;
+using SkillQuest.Terrain;
 
 namespace SkillQuest.Procedural.World;
 
 public partial class EntryPointNodeWorldRegion : EntryPointNode {
     public override bool Main(Region region){
-        if ( region.Universe is not null ) OnGenerate(region);
+        if ( region.World is not null ) OnGenerate(region);
 
-        return region.Universe is not null;
+        return region.World is not null;
     }
 }

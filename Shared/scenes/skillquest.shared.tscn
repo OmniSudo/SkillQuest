@@ -1,12 +1,10 @@
-[gd_scene load_steps=8 format=3 uid="uid://cy730oecagcjh"]
+[gd_scene load_steps=6 format=3 uid="uid://cy730oecagcjh"]
 
 [ext_resource type="Script" path="res://Shared/code/Shared.cs" id="1_k2l27"]
-[ext_resource type="Script" path="res://Shared/code/Universe.cs" id="2_24n2o"]
+[ext_resource type="Script" path="res://Shared/code/World/Universe.cs" id="2_24n2o"]
 [ext_resource type="Script" path="res://Shared/code/Procedural/World/WorldGenPipeline.cs" id="3_yhobo"]
 [ext_resource type="Script" path="res://Shared/code/Procedural/World/EntryPointNodeWorldRegion.cs" id="4_1tca5"]
 [ext_resource type="Script" path="res://Shared/code/Procedural/World/Voronoi2DGenerator.cs" id="5_e1swc"]
-[ext_resource type="Script" path="res://Shared/code/Procedural/World/Room/StoneRoom.cs" id="6_oakkq"]
-[ext_resource type="Script" path="res://Shared/code/FreeLookCamera.cs" id="7_ojhxs"]
 
 [node name="Shared" type="Node"]
 script = ExtResource("1_k2l27")
@@ -19,34 +17,22 @@ script = ExtResource("1_k2l27")
 
 [node name="ItemStacks" type="Node" parent="Ledger"]
 
-[node name="Universe" type="Node3D" parent="." node_paths=PackedStringArray("TerrainGenerator", "RegionContainer")]
+[node name="World" type="Node3D" parent="." node_paths=PackedStringArray("TerrainGenerator", "RegionContainer")]
 script = ExtResource("2_24n2o")
 TerrainGenerator = NodePath("Procgen/Terrain")
 RegionContainer = NodePath("Regions")
 
-[node name="Procgen" type="Node" parent="Universe"]
+[node name="Procgen" type="Node" parent="World"]
 
-[node name="Terrain" type="Node" parent="Universe/Procgen"]
+[node name="Terrain" type="Node" parent="World/Procgen"]
 script = ExtResource("3_yhobo")
 
-[node name="EntryPoint" type="Node" parent="Universe/Procgen/Terrain"]
+[node name="EntryPoint" type="Node" parent="World/Procgen/Terrain"]
 script = ExtResource("4_1tca5")
 
-[node name="VoronoiGenerator" type="Node" parent="Universe/Procgen/Terrain/EntryPoint"]
+[node name="VoronoiGenerator" type="Node" parent="World/Procgen/Terrain/EntryPoint"]
 script = ExtResource("5_e1swc")
 
-[node name="Regions" type="Node3D" parent="Universe"]
-
-[node name="Testing" type="Node3D" parent="Universe"]
-
-[node name="Room" type="Node3D" parent="Universe/Testing"]
-script = ExtResource("6_oakkq")
-Size = Vector2i(3, 3)
-
-[node name="DirectionalLight3D" type="DirectionalLight3D" parent="Universe/Testing"]
-transform = Transform3D(0.896643, 0.182795, 0.403259, -0.156974, -0.720386, 0.675576, 0.413994, -0.669052, -0.617235, 0, 0, 0)
-
-[node name="Camera3D" type="Camera3D" parent="Universe/Testing"]
-script = ExtResource("7_ojhxs")
+[node name="Regions" type="Node3D" parent="World"]
 
 [node name="System" type="Node" parent="."]

@@ -29,7 +29,7 @@ public partial class Client : Node {
         try {
             UI = GetNode<Control>( "UI" );
             
-            Shared.Multiplayer.Connect( IPEndPoint.Parse( "127.0.0.1:3698" ) ).ContinueWith(
+            Shared.SH.Multiplayer.Connect( IPEndPoint.Parse( "127.0.0.1:3698" ) ).ContinueWith(
                 task => {
                     Connected?.Invoke( task.Result );
                 }

@@ -198,7 +198,7 @@ public class HostAttribute : RpcAttribute {
                 Arguments = FormatArgs( args ),
             };
 
-            Shared.Multiplayer.SystemChannel.Send( Multiplayer.Host, _packet, true );
+            Shared.SH.Multiplayer.SystemChannel.Send( Multiplayer.Host, _packet, true );
         }
     }
 
@@ -223,8 +223,8 @@ public class BroadcastAttribute : RpcAttribute {
 
             foreach (
                 var connection in
-                Shared.Multiplayer.Clients.Values.Where( (c) => (Rpc.Filter?.IsRecipient( c ) ?? true) )) {
-                Shared.Multiplayer.SystemChannel.Send( connection, _packet, true );
+                Shared.SH.Multiplayer.Clients.Values.Where( (c) => (Rpc.Filter?.IsRecipient( c ) ?? true) )) {
+                Shared.SH.Multiplayer.SystemChannel.Send( connection, _packet, true );
             }
         }
     }

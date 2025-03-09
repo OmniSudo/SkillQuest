@@ -33,7 +33,7 @@ public partial class Material : Node {
 
             var split = id.Split( '/' );
 
-            var root = Shared.Materials;
+            var root = Shared.SH.Materials;
             var node = root;
 
             foreach (var name in split[..^1]) {

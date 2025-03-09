@@ -34,7 +34,7 @@ public partial class Item : Node {
 
             var split = id.Split( '/' );
 
-            var root = Shared.Items;
+            var root = Shared.SH.Items;
             var node = root;
 
             foreach (var name in split[..^1]) {

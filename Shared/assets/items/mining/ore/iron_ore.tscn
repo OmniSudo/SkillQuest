@@ -1,6 +1,0 @@
-[gd_scene load_steps=2 format=3 uid="uid://br3ll2wdr18pg"]
-
-[ext_resource type="Script" path="res://Shared/code/Items/Mining/Ore.cs" id="1_q4iwu"]
-
-[node name="Iron Ore" type="Node"]
-script = ExtResource("1_q4iwu")

@@ -1,5 +1,5 @@
 ﻿namespace SkillQuest.Actor;
 
-public class NonPlayerCharacter : Character {
+public partial class NonPlayerCharacter : Character {
     
 }

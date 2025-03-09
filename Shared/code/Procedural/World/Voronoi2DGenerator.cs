@@ -2,7 +2,7 @@
 using SkillQuest.API.Geometry;
 using SkillQuest.API.Geometry.Random;
 using SkillQuest.Procedural.Node;
-using SkillQuest.World;
+using SkillQuest.Terrain;
 using System;
 using System.Linq;
 

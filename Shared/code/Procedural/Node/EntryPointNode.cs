@@ -1,4 +1,4 @@
-﻿using SkillQuest.World;
+﻿using SkillQuest.Terrain;
 
 namespace SkillQuest.Procedural.Node;
 

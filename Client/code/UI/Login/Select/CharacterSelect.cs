@@ -174,7 +174,11 @@ public partial class CharacterSelect : CanvasLayer {
     [Host]
     private static async void _SV_Get(Character.Info info) {
         if (_getCharacter.Remove( Network.Rpc.Caller, out var tcs )) {
-            tcs.SetResult( info );
+            if (true /* TODO: CHECK CHARACTER BELONGS TO STEAM ID */) {
+                tcs.SetResult( info );
+            } else {
+                /* TODO: ERROR */
+            }
         }
     }
 

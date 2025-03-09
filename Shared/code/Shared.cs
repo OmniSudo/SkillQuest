@@ -12,30 +12,36 @@ namespace SkillQuest;
 public partial class Shared : Node {
     public const string VERSION = "0.0.0";
     
-    
-    public static Node Ledger;
+    public Node Ledger;
 
-    public static Node Items;
+    public Node Items;
 
-    public static Node Materials;
+    public Node Materials;
 
-    public static Node ItemStacks;
+    public Node ItemStacks;
 
-    public static Node System;
+    public Node System;
 
-    public static Multiplayer Multiplayer;
+    [Export] public World World;
+
+    public Multiplayer Multiplayer;
 
     public static Shared SH;
 
     // Called when the node enters the scene tree for the first time.
     public override void _Ready() {
         SH = this;
+
+        System = GetNode<Node>( "System" );
+        Multiplayer = new Multiplayer();
+
+        World ??= GetNodeOrNull<World>( "World" ) ?? new World() {
+            Name = "World",
+        };
         
         Ledger = GetNode<Node>( "Ledger" );
         Items = Ledger.GetNode<Node>( "Items" );
         Materials = Ledger.GetNode<Node>( "Materials" );
-        System = GetNode<Node>( "System" );
-        Multiplayer = new Multiplayer();
     }
 
     public override void _Process(double delta) {
