@@ -1,5 +1,6 @@
 ﻿using Godot;
 using LuaNET.Lua54;
+using System.Reflection;
 
 namespace SkillQuest.Scripting;
 
@@ -65,15 +66,23 @@ public static class LuaState {
     }
 
     private static int Require(lua_State l) {
-        if (Lua.lua_isstring( l, 1 ) == 0) return 0;
+        if (Lua.lua_isstring( l, 1 ) == 0) {
+            Lua.luaL_error( l, "expected parameter path to be a string" );
+            return 0;
+        }
         var path = Lua.lua_tostring( l, 1 );
 
         var res = $"res://addons/{path.Replace( '.', '/' )}.lua";
+        
         if (FileAccess.FileExists( res )) {
-            Lua.luaL_dofile( l, ProjectSettings.GlobalizePath( res ) );
+            if (Lua.luaL_dofile( l, ProjectSettings.GlobalizePath( res ) ) != Lua.LUA_OK) {
+                Lua.lua_error( l );
+                return 0;
+            }
             return 1;
         }
-
+        
+        GD.PrintErr( $"File {res} not found");
         return 0;
     }
 

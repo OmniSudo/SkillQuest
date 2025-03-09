@@ -1,7 +1,7 @@
 ﻿--- @author omnisudo
 --- @date 3/9/2025
 
-return require( "recipe.oven" )({
+return require( "cooking.recipe.oven" )({
     Input = {
         ["cooking.item.ingredient.dough"] = 1,
         ["cooking.item.ingredient.tomato"] = 1,
