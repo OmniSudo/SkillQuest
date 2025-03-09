@@ -8,4 +8,4 @@ ITEM.details = { name = {} }
 ITEM.details.material = "iron"
 ITEM.details.name = { ITEM.details.material .. " ore", ITEM.details.material .. " ores" }
 
-print( ITEM.details.name[ 1 ] )
+-- TODO: Inherit from ore somewhere

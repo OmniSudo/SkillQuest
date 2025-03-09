@@ -9,6 +9,7 @@
     <InterceptorsPreviewNamespaces>$(InterceptorsPreviewNamesapces);SkillQuest</InterceptorsPreviewNamespaces>
   </PropertyGroup>
   <ItemGroup>
+    <Content Include="Client\assets\interface\tmp" />
     <Content Include="Client\assets\textures\Rect.png" />
     <Content Include="Client\assets\textures\Rect.png.import" />
     <Content Include="Client\scenes\Main.tscn" />
@@ -17,9 +18,25 @@
     <Content Include="icon.svg" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Server\assets\interface\tmp" />
+    <Content Include="Shared\assets\animations\tmp" />
+    <Content Include="Shared\assets\codex\tmp" />
+    <Content Include="Shared\assets\creatures\goblin\tmp" />
     <Content Include="Shared\assets\creatures\human\male\male.blend" />
     <Content Include="Shared\assets\creatures\human\male\male.blend.import" />
     <Content Include="Shared\assets\creatures\human\male\male.blend1" />
+    <Content Include="Shared\assets\loot\tmp" />
+    <Content Include="Shared\assets\materials\tmp" />
+    <Content Include="Shared\assets\quests\tmp" />
+    <Content Include="Shared\assets\recipes\cooking\tmp" />
+    <Content Include="Shared\assets\tech\tmp" />
+    <Content Include="Shared\assets\weather\tmp" />
+    <Content Include="Shared\assets\world\buildings\tmp" />
+    <Content Include="Shared\assets\world\dungeons\tmp" />
+    <Content Include="Shared\assets\world\landscape\tmp" />
+    <Content Include="Shared\assets\world\plants\tmp" />
+    <Content Include="Shared\assets\world\roads\tmp" />
+    <Content Include="Shared\assets\world\settlements\tmp" />
     <Content Include="Shared\code\Experiment\ItemLoader.lua" />
     <Content Include="Shared\lib\**">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -48,15 +65,7 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Client\assets\interface\" />
-    <Folder Include="Server\assets\interface\" />
     <Folder Include="Server\shaders\" />
-    <Folder Include="Shared\assets\creatures\goblin\" />
-    <Folder Include="Shared\assets\loot\" />
-    <Folder Include="Shared\assets\quests\" />
-    <Folder Include="Shared\assets\recipes\cooking\" />
-    <Folder Include="Shared\assets\tech\" />
-    <Folder Include="Shared\assets\weather\" />
     <Folder Include="Shared\code\Items\Cooking\Cooked\" />
     <Folder Include="Shared\code\Items\Cooking\Intermediate\" />
     <Folder Include="Shared\code\Items\Cooking\Raw\" />
