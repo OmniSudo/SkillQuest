@@ -1,7 +1,8 @@
-[gd_scene load_steps=6 format=3 uid="uid://cy730oecagcjh"]
+[gd_scene load_steps=7 format=3 uid="uid://cy730oecagcjh"]
 
 [ext_resource type="Script" path="res://Shared/code/Shared.cs" id="1_k2l27"]
-[ext_resource type="Script" path="res://Shared/code/World/Universe.cs" id="2_24n2o"]
+[ext_resource type="Script" path="res://Shared/code/Experiment/LuaItemLoader.cs" id="2_opuby"]
+[ext_resource type="Script" path="res://Shared/code/Terrain/World.cs" id="3_c20ey"]
 [ext_resource type="Script" path="res://Shared/code/Procedural/World/WorldGenPipeline.cs" id="3_yhobo"]
 [ext_resource type="Script" path="res://Shared/code/Procedural/World/EntryPointNodeWorldRegion.cs" id="4_1tca5"]
 [ext_resource type="Script" path="res://Shared/code/Procedural/World/Voronoi2DGenerator.cs" id="5_e1swc"]
@@ -12,15 +13,14 @@ script = ExtResource("1_k2l27")
 [node name="Ledger" type="Node" parent="."]
 
 [node name="Items" type="Node" parent="Ledger"]
+script = ExtResource("2_opuby")
 
 [node name="Materials" type="Node" parent="Ledger"]
 
 [node name="ItemStacks" type="Node" parent="Ledger"]
 
-[node name="World" type="Node3D" parent="." node_paths=PackedStringArray("TerrainGenerator", "RegionContainer")]
-script = ExtResource("2_24n2o")
-TerrainGenerator = NodePath("Procgen/Terrain")
-RegionContainer = NodePath("Regions")
+[node name="World" type="Node3D" parent="."]
+script = ExtResource("3_c20ey")
 
 [node name="Procgen" type="Node" parent="World"]
 
