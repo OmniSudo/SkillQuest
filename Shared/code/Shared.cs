@@ -1,5 +1,6 @@
 using Godot;
 using SkillQuest.Network;
+using SkillQuest.Terrain;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;

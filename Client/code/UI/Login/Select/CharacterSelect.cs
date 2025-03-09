@@ -108,8 +108,11 @@ public partial class CharacterSelect : CanvasLayer {
         }
 
         public static void Close() {
-            var node = SkillQuest.Client.UI.GetNode( "Character Select" );
-            SkillQuest.Client.UI.RemoveChild( node );
+            SkillQuest.Shared.SH.CallDeferred( () => {
+                var node = SkillQuest.Client.UI.GetNode( "Character Select" );
+                SkillQuest.Client.UI.RemoveChild( node );
+                node.QueueFree();
+            } );
         }
     }
 

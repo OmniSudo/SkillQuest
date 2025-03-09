@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 namespace SkillQuest.Procedural.World;
 
 public partial class WorldGenPipeline : ProcGenPipeline {
-    public async Task<Region?> Generate(SkillQuest.World world, Vector3 position) {
+    public async Task<Region?> Generate(SkillQuest.Terrain.World world, Vector3 position) {
         var region = new Region(world, position * 16);
 
         List<Task> tasks;
@@ -32,9 +32,7 @@ public partial class WorldGenPipeline : ProcGenPipeline {
             }
         }
 
-        foreach (var task in tasks) {
-            task.Wait();
-        }
+        Task.WaitAll(tasks.ToArray());
 
         return region;
     }

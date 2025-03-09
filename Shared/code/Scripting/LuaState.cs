@@ -8,12 +8,13 @@ public static class LuaState {
 
     static LuaState() {
         Lua.luaopen_base( Global );
-        Lua.luaopen_coroutine( Global );
         Lua.luaopen_math( Global );
         Lua.luaopen_table( Global );
         Lua.luaopen_string( Global );
+        Lua.luaopen_coroutine( Global );
 
         Lua.lua_register( Global, "print", Print );
+        Lua.lua_register( Global, "require", Require );
     }
 
     private static int Print(lua_State state) {
@@ -60,6 +61,19 @@ public static class LuaState {
         }
 
         GD.Print( s );
+        return 0;
+    }
+
+    private static int Require(lua_State l) {
+        if (Lua.lua_isstring( l, 1 ) == 0) return 0;
+        var path = Lua.lua_tostring( l, 1 );
+
+        var res = $"res://addons/{path.Replace( '.', '/' )}.lua";
+        if (FileAccess.FileExists( res )) {
+            Lua.luaL_dofile( l, ProjectSettings.GlobalizePath( res ) );
+            return 1;
+        }
+
         return 0;
     }
 

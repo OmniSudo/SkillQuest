@@ -7,6 +7,6 @@ namespace SkillQuest.Experiment;
 [Tool]
 public partial class LuaItemLoader : Node {
     public override void _Ready() {
-        LuaState.Global.DoFile( "res://Shared/assets/items/mining/ore/IronOre.lua");
+        LuaState.DoFile( LuaState.Global, "res://addons/cooking/item/food/pizza/cheese_pizza.lua" );
     }
 }
